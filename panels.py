@@ -6,7 +6,7 @@ class bw_posemode_panel(bpy.types.Panel):
     bl_label = "Bone Widget"
     bl_category = "RIG Tools"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
+    bl_region_type = 'UI'
     # bl_context = "posemode"
 
     items =[]
@@ -46,3 +46,13 @@ class bw_specials(Menu):
         layout.operator("bonewidget.match_bone_transforms", icon = 'GROUP_BONE')
         layout.operator("bonewidget.add_widgets",icon = "ZOOMIN",text="Add Widgets")
         layout.operator("bonewidget.remove_widgets",icon = "ZOOMOUT",text="Remove Widgets")
+
+
+def register():
+    bpy.utils.register_class(bw_specials)
+    bpy.utils.register_class(bw_posemode_panel)
+
+
+def unregister():
+    bpy.utils.unregister_class(bw_specials)
+    bpy.utils.unregister_class(bw_posemode_panel)

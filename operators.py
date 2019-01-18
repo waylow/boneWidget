@@ -11,7 +11,8 @@ from .functions import returnToArmature
 from .functions import addRemoveWidgets
 from .functions import readWidgets
 from .functions import objectDataToDico
-from bpy.types import Operator  
+from .functions import get_collection
+from bpy.types import Operator
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
 
 
@@ -28,9 +29,9 @@ class bw_createWidget(bpy.types.Operator):
         name="Relative size",  
         default=True,  
         description="Widget size proportionnal to Bone size"  
-        ) 
-        
-    global_size = FloatProperty(  
+        )
+
+    global_size = FloatProperty(
        name="Global Size : ",  
        default=1.0,  
        description="Global Size : " 
@@ -56,8 +57,8 @@ class bw_createWidget(bpy.types.Operator):
     def execute(self, context):       
         wgts = readWidgets()
         for bone in bpy.context.selected_pose_bones :
-            createWidget(bone,wgts[context.scene.widget_list],self.relative_size,self.global_size,[1,1,1],self.slide)
-                        
+            createWidget(bone,wgts[context.scene.widget_list],self.relative_size,self.global_size,[1,1,1],self.slide, get_collection(context))
+
         return {'FINISHED'}
 
 
@@ -169,3 +170,22 @@ class bw_removeWidgets(bpy.types.Operator):
         objects= bpy.context.scene.widget_list
         addRemoveWidgets(context,"remove",bpy.types.Scene.widget_list[1]['items'],objects)
         return {'FINISHED'}
+
+
+def register():
+    bpy.utils.register_class(bw_removeWidgets)
+    bpy.utils.register_class(bw_addWidgets)
+    bpy.utils.register_class(bw_match_symmetrizeShape)
+    bpy.utils.register_class(bw_MatchBoneTransforms)
+    bpy.utils.register_class(bw_returnToArmature)
+    bpy.utils.register_class(bw_editWidget)
+    bpy.utils.register_class(bw_createWidget)
+
+def unregister():
+    bpy.utils.unregister_class(bw_createWidget)
+    bpy.utils.unregister_class(bw_editWidget)
+    bpy.utils.unregister_class(bw_returnToArmature)
+    bpy.utils.unregister_class(bw_MatchBoneTransforms)
+    bpy.utils.unregister_class(bw_match_symmetrizeShape)
+    bpy.utils.unregister_class(bw_addWidgets)
+    bpy.utils.unregister_class(bw_removeWidgets)
