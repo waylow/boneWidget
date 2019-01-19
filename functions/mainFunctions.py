@@ -2,9 +2,21 @@ import bpy
 import numpy
 from .jsonFunctions import objectDataToDico
 
-def boneMatrix(widget,matchBone):
+
+def get_collection(context):
+    collection = context.scene.collection.children.get('WGT_shapes')
+    if collection:
+        return collection
+    collection = bpy.data.collections.get('WGT_shapes')
+    if not collection:
+        collection = bpy.data.collections.new('WGT_shapes')
+    context.scene.collection.children.link(collection)
+    return collection
+
+
+def boneMatrix(widget, matchBone):
     #widget.matrix_local = matchBone.bone.matrix_local
-    widget.matrix_world = matchBone.id_data.matrix_world*matchBone.bone.matrix_local
+    widget.matrix_world = matchBone.id_data.matrix_world @ matchBone.bone.matrix_local
     #widget.scale = [matchBone.bone.length,matchBone.bone.length,matchBone.bone.length]
     widget.data.update()
 
@@ -18,7 +30,8 @@ def fromWidgetFindBone(widget):
 
     return matchBone
 
-def createWidget(bone,widget,relative,size,scale,slide):
+
+def createWidget(bone, widget, relative, size, scale, slide, collection):
     C = bpy.context
     D = bpy.data
 
@@ -27,11 +40,14 @@ def createWidget(bone,widget,relative,size,scale,slide):
     else :
         matrixBone = bone
 
+    # this is a bit weird; don't unlink objects willy-nilly
+    '''
     if bone.custom_shape :
         bone.custom_shape.name = bone.custom_shape.name+"_old"
         bone.custom_shape.data.name = bone.custom_shape.data.name+"_old"
-        if C.scene.objects.get(bone.custom_shape.name) :
-            C.scene.objects.unlink(bone.custom_shape)
+        if C.scene.collection.objects.get(bone.custom_shape.name) :
+            C.scene.collection.objects.unlink(bone.custom_shape)
+    '''
 
     newData = D.meshes.new(bone.name)
 
@@ -47,15 +63,15 @@ def createWidget(bone,widget,relative,size,scale,slide):
 
     newObject.data = newData
     newObject.name = 'WGT-%s'%bone.name
-    C.scene.objects.link(newObject)
-    newObject.matrix_world = bone.id_data.matrix_world*matrixBone.bone.matrix_local
+    # C.scene.collection.objects.link(newObject)
+    collection.objects.link(newObject)
+    newObject.matrix_world = bone.id_data.matrix_world @ matrixBone.bone.matrix_local
     #newObject.scale = [matrixBone.bone.length,matrixBone.bone.length,matrixBone.bone.length]
     C.scene.update()
 
     bone.custom_shape = newObject
     bone.bone.show_wire = True
-    newObject.layers = [False,False,False,False,False,False,False,False,False,True,False,False,False,False,False,False,False,False,False,False]
-
+    # lets just delete the ugly layers list
 def symmetrizeWidget(bone):
     C = bpy.context
     D = bpy.data
@@ -98,8 +114,9 @@ def editWidget(active_bone):
 
     armature = active_bone.id_data
     bpy.ops.object.mode_set(mode='OBJECT')
-    C.active_object.select = False
+    C.active_object.select_set(False)
 
+    '''
     if C.space_data.lock_camera_and_layers == False :
         visibleLayers = numpy.array(bpy.context.space_data.layers)+widget.layers-armature.layers
         bpy.context.space_data.layers = visibleLayers.tolist()
@@ -107,11 +124,13 @@ def editWidget(active_bone):
     else :
         visibleLayers = numpy.array(bpy.context.scene.layers)+widget.layers-armature.layers
         bpy.context.scene.layers = visibleLayers.tolist()
-
+    '''
+    collection = get_collection(C)
+    collection.hide_viewport = False
     if C.space_data.local_view :
         bpy.ops.view3d.localview()
 
-    bpy.context.scene.objects.active = widget
+    bpy.context.view_layer.objects.active = widget
     bpy.ops.object.mode_set(mode='EDIT')
 
 def returnToArmature(widget):
@@ -124,6 +143,7 @@ def returnToArmature(widget):
     if C.active_object.mode == 'EDIT':
         bpy.ops.object.mode_set(mode='OBJECT')
 
+    '''
     if C.space_data.lock_camera_and_layers == False :
         visibleLayers = numpy.array(bpy.context.space_data.layers)-widget.layers+armature.layers
         bpy.context.space_data.layers = visibleLayers.tolist()
@@ -131,11 +151,13 @@ def returnToArmature(widget):
     else :
         visibleLayers = numpy.array(bpy.context.scene.layers)-widget.layers+armature.layers
         bpy.context.scene.layers = visibleLayers.tolist()
-
+    '''
+    collection = get_collection(C)
+    collection.hide_viewport = True
     if C.space_data.local_view :
         bpy.ops.view3d.localview()
-    bpy.context.scene.objects.active = armature
-    armature.select = True
+    bpy.context.view_layer.objects.active = armature
+    armature.select_set(True)
     bpy.ops.object.mode_set(mode='POSE')
     armature.data.bones[bone.name].select = True
     armature.data.bones.active = armature.data.bones[bone.name]

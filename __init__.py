@@ -20,9 +20,9 @@ Created by Manuel Rais and Christophe Seux
 
 bl_info = {
     "name": "Bone Widget",
-    "author": "Manuel Rais, Christophe Seux",
-    "version": (1, 0),
-    "blender": (2, 77, 0),
+    "author": "Manuel Rais, Christophe Seux, Bassam Kurdali",
+    "version": (1, 1),
+    "blender": (2, 80, 0),
     "location": "",
     "description": "",
     "warning": "",
@@ -48,12 +48,16 @@ import os
 
 def register():
     
-    bpy.utils.register_module(__name__)
+    #bpy.utils.register_module(__name__)
+    operators.register()
+    panels.register()
     
 
     
 def unregister():
-    bpy.utils.unregister_module(__name__)
+    #bpy.utils.unregister_module(__name__)
+    operators.unregister()
+    panels.register()
 
 
     
