@@ -126,6 +126,7 @@ class bw_match_symmetrizeShape(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}  
        
     def execute(self, context):
+        collection = get_collection(context)
         widgetsAndBones= findMatchBones()[0]
         activeObject= findMatchBones()[1]
         widgetsAndBones= findMatchBones()[0]
@@ -133,10 +134,10 @@ class bw_match_symmetrizeShape(bpy.types.Operator):
         for bone in widgetsAndBones :
             if activeObject.name.endswith("L") :
                 if bone.name.endswith("L") and widgetsAndBones[bone]:
-                    symmetrizeWidget(bone)
+                    symmetrizeWidget(bone, collection)
             else :
                 if bone.name.endswith("R") and widgetsAndBones[bone]:
-                    symmetrizeWidget(bone)
+                    symmetrizeWidget(bone, collection)
 
         return {'FINISHED'}
 

@@ -40,7 +40,7 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
     else :
         matrixBone = bone
 
-    # this is a bit weird; don't unlink objects willy-nilly
+    # don't unlink objects
     '''
     if bone.custom_shape :
         bone.custom_shape.name = bone.custom_shape.name+"_old"
@@ -72,7 +72,9 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
     bone.custom_shape = newObject
     bone.bone.show_wire = True
     # lets just delete the ugly layers list
-def symmetrizeWidget(bone):
+
+
+def symmetrizeWidget(bone, collection):
     C = bpy.context
     D = bpy.data
 
@@ -83,12 +85,15 @@ def symmetrizeWidget(bone):
         mirrorBone = findMirrorObject(bone)
     mirrorWidget = mirrorBone.custom_shape
 
-    if mirrorWidget :
+
+    if mirrorWidget:
         mirrorWidget.name = mirrorWidget.name+"_old"
         mirrorWidget.data.name = mirrorWidget.data.name+"_old"
-        if C.scene.objects.get(mirrorWidget.name) :
+        # don't unlink
+        '''
+        if C.scene.objects.get(mirrorWidget.name):
             C.scene.objects.unlink(mirrorWidget)
-
+        '''
     newData = widget.data.copy()
     for vert in newData.vertices :
         vert.co = numpy.array(vert.co)*(-1,1,1)
@@ -97,14 +102,14 @@ def symmetrizeWidget(bone):
     newObject.data = newData
     newData.update()
     newObject.name = 'WGT-%s'%mirrorBone.name
-    C.scene.objects.link(newObject)
+    collection.objects.link(newObject)
+    # C.scene.objects.link(newObject)
     newObject.matrix_local = mirrorBone.bone.matrix_local
     newObject.scale = [mirrorBone.bone.length,mirrorBone.bone.length,mirrorBone.bone.length]
 
     C.scene.update()
     mirrorBone.custom_shape = newObject
     mirrorBone.bone.show_wire = True
-    newObject.layers = [False,False,False,False,False,False,False,False,False,True,False,False,False,False,False,False,False,False,False,False]
 
 
 def editWidget(active_bone):
