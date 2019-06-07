@@ -20,11 +20,12 @@ def boneMatrix(widget, matchBone):
     #widget.scale = [matchBone.bone.length,matchBone.bone.length,matchBone.bone.length]
     widget.data.update()
 
+
 def fromWidgetFindBone(widget):
     matchBone = None
-    for ob in bpy.context.scene.objects :
-        if ob.type == "ARMATURE" :
-            for bone in ob.pose.bones :
+    for ob in bpy.context.scene.objects:
+        if ob.type == "ARMATURE":
+            for bone in ob.pose.bones:
                 if bone.custom_shape == widget:
                     matchBone = bone
 
@@ -35,9 +36,9 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
     C = bpy.context
     D = bpy.data
 
-    if bone.custom_shape_transform :
+    if bone.custom_shape_transform:
         matrixBone = bone.custom_shape_transform
-    else :
+    else:
         matrixBone = bone
 
     # don't unlink objects
@@ -51,27 +52,28 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
 
     newData = D.meshes.new(bone.name)
 
-    if relative == True :
+    if relative == True:
         boneLength = 1
-    else :
+    else:
         boneLength = (1/bone.bone.length)
 
-    newData.from_pydata(numpy.array(widget['vertices'])*[size*scale[0]*boneLength,size*scale[2]*boneLength,size*scale[1]*boneLength]+[0,slide,0],widget['edges'],widget['faces'])
+    newData.from_pydata(numpy.array(widget['vertices'])*[size*scale[0]*boneLength, size*scale[2]
+                                                         * boneLength, size*scale[1]*boneLength]+[0, slide, 0], widget['edges'], widget['faces'])
     newData.update(calc_edges=True)
 
-    newObject = D.objects.new('WGT-%s'%bone.name,newData)
+    newObject = D.objects.new('WGT-%s' % bone.name, newData)
 
     newObject.data = newData
-    newObject.name = 'WGT-%s'%bone.name
+    newObject.name = 'WGT-%s' % bone.name
     # C.scene.collection.objects.link(newObject)
     collection.objects.link(newObject)
     newObject.matrix_world = bone.id_data.matrix_world @ matrixBone.bone.matrix_local
     #newObject.scale = [matrixBone.bone.length,matrixBone.bone.length,matrixBone.bone.length]
-    C.scene.update()
+    layer = bpy.context.view_layer
+    layer.update()
 
     bone.custom_shape = newObject
     bone.bone.show_wire = True
-    # lets just delete the ugly layers list
 
 
 def symmetrizeWidget(bone, collection):
@@ -79,12 +81,11 @@ def symmetrizeWidget(bone, collection):
     D = bpy.data
 
     widget = bone.custom_shape
-    if findMirrorObject(bone).custom_shape_transform :
+    if findMirrorObject(bone).custom_shape_transform:
         mirrorBone = findMirrorObject(bone).custom_shape_transform
-    else :
+    else:
         mirrorBone = findMirrorObject(bone)
     mirrorWidget = mirrorBone.custom_shape
-
 
     if mirrorWidget:
         mirrorWidget.name = mirrorWidget.name+"_old"
@@ -95,19 +96,21 @@ def symmetrizeWidget(bone, collection):
             C.scene.objects.unlink(mirrorWidget)
         '''
     newData = widget.data.copy()
-    for vert in newData.vertices :
-        vert.co = numpy.array(vert.co)*(-1,1,1)
+    for vert in newData.vertices:
+        vert.co = numpy.array(vert.co)*(-1, 1, 1)
 
     newObject = widget.copy()
     newObject.data = newData
     newData.update()
-    newObject.name = 'WGT-%s'%mirrorBone.name
+    newObject.name = 'WGT-%s' % mirrorBone.name
     collection.objects.link(newObject)
     # C.scene.objects.link(newObject)
     newObject.matrix_local = mirrorBone.bone.matrix_local
-    newObject.scale = [mirrorBone.bone.length,mirrorBone.bone.length,mirrorBone.bone.length]
+    newObject.scale = [mirrorBone.bone.length, mirrorBone.bone.length, mirrorBone.bone.length]
 
-    C.scene.update()
+    layer = bpy.context.view_layer
+    layer.update()
+
     mirrorBone.custom_shape = newObject
     mirrorBone.bone.show_wire = True
 
@@ -132,11 +135,12 @@ def editWidget(active_bone):
     '''
     collection = get_collection(C)
     collection.hide_viewport = False
-    if C.space_data.local_view :
+    if C.space_data.local_view:
         bpy.ops.view3d.localview()
 
     bpy.context.view_layer.objects.active = widget
     bpy.ops.object.mode_set(mode='EDIT')
+
 
 def returnToArmature(widget):
     C = bpy.context
@@ -159,7 +163,7 @@ def returnToArmature(widget):
     '''
     collection = get_collection(C)
     collection.hide_viewport = True
-    if C.space_data.local_view :
+    if C.space_data.local_view:
         bpy.ops.view3d.localview()
     bpy.context.view_layer.objects.active = armature
     armature.select_set(True)
@@ -169,19 +173,20 @@ def returnToArmature(widget):
 
 
 def findMirrorObject(object):
-    if object.name.endswith("L") :
+    if object.name.endswith("L"):
         suffixe = 'R'
-    elif object.name.endswith("R") :
+    elif object.name.endswith("R"):
         suffixe = 'L'
 
     objectName = list(object.name)
     objectBaseName = objectName[:-1]
     mirroredObjectName = "".join(objectBaseName)+suffixe
 
-    if object.id_data.type == 'ARMATURE' :
+    if object.id_data.type == 'ARMATURE':
         return object.id_data.pose.bones.get(mirroredObjectName)
-    else :
+    else:
         return bpy.context.scene.objects.get(mirroredObjectName)
+
 
 def findMatchBones():
     C = bpy.context
@@ -190,25 +195,25 @@ def findMatchBones():
     widgetsAndBones = {}
 
     if bpy.context.object.type == 'ARMATURE':
-        for bone in C.selected_pose_bones :
+        for bone in C.selected_pose_bones:
             if bone.name.endswith("L") or bone.name.endswith("R"):
                 widgetsAndBones[bone] = bone.custom_shape
                 mirrorBone = findMirrorObject(bone)
-                if mirrorBone :
-                    widgetsAndBones[mirrorBone]= mirrorBone.custom_shape
+                if mirrorBone:
+                    widgetsAndBones[mirrorBone] = mirrorBone.custom_shape
 
         armature = bpy.context.object
         activeObject = C.active_pose_bone
-    else :
-        for shape in C.selected_objects :
+    else:
+        for shape in C.selected_objects:
             bone = fromWidgetFindBone(shape)
             if bone.name.endswith("L") or bone.name.endswith("R"):
                 widgetsAndBones[fromWidgetFindBone(shape)] = shape
 
                 mirrorShape = findMirrorObject(shape)
-                if mirrorShape :
-                   widgetsAndBones[mirrorShape]= mirrorShape
+                if mirrorShape:
+                    widgetsAndBones[mirrorShape] = mirrorShape
 
         activeObject = fromWidgetFindBone(C.object)
         armature = activeObject.id_data
-    return (widgetsAndBones,activeObject,armature)
+    return (widgetsAndBones, activeObject, armature)
