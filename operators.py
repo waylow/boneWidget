@@ -17,6 +17,7 @@ from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
 
 
 class bw_createWidget(bpy.types.Operator):
+    """Creates a widget for selected bone """
     bl_idname = "bonewidget.create_widget"
     bl_label = "Create"
     bl_options = {'REGISTER', 'UNDO'}
@@ -64,6 +65,7 @@ class bw_createWidget(bpy.types.Operator):
 
 
 class bw_editWidget(bpy.types.Operator):
+    """Edit the widget for selected bone """
     bl_idname = "bonewidget.edit_widget"
     bl_label = "Edit"
 
@@ -77,6 +79,7 @@ class bw_editWidget(bpy.types.Operator):
 
 
 class bw_returnToArmature(bpy.types.Operator):
+    """Switch back to the armature """
     bl_idname = "bonewidget.return_to_armature"
     bl_label = "Return to armature"
 
@@ -96,6 +99,7 @@ class bw_returnToArmature(bpy.types.Operator):
 
 
 class bw_MatchBoneTransforms(bpy.types.Operator):
+    """Match the widget to the bone transforms """
     bl_idname = "bonewidget.match_bone_transforms"
     bl_label = "Match bone transforms"
 
@@ -121,6 +125,7 @@ class bw_MatchBoneTransforms(bpy.types.Operator):
 
 
 class bw_match_symmetrizeShape(bpy.types.Operator):
+    """Symmetrize to the opposite side, if it is named with a .L or .R"""
     bl_idname = "bonewidget.symmetrize_shape"
     bl_label = "Symmetrize"
     bl_options = {'REGISTER', 'UNDO'}
@@ -143,6 +148,7 @@ class bw_match_symmetrizeShape(bpy.types.Operator):
 
 
 class bw_addWidgets(bpy.types.Operator):
+    """Add selected mesh object to Bone Widget Library"""
     bl_idname = "bonewidget.add_widgets"
     bl_label = "Add Widgets"
 
@@ -165,6 +171,7 @@ class bw_addWidgets(bpy.types.Operator):
 
 
 class bw_removeWidgets(bpy.types.Operator):
+    """Remove selected widget object from the Bone Widget Library"""
     bl_idname = "bonewidget.remove_widgets"
     bl_label = "Remove Widgets"
 
@@ -174,21 +181,24 @@ class bw_removeWidgets(bpy.types.Operator):
         return {'FINISHED'}
 
 
+classes = (
+    bw_removeWidgets,
+    bw_addWidgets,
+    bw_match_symmetrizeShape,
+    bw_MatchBoneTransforms,
+    bw_returnToArmature,
+    bw_editWidget,
+    bw_createWidget,
+)
+
+
 def register():
-    bpy.utils.register_class(bw_removeWidgets)
-    bpy.utils.register_class(bw_addWidgets)
-    bpy.utils.register_class(bw_match_symmetrizeShape)
-    bpy.utils.register_class(bw_MatchBoneTransforms)
-    bpy.utils.register_class(bw_returnToArmature)
-    bpy.utils.register_class(bw_editWidget)
-    bpy.utils.register_class(bw_createWidget)
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
 
 
 def unregister():
-    bpy.utils.unregister_class(bw_createWidget)
-    bpy.utils.unregister_class(bw_editWidget)
-    bpy.utils.unregister_class(bw_returnToArmature)
-    bpy.utils.unregister_class(bw_MatchBoneTransforms)
-    bpy.utils.unregister_class(bw_match_symmetrizeShape)
-    bpy.utils.unregister_class(bw_addWidgets)
-    bpy.utils.unregister_class(bw_removeWidgets)
+    from bpy.utils import unregister_class
+    for cls in classes:
+        unregister_class(cls)

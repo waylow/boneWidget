@@ -45,7 +45,7 @@ class bw_specials(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("bonewidget.symmetrize_shape", icon='MOD_MULTIRES')
+        layout.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR')
         layout.operator("bonewidget.match_bone_transforms", icon='GROUP_BONE')
         layout.operator("bonewidget.add_widgets", icon="ADD", text="Add Widgets")
         layout.operator("bonewidget.remove_widgets", icon="REMOVE", text="Remove Widgets")

@@ -6,13 +6,12 @@ import numpy
 
 def objectDataToDico(object):
     verts = []
-    #mesh = object.copy().to_mesh(bpy.context.scene, True, 'PREVIEW')
     depsgraph = bpy.context.evaluated_depsgraph_get()
     mesh = object.evaluated_get(depsgraph).to_mesh()
     for v in mesh.vertices:
         verts.append(tuple(numpy.array(tuple(v.co)) *
                            (object.scale[0], object.scale[1], object.scale[2])))
-        # verts.append(tuple(v.co))
+
     polygons = []
     for p in mesh.polygons:
         polygons.append(tuple(p.vertices))
@@ -51,8 +50,8 @@ def addRemoveWidgets(context, addOrRemove, items, widgets):
         widget_items.append(widget_item[1])
 
     if addOrRemove == 'add':
-        suffixes_1 = ("WGT-", "wgt-", "CS-", "cs-")
-        suffixes_2 = ("WGT_", "wgt_", "CS_", "cs_")
+        suffixes_1 = ("WDGT-", "wdgt-", "WGT-", "wgt-", "CS-", "cs-")
+        suffixes_2 = ("WDGT_", "wdgt_", "WGT_", "wgt_", "CS_", "cs_")
         for ob in widgets:
             if ob.name.startswith(suffixes_1):
                 ob_name = ob.name.split("-", 1)[1]
