@@ -17,7 +17,7 @@ from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
 
 
 class bw_createWidget(bpy.types.Operator):
-    """Creates a widget for selected bone """
+    """Creates a widget for selected bone"""
     bl_idname = "bonewidget.create_widget"
     bl_label = "Create"
     bl_options = {'REGISTER', 'UNDO'}
@@ -65,7 +65,7 @@ class bw_createWidget(bpy.types.Operator):
 
 
 class bw_editWidget(bpy.types.Operator):
-    """Edit the widget for selected bone """
+    """Edit the widget for selected bone"""
     bl_idname = "bonewidget.edit_widget"
     bl_label = "Edit"
 
@@ -79,7 +79,7 @@ class bw_editWidget(bpy.types.Operator):
 
 
 class bw_returnToArmature(bpy.types.Operator):
-    """Switch back to the armature """
+    """Switch back to the armature"""
     bl_idname = "bonewidget.return_to_armature"
     bl_label = "Return to armature"
 
@@ -99,7 +99,7 @@ class bw_returnToArmature(bpy.types.Operator):
 
 
 class bw_MatchBoneTransforms(bpy.types.Operator):
-    """Match the widget to the bone transforms """
+    """Match the widget to the bone transforms"""
     bl_idname = "bonewidget.match_bone_transforms"
     bl_label = "Match bone transforms"
 

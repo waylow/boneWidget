@@ -81,6 +81,7 @@ def symmetrizeWidget(bone, collection):
     D = bpy.data
 
     widget = bone.custom_shape
+
     if findMirrorObject(bone).custom_shape_transform:
         mirrorBone = findMirrorObject(bone).custom_shape_transform
     else:
@@ -177,6 +178,10 @@ def findMirrorObject(object):
         suffixe = 'R'
     elif object.name.endswith("R"):
         suffixe = 'L'
+    elif object.name.endswith("l"):
+        suffixe = 'r'
+    elif object.name.endswith("r"):
+        suffixe = 'l'
 
     objectName = list(object.name)
     objectBaseName = objectName[:-1]
