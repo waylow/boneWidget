@@ -42,7 +42,6 @@ class bw_posemode_panel(bpy.types.Panel):
 
 class bw_specials(Menu):
     bl_label = "Bone Widget Specials"
-    bl_idname = 'POSEMODE_MT_bw_specials'
 
     def draw(self, context):
         layout = self.layout
