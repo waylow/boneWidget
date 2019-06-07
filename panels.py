@@ -51,11 +51,19 @@ class bw_specials(Menu):
         layout.operator("bonewidget.remove_widgets", icon="REMOVE", text="Remove Widgets")
 
 
+classes = (
+    bw_specials,
+    bw_posemode_panel,
+)
+
+
 def register():
-    bpy.utils.register_class(bw_specials)
-    bpy.utils.register_class(bw_posemode_panel)
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
 
 
 def unregister():
-    bpy.utils.unregister_class(bw_specials)
-    bpy.utils.unregister_class(bw_posemode_panel)
+    from bpy.utils import unregister_class
+    for cls in classes:
+        unregister_class(cls)
