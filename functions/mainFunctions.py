@@ -15,9 +15,10 @@ def get_collection(context):
 
 
 def boneMatrix(widget, matchBone):
-    #widget.matrix_local = matchBone.bone.matrix_local
-    widget.matrix_world = matchBone.id_data.matrix_world @ matchBone.bone.matrix_local
-    #widget.scale = [matchBone.bone.length,matchBone.bone.length,matchBone.bone.length]
+    widget.matrix_local = matchBone.bone.matrix_local
+    # widget.matrix_world = matchBone.id_data.matrix_world @ matchBone.bone.matrix_local
+    # widget.matrix_world = matchBone.matrix_world @ matchBone.bone.matrix_local
+    widget.scale = [matchBone.bone.length, matchBone.bone.length, matchBone.bone.length]
     widget.data.update()
 
 
@@ -177,17 +178,17 @@ def returnToArmature(widget):
 
 def findMirrorObject(object):
     if object.name.endswith("L"):
-        suffixe = 'R'
+        suffix = 'R'
     elif object.name.endswith("R"):
-        suffixe = 'L'
+        suffix = 'L'
     elif object.name.endswith("l"):
-        suffixe = 'r'
+        suffix = 'r'
     elif object.name.endswith("r"):
-        suffixe = 'l'
+        suffix = 'l'
 
     objectName = list(object.name)
     objectBaseName = objectName[:-1]
-    mirroredObjectName = "".join(objectBaseName)+suffixe
+    mirroredObjectName = "".join(objectBaseName)+suffix
 
     if object.id_data.type == 'ARMATURE':
         return object.id_data.pose.bones.get(mirroredObjectName)
