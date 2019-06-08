@@ -18,7 +18,7 @@ def boneMatrix(widget, matchBone):
     widget.matrix_local = matchBone.bone.matrix_local
     # need to make this take the armature scale into account
     # id_data below now points to the armature data rather than the object
-    # widget.matrix_world = bpy.context.scene.objects[matchBone.id_data.name].matrix_world @ matchBone.bone.matrix_local
+    # widget.matrix_world = bpy.context.active_pose_bone.id_data.matrix_world @ matchBone.bone.matrix_local
     # widget.matrix_world = matchBone.matrix_world @ matchBone.bone.matrix_local
     widget.scale = [matchBone.bone.length, matchBone.bone.length, matchBone.bone.length]
     widget.data.update()
@@ -52,7 +52,7 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
         if C.scene.collection.objects.get(bone.custom_shape.name) :
             C.scene.collection.objects.unlink(bone.custom_shape)
     '''
-    # make the data name inclide the prefix
+    # make the data name include the prefix
     newData = D.meshes.new('WGT-%s' % bone.name)
 
     if relative == True:
@@ -70,8 +70,9 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
     newObject.name = 'WGT-%s' % bone.name
     # C.scene.collection.objects.link(newObject)
     collection.objects.link(newObject)
-    newObject.matrix_world = bone.id_data.matrix_world @ matrixBone.bone.matrix_local
-    #newObject.scale = [matrixBone.bone.length,matrixBone.bone.length,matrixBone.bone.length]
+    # When it creates the widget it still doesn't take the armature scale into account
+    newObject.matrix_world = matrixBone.bone.matrix_local
+    newObject.scale = [matrixBone.bone.length, matrixBone.bone.length, matrixBone.bone.length]
     layer = bpy.context.view_layer
     layer.update()
 
