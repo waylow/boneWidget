@@ -11,3 +11,9 @@ list of bugs/todos:
 -connect user preferences to the functions
   -need to edit json function addRemoveWidgets to use the prefix
 -add operator to show/hide the collections
+
+-add property to be able to rotate the widgets
+
+-add function to clear widget from bone
+
+-improve the ui

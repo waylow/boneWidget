@@ -139,6 +139,8 @@ def editWidget(active_bone):
     if C.space_data.local_view:
         bpy.ops.view3d.localview()
 
+    # select object and make it active
+    widget.select_set(True)
     bpy.context.view_layer.objects.active = widget
     bpy.ops.object.mode_set(mode='EDIT')
 
