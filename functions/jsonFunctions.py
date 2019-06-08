@@ -50,12 +50,13 @@ def addRemoveWidgets(context, addOrRemove, items, widgets):
         widget_items.append(widget_item[1])
 
     if addOrRemove == 'add':
-        suffixes_1 = ("WDGT-", "wdgt-", "WGT-", "wgt-", "CS-", "cs-")
-        suffixes_2 = ("WDGT_", "wdgt_", "WGT_", "wgt_", "CS_", "cs_")
+        # WILL CHANGE THIS TO USE THE USER PREFERENCES
+        prefix_1 = ("WDGT-", "wdgt-", "WGT-", "wgt-", "CS-", "cs-")
+        prefix_2 = ("WDGT_", "wdgt_", "WGT_", "wgt_", "CS_", "cs_")
         for ob in widgets:
-            if ob.name.startswith(suffixes_1):
+            if ob.name.startswith(prefix_1):
                 ob_name = ob.name.split("-", 1)[1]
-            elif ob.name.startswith(suffixes_2):
+            elif ob.name.startswith(prefix_2):
                 ob_name = ob.name.split("_", 1)[1]
             else:
                 ob_name = ob.name
