@@ -50,14 +50,10 @@ def addRemoveWidgets(context, addOrRemove, items, widgets):
         widget_items.append(widget_item[1])
 
     if addOrRemove == 'add':
-        # WILL CHANGE THIS TO USE THE USER PREFERENCES
-        prefix_1 = ("WDGT-", "wdgt-", "WGT-", "wgt-", "CS-", "cs-")
-        prefix_2 = ("WDGT_", "wdgt_", "WGT_", "wgt_", "CS_", "cs_")
+        bw_widget_prefix = bpy.context.preferences.addons["boneWidget"].preferences.widget_prefix
         for ob in widgets:
-            if ob.name.startswith(prefix_1):
-                ob_name = ob.name.split("-", 1)[1]
-            elif ob.name.startswith(prefix_2):
-                ob_name = ob.name.split("_", 1)[1]
+            if ob.name.startswith(bw_widget_prefix):
+                ob_name = ob.name[len(bw_widget_prefix):]
             else:
                 ob_name = ob.name
             wgts[ob_name] = objectDataToDico(ob)
