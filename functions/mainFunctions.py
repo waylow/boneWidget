@@ -16,7 +16,9 @@ def get_collection(context):
 
 def boneMatrix(widget, matchBone):
     widget.matrix_local = matchBone.bone.matrix_local
-    # widget.matrix_world = matchBone.id_data.matrix_world @ matchBone.bone.matrix_local
+    # need to make this take the armature scale into account
+    # id_data below now points to the armature data rather than the object
+    # widget.matrix_world = bpy.context.scene.objects[matchBone.id_data.name].matrix_world @ matchBone.bone.matrix_local
     # widget.matrix_world = matchBone.matrix_world @ matchBone.bone.matrix_local
     widget.scale = [matchBone.bone.length, matchBone.bone.length, matchBone.bone.length]
     widget.data.update()
@@ -50,8 +52,8 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
         if C.scene.collection.objects.get(bone.custom_shape.name) :
             C.scene.collection.objects.unlink(bone.custom_shape)
     '''
-
-    newData = D.meshes.new(bone.name)
+    # make the data name inclide the prefix
+    newData = D.meshes.new('WGT-%s' % bone.name)
 
     if relative == True:
         boneLength = 1
