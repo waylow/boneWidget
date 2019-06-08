@@ -33,7 +33,8 @@ bl_info = {
 
 from . import operators
 from . import panels
-from .functions import readWidgets
+from . import prefs
+#from .functions import readWidgets
 
 import bpy
 import os
@@ -42,8 +43,10 @@ import os
 def register():
     operators.register()
     panels.register()
+    prefs.register()
 
 
 def unregister():
     operators.unregister()
-    panels.register()
+    panels.unregister()
+    prefs.unregister()
