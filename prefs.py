@@ -33,6 +33,7 @@ class BoneWidgetPreferences(AddonPreferences):
         row = layout.row()
         col = row.column()
         col.prop(self, "widget_prefix", text="Widget Prefix")
+        #add symmetry suffix later
         #col.prop(self, "symmetry_suffix", text="Symmetry suffix")
         col.prop(self, "bonewidget_collection_name", text="Collection name")
 

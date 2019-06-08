@@ -4,12 +4,13 @@ from .jsonFunctions import objectDataToDico
 
 
 def get_collection(context):
-    collection = context.scene.collection.children.get('WGT_shapes')
+    bw_collection_name = context.preferences.addons["boneWidget"].preferences.bonewidget_collection_name
+    collection = context.scene.collection.children.get(bw_collection_name)
     if collection:
         return collection
-    collection = bpy.data.collections.get('WGT_shapes')
+    collection = bpy.data.collections.get(bw_collection_name)
     if not collection:
-        collection = bpy.data.collections.new('WGT_shapes')
+        collection = bpy.data.collections.new(bw_collection_name)
     context.scene.collection.children.link(collection)
     return collection
 
@@ -38,6 +39,7 @@ def fromWidgetFindBone(widget):
 def createWidget(bone, widget, relative, size, scale, slide, collection):
     C = bpy.context
     D = bpy.data
+    bw_widget_prefix = C.preferences.addons["boneWidget"].preferences.widget_prefix
 
     if bone.custom_shape_transform:
         matrixBone = bone.custom_shape_transform
@@ -53,7 +55,7 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
             C.scene.collection.objects.unlink(bone.custom_shape)
     '''
     # make the data name include the prefix
-    newData = D.meshes.new('WGT-%s' % bone.name)
+    newData = D.meshes.new(bw_widget_prefix + bone.name)
 
     if relative == True:
         boneLength = 1
@@ -64,10 +66,10 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
                                                          * boneLength, size*scale[1]*boneLength]+[0, slide, 0], widget['edges'], widget['faces'])
     newData.update(calc_edges=True)
 
-    newObject = D.objects.new('WGT-%s' % bone.name, newData)
+    newObject = D.objects.new(bw_widget_prefix + bone.name, newData)
 
     newObject.data = newData
-    newObject.name = 'WGT-%s' % bone.name
+    newObject.name = bw_widget_prefix + bone.name
     # C.scene.collection.objects.link(newObject)
     collection.objects.link(newObject)
     # When it creates the widget it still doesn't take the armature scale into account
