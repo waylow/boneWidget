@@ -3,7 +3,7 @@ from .functions import readWidgets
 from bpy.types import Menu
 
 
-class bw_posemode_panel(bpy.types.Panel):
+class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     bl_label = "Bone Widget"
     bl_category = "RIG Tools"
     bl_space_type = 'VIEW_3D'
@@ -31,7 +31,7 @@ class bw_posemode_panel(bpy.types.Panel):
             row.prop(context.scene, "widget_list", expand=False, text="")
 
         row = layout.row(align=True)
-        row.menu("bw_specials", icon='DOWNARROW_HLT', text="")
+        row.menu("BONEWIDGET_MT_bw_specials", icon='DOWNARROW_HLT', text="")
         row.operator("bonewidget.create_widget", icon="OBJECT_DATAMODE")
 
         if bpy.context.mode == "POSE":
@@ -40,7 +40,7 @@ class bw_posemode_panel(bpy.types.Panel):
             row.operator("bonewidget.return_to_armature", icon="LOOP_BACK", text='To bone')
 
 
-class bw_specials(Menu):
+class BONEWIDGET_MT_bw_specials(Menu):
     bl_label = "Bone Widget Specials"
 
     def draw(self, context):
@@ -52,8 +52,8 @@ class bw_specials(Menu):
 
 
 classes = (
-    bw_specials,
-    bw_posemode_panel,
+    BONEWIDGET_MT_bw_specials,
+    BONEWIDGET_PT_posemode_panel,
 )
 
 
