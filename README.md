@@ -6,9 +6,6 @@
 2.8 list of bugs/todos:
 -Symmetrise not yet working
 
--connect user preferences to the functions
-  -need to edit json function addRemoveWidgets to use the prefix
-
 -add property to be able to rotate the widgets
 -add function to clear widget from bone
 -add operator to show/hide the collections
