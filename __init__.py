@@ -1,5 +1,5 @@
 '''
-Copyright (C) 2016 Manuel Rais
+Copyright (C) 2019 Manuel Rais
 manu@g-lul.com
 
 Created by Manuel Rais and Christophe Seux
