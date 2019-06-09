@@ -29,21 +29,21 @@ class bw_createWidget(bpy.types.Operator):
     relative_size: BoolProperty(
         name="Relative size",
         default=True,
-        description="Widget size proportionnal to Bone size"
+        description="Widget size proportionnal to bone size"
     )
 
     global_size: FloatProperty(
-        name="Global Size : ",
+        name="Global Size",
         default=1.0,
-        description="Global Size : "
+        description="Global Size"
     )
 
     slide: FloatProperty(
-        name="Slide :",
+        name="Slide",
         default=0.0,
         subtype='DISTANCE',
         unit='LENGTH',
-        description="slide"
+        description="slide widget along y axis"
     )
 
     def draw(self, context):
