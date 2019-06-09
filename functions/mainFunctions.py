@@ -46,14 +46,12 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
     else:
         matrixBone = bone
 
-    # don't unlink objects
-    '''
-    if bone.custom_shape :
+    if bone.custom_shape:
         bone.custom_shape.name = bone.custom_shape.name+"_old"
         bone.custom_shape.data.name = bone.custom_shape.data.name+"_old"
-        if C.scene.collection.objects.get(bone.custom_shape.name) :
+        if C.scene.collection.objects.get(bone.custom_shape.name):
             C.scene.collection.objects.unlink(bone.custom_shape)
-    '''
+
     # make the data name include the prefix
     newData = D.meshes.new(bw_widget_prefix + bone.name)
 
@@ -93,6 +91,7 @@ def symmetrizeWidget(bone, collection):
         mirrorBone = findMirrorObject(bone).custom_shape_transform
     else:
         mirrorBone = findMirrorObject(bone)
+
     mirrorWidget = mirrorBone.custom_shape
 
     if mirrorWidget:
@@ -191,6 +190,9 @@ def findMirrorObject(object):
         suffix = 'r'
     elif object.name.endswith("r"):
         suffix = 'l'
+    else:  # what if the widget ends in .001?
+        print('Object suffix unknown using blank')
+        suffix = ''
 
     objectName = list(object.name)
     objectBaseName = objectName[:-1]

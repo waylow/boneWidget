@@ -1,22 +1,24 @@
 import bpy
 
-from .functions import findMatchBones
-from .functions import fromWidgetFindBone
-from .functions import findMirrorObject
-from .functions import symmetrizeWidget
-from .functions import boneMatrix
-from .functions import createWidget
-from .functions import editWidget
-from .functions import returnToArmature
-from .functions import addRemoveWidgets
-from .functions import readWidgets
-from .functions import objectDataToDico
-from .functions import get_collection
+from .functions import (
+    findMatchBones,
+    fromWidgetFindBone,
+    findMirrorObject,
+    symmetrizeWidget,
+    boneMatrix,
+    createWidget,
+    editWidget,
+    returnToArmature,
+    addRemoveWidgets,
+    readWidgets,
+    objectDataToDico,
+    get_collection,
+)
 from bpy.types import Operator
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
 
 
-class bw_createWidget(bpy.types.Operator):
+class BONEWIDGET_OT_createWidget(bpy.types.Operator):
     """Creates a widget for selected bone"""
     bl_idname = "bonewidget.create_widget"
     bl_label = "Create"
@@ -43,7 +45,7 @@ class bw_createWidget(bpy.types.Operator):
         default=0.0,
         subtype='DISTANCE',
         unit='LENGTH',
-        description="slide widget along y axis"
+        description="Slide widget along y axis"
     )
 
     def draw(self, context):
@@ -64,7 +66,7 @@ class bw_createWidget(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class bw_editWidget(bpy.types.Operator):
+class BONEWIDGET_OT_editWidget(bpy.types.Operator):
     """Edit the widget for selected bone"""
     bl_idname = "bonewidget.edit_widget"
     bl_label = "Edit"
@@ -78,7 +80,7 @@ class bw_editWidget(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class bw_returnToArmature(bpy.types.Operator):
+class BONEWIDGET_OT_returnToArmature(bpy.types.Operator):
     """Switch back to the armature"""
     bl_idname = "bonewidget.return_to_armature"
     bl_label = "Return to armature"
@@ -98,7 +100,7 @@ class bw_returnToArmature(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class bw_MatchBoneTransforms(bpy.types.Operator):
+class BONEWIDGET_OT_matchBoneTransforms(bpy.types.Operator):
     """Match the widget to the bone transforms"""
     bl_idname = "bonewidget.match_bone_transforms"
     bl_label = "Match bone transforms"
@@ -124,7 +126,7 @@ class bw_MatchBoneTransforms(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class bw_match_symmetrizeShape(bpy.types.Operator):
+class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
     """Symmetrize to the opposite side, if it is named with a .L or .R"""
     bl_idname = "bonewidget.symmetrize_shape"
     bl_label = "Symmetrize"
@@ -136,18 +138,22 @@ class bw_match_symmetrizeShape(bpy.types.Operator):
         activeObject = findMatchBones()[1]
         widgetsAndBones = findMatchBones()[0]
 
+        if not activeObject:
+            self.report({"INFO"}, "No active bone or object")
+            return {'FINISHED'}
+
         for bone in widgetsAndBones:
             if activeObject.name.endswith("L"):
                 if bone.name.endswith("L") and widgetsAndBones[bone]:
                     symmetrizeWidget(bone, collection)
-            else:
+            elif activeObject.name.endswith("R"):
                 if bone.name.endswith("R") and widgetsAndBones[bone]:
                     symmetrizeWidget(bone, collection)
 
         return {'FINISHED'}
 
 
-class bw_addWidgets(bpy.types.Operator):
+class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
     """Add selected mesh object to Bone Widget Library"""
     bl_idname = "bonewidget.add_widgets"
     bl_label = "Add Widgets"
@@ -170,7 +176,7 @@ class bw_addWidgets(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class bw_removeWidgets(bpy.types.Operator):
+class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
     """Remove selected widget object from the Bone Widget Library"""
     bl_idname = "bonewidget.remove_widgets"
     bl_label = "Remove Widgets"
@@ -182,13 +188,13 @@ class bw_removeWidgets(bpy.types.Operator):
 
 
 classes = (
-    bw_removeWidgets,
-    bw_addWidgets,
-    bw_match_symmetrizeShape,
-    bw_MatchBoneTransforms,
-    bw_returnToArmature,
-    bw_editWidget,
-    bw_createWidget,
+    BONEWIDGET_OT_removeWidgets,
+    BONEWIDGET_OT_addWidgets,
+    BONEWIDGET_OT_matchSymmetrizeShape,
+    BONEWIDGET_OT_matchBoneTransforms,
+    BONEWIDGET_OT_returnToArmature,
+    BONEWIDGET_OT_editWidget,
+    BONEWIDGET_OT_createWidget,
 )
 
 
