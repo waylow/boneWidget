@@ -14,7 +14,7 @@
 
 -it doesn't delete the _old widget_ when creating a new one
 
--at the moment it won't match the bone matrix when the armature is not at a scale of 1.0  This is because the old id_data used to point to the object, but now it points to the data.
+-at the moment it will only match the bone matrix when the armature is at a scale of 1.0  This is because the old id_data used to point to the object, but now it points to the data object.
 I need to think about how to solve this.
 
 -improve the ui

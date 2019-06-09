@@ -85,6 +85,7 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
 def symmetrizeWidget(bone, collection):
     C = bpy.context
     D = bpy.data
+    bw_widget_prefix = C.preferences.addons["boneWidget"].preferences.widget_prefix
 
     widget = bone.custom_shape
 
@@ -109,7 +110,7 @@ def symmetrizeWidget(bone, collection):
     newObject = widget.copy()
     newObject.data = newData
     newData.update()
-    newObject.name = 'WGT-%s' % mirrorBone.name
+    newObject.name = bw_widget_prefix + mirrorBone.name
     collection.objects.link(newObject)
     # C.scene.objects.link(newObject)
     newObject.matrix_local = mirrorBone.bone.matrix_local
