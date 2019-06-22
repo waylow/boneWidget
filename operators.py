@@ -1,68 +1,73 @@
 import bpy
 
-from .functions import findMatchBones
-from .functions import fromWidgetFindBone
-from .functions import findMirrorObject
-from .functions import symmetrizeWidget
-from .functions import boneMatrix
-from .functions import createWidget
-from .functions import editWidget
-from .functions import returnToArmature
-from .functions import addRemoveWidgets
-from .functions import readWidgets
-from .functions import objectDataToDico
-from .functions import get_collection
+from .functions import (
+    findMatchBones,
+    fromWidgetFindBone,
+    findMirrorObject,
+    symmetrizeWidget,
+    boneMatrix,
+    createWidget,
+    editWidget,
+    returnToArmature,
+    addRemoveWidgets,
+    readWidgets,
+    objectDataToDico,
+    get_collection,
+)
 from bpy.types import Operator
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
 
 
-class bw_createWidget(bpy.types.Operator):
+class BONEWIDGET_OT_createWidget(bpy.types.Operator):
+    """Creates a widget for selected bone"""
     bl_idname = "bonewidget.create_widget"
     bl_label = "Create"
-    bl_options = {'REGISTER', 'UNDO'}  
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
         return (context.object and context.object.mode == 'POSE')
 
-    relative_size = BoolProperty(  
-        name="Relative size",  
-        default=True,  
-        description="Widget size proportionnal to Bone size"  
-        )
+    relative_size: BoolProperty(
+        name="Relative size",
+        default=True,
+        description="Widget size proportionnal to bone size"
+    )
 
-    global_size = FloatProperty(
-       name="Global Size : ",  
-       default=1.0,  
-       description="Global Size : " 
-       )  
+    global_size: FloatProperty(
+        name="Global Size",
+        default=1.0,
+        description="Global Size"
+    )
 
-    slide = FloatProperty(  
-       name="Slide :",  
-       default=0.0,  
-       subtype='DISTANCE',  
-       unit='LENGTH',  
-       description="slide"  
-       ) 
-    
+    slide: FloatProperty(
+        name="Slide",
+        default=0.0,
+        subtype='DISTANCE',
+        unit='LENGTH',
+        description="Slide widget along y axis"
+    )
+
     def draw(self, context):
-        layout = self.layout     
-        row = layout.row(align= True)  
+        layout = self.layout
+        row = layout.row(align=True)
         row.prop(self, "relative_size")
-        row = layout.row(align= True)  
+        row = layout.row(align=True)
         row.prop(self, "global_size", expand=False)
-        row = layout.row(align= True)  
+        row = layout.row(align=True)
         row.prop(self, "slide")
 
-    def execute(self, context):       
+    def execute(self, context):
         wgts = readWidgets()
-        for bone in bpy.context.selected_pose_bones :
-            createWidget(bone,wgts[context.scene.widget_list],self.relative_size,self.global_size,[1,1,1],self.slide, get_collection(context))
+        for bone in bpy.context.selected_pose_bones:
+            createWidget(bone, wgts[context.scene.widget_list], self.relative_size, self.global_size, [
+                         1, 1, 1], self.slide, get_collection(context))
 
         return {'FINISHED'}
 
 
-class bw_editWidget(bpy.types.Operator):
+class BONEWIDGET_OT_editWidget(bpy.types.Operator):
+    """Edit the widget for selected bone"""
     bl_idname = "bonewidget.edit_widget"
     bl_label = "Edit"
 
@@ -75,117 +80,131 @@ class bw_editWidget(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class bw_returnToArmature(bpy.types.Operator):
+class BONEWIDGET_OT_returnToArmature(bpy.types.Operator):
+    """Switch back to the armature"""
     bl_idname = "bonewidget.return_to_armature"
     bl_label = "Return to armature"
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.type == 'MESH' 
-            and context.object.mode in ['EDIT','OBJECT'] )
+        return (context.object and context.object.type == 'MESH'
+                and context.object.mode in ['EDIT', 'OBJECT'])
 
     def execute(self, context):
-        if fromWidgetFindBone(bpy.context.object):    
+        if fromWidgetFindBone(bpy.context.object):
             returnToArmature(bpy.context.object)
-        
-        else :
+
+        else:
             self.report({'INFO'}, 'Object is not a bone widget')
-        
+
         return {'FINISHED'}
 
 
-        
-class bw_MatchBoneTransforms(bpy.types.Operator):
+class BONEWIDGET_OT_matchBoneTransforms(bpy.types.Operator):
+    """Match the widget to the bone transforms"""
     bl_idname = "bonewidget.match_bone_transforms"
     bl_label = "Match bone transforms"
-    
+
     def execute(self, context):
-        if bpy.context.mode == "POSE" :
-            for bone in bpy.context.selected_pose_bones :
+        if bpy.context.mode == "POSE":
+            for bone in bpy.context.selected_pose_bones:
                 if bone.custom_shape_transform and bone.custom_shape:
-                    boneMatrix(bone.custom_shape,bone.custom_shape_transform)
-                elif bone.custom_shape :
-                    boneMatrix(bone.custom_shape,bone)
-                
-        else  :
-            for ob in bpy.context.selected_objects :
-                if ob.type == 'MESH' :
+                    boneMatrix(bone.custom_shape, bone.custom_shape_transform)
+                elif bone.custom_shape:
+                    boneMatrix(bone.custom_shape, bone)
+
+        else:
+            for ob in bpy.context.selected_objects:
+                if ob.type == 'MESH':
                     matchBone = fromWidgetFindBone(ob)
-                    if matchBone :
-                        if matchBone.custom_shape_transform :
-                            boneMatrix(ob,matchBone.custom_shape_transform)
-                        else :
-                            boneMatrix(ob,matchBone)
+                    if matchBone:
+                        if matchBone.custom_shape_transform:
+                            boneMatrix(ob, matchBone.custom_shape_transform)
+                        else:
+                            boneMatrix(ob, matchBone)
 
         return {'FINISHED'}
 
 
-class bw_match_symmetrizeShape(bpy.types.Operator):
+class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
+    """Symmetrize to the opposite side, if it is named with a .L or .R"""
     bl_idname = "bonewidget.symmetrize_shape"
     bl_label = "Symmetrize"
-    bl_options = {'REGISTER', 'UNDO'}  
-       
+    bl_options = {'REGISTER', 'UNDO'}
+
     def execute(self, context):
-        widgetsAndBones= findMatchBones()[0]
-        activeObject= findMatchBones()[1]
-        widgetsAndBones= findMatchBones()[0]
-        
-        for bone in widgetsAndBones :
-            if activeObject.name.endswith("L") :
+        collection = get_collection(context)
+        widgetsAndBones = findMatchBones()[0]
+        activeObject = findMatchBones()[1]
+        widgetsAndBones = findMatchBones()[0]
+
+        if not activeObject:
+            self.report({"INFO"}, "No active bone or object")
+            return {'FINISHED'}
+
+        for bone in widgetsAndBones:
+            if activeObject.name.endswith("L"):
                 if bone.name.endswith("L") and widgetsAndBones[bone]:
-                    symmetrizeWidget(bone)
-            else :
+                    symmetrizeWidget(bone, collection)
+            elif activeObject.name.endswith("R"):
                 if bone.name.endswith("R") and widgetsAndBones[bone]:
-                    symmetrizeWidget(bone)
+                    symmetrizeWidget(bone, collection)
 
         return {'FINISHED'}
 
 
-class bw_addWidgets(bpy.types.Operator):
+class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
+    """Add selected mesh object to Bone Widget Library"""
     bl_idname = "bonewidget.add_widgets"
     bl_label = "Add Widgets"
 
     def execute(self, context):
-        objects=[]
-        if bpy.context.mode == "POSE" :
-            for bone in bpy.context.selected_pose_bones :
+        objects = []
+        if bpy.context.mode == "POSE":
+            for bone in bpy.context.selected_pose_bones:
                 objects.append(bone.custom_shape)
-        else  :
-            for ob in bpy.context.selected_objects :
-                if ob.type == 'MESH' :
+        else:
+            for ob in bpy.context.selected_objects:
+                if ob.type == 'MESH':
                     objects.append(ob)
-        
-        if not objects :
+
+        if not objects:
             self.report({'INFO'}, 'Select Meshes or Pose_bones')
-            
-        addRemoveWidgets(context,"add",bpy.types.Scene.widget_list[1]['items'],objects)
-    
+
+        addRemoveWidgets(context, "add", bpy.types.Scene.widget_list[1]['items'], objects)
+
         return {'FINISHED'}
 
-class bw_removeWidgets(bpy.types.Operator):
+
+class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
+    """Remove selected widget object from the Bone Widget Library"""
     bl_idname = "bonewidget.remove_widgets"
     bl_label = "Remove Widgets"
 
     def execute(self, context):
-        objects= bpy.context.scene.widget_list
-        addRemoveWidgets(context,"remove",bpy.types.Scene.widget_list[1]['items'],objects)
+        objects = bpy.context.scene.widget_list
+        addRemoveWidgets(context, "remove", bpy.types.Scene.widget_list[1]['items'], objects)
         return {'FINISHED'}
 
 
+classes = (
+    BONEWIDGET_OT_removeWidgets,
+    BONEWIDGET_OT_addWidgets,
+    BONEWIDGET_OT_matchSymmetrizeShape,
+    BONEWIDGET_OT_matchBoneTransforms,
+    BONEWIDGET_OT_returnToArmature,
+    BONEWIDGET_OT_editWidget,
+    BONEWIDGET_OT_createWidget,
+)
+
+
 def register():
-    bpy.utils.register_class(bw_removeWidgets)
-    bpy.utils.register_class(bw_addWidgets)
-    bpy.utils.register_class(bw_match_symmetrizeShape)
-    bpy.utils.register_class(bw_MatchBoneTransforms)
-    bpy.utils.register_class(bw_returnToArmature)
-    bpy.utils.register_class(bw_editWidget)
-    bpy.utils.register_class(bw_createWidget)
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
+
 
 def unregister():
-    bpy.utils.unregister_class(bw_createWidget)
-    bpy.utils.unregister_class(bw_editWidget)
-    bpy.utils.unregister_class(bw_returnToArmature)
-    bpy.utils.unregister_class(bw_MatchBoneTransforms)
-    bpy.utils.unregister_class(bw_match_symmetrizeShape)
-    bpy.utils.unregister_class(bw_addWidgets)
-    bpy.utils.unregister_class(bw_removeWidgets)
+    from bpy.utils import unregister_class
+    for cls in classes:
+        unregister_class(cls)

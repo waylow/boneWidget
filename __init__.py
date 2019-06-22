@@ -1,5 +1,5 @@
 '''
-Copyright (C) 2016 Manuel Rais
+Copyright (C) 2019 Manuel Rais
 manu@g-lul.com
 
 Created by Manuel Rais and Christophe Seux
@@ -20,8 +20,8 @@ Created by Manuel Rais and Christophe Seux
 
 bl_info = {
     "name": "Bone Widget",
-    "author": "Manuel Rais, Christophe Seux, Bassam Kurdali",
-    "version": (1, 1),
+    "author": "Manuel Rais, Christophe Seux, Bassam Kurdali, Wayne Dixon",
+    "version": (1, 2),
     "blender": (2, 80, 0),
     "location": "",
     "description": "",
@@ -29,40 +29,24 @@ bl_info = {
     "wiki_url": "",
     "tracker_url": "",
     "category": "Rigging"}
-'''
-if "bpy" in locals():
-    import imp
-    imp.reload(operators)
-    imp.reload(panels)
-'''
+
 
 from . import operators
 from . import panels
-from .functions import readWidgets
-    
+from . import prefs
+#from .functions import readWidgets
+
 import bpy
 import os
 
 
-
-
 def register():
-    
-    #bpy.utils.register_module(__name__)
     operators.register()
     panels.register()
-    
+    prefs.register()
 
-    
+
 def unregister():
-    #bpy.utils.unregister_module(__name__)
     operators.unregister()
-    panels.register()
-
-
-    
-'''
-if __name__ == "__main__":
-    register()
-    
-'''
+    panels.unregister()
+    prefs.unregister()
