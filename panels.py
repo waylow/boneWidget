@@ -1,5 +1,8 @@
 import bpy
-from .functions import readWidgets
+from .functions import (
+    readWidgets,
+    get_view_layer_collection,
+)
 from bpy.types import Menu
 
 
@@ -38,6 +41,17 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
             row.operator("bonewidget.edit_widget", icon="OUTLINER_DATA_MESH")
         else:
             row.operator("bonewidget.return_to_armature", icon="LOOP_BACK", text='To bone')
+
+        collection = get_view_layer_collection(context)
+        if collection.hide_viewport:
+            icon = "HIDE_ON"
+            text = "Unhide Collection"
+        else:
+            icon = "HIDE_OFF"
+            text = "Hide Collection"
+        row = layout.row()
+        row.operator("bonewidget.toggle_collection_visibilty",
+                     icon=icon, text=text)
 
 
 class BONEWIDGET_MT_bw_specials(Menu):

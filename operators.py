@@ -13,6 +13,7 @@ from .functions import (
     readWidgets,
     objectDataToDico,
     get_collection,
+    get_view_layer_collection,
 )
 from bpy.types import Operator
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
@@ -187,6 +188,21 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
+    """HideUnhide the bone widget collection"""
+    bl_idname = "bonewidget.toggle_collection_visibilty"
+    bl_label = "Collection Visibilty"
+
+    @classmethod
+    def poll(cls, context):
+        return (context.object and context.object.type == 'ARMATURE' and context.object.pose)
+
+    def execute(self, context):
+        collection = get_view_layer_collection(context)
+        collection.hide_viewport = not collection.hide_viewport
+        return {'FINISHED'}
+
+
 classes = (
     BONEWIDGET_OT_removeWidgets,
     BONEWIDGET_OT_addWidgets,
@@ -195,6 +211,7 @@ classes = (
     BONEWIDGET_OT_returnToArmature,
     BONEWIDGET_OT_editWidget,
     BONEWIDGET_OT_createWidget,
+    BONEWIDGET_OT_toggleCollectionVisibility,
 )
 
 

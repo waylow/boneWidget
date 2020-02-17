@@ -20,6 +20,14 @@ def get_view_layer_collection(context):
     collection = context.view_layer.layer_collection.children[bw_collection_name]
     return collection
 
+def hide_bw_collection(context):
+    #find the collection (already know this)
+    bw_collection_name = context.preferences.addons["boneWidget"].preferences.bonewidget_collection_name
+    collection = context.view_layer.layer_collection.children[bw_collection_name]
+    #toggle
+    collection = get_view_layer_collection(C)
+    collection.hide_viewport = True
+
 
 def boneMatrix(widget, matchBone):
     widget.matrix_local = matchBone.bone.matrix_local
@@ -38,7 +46,6 @@ def fromWidgetFindBone(widget):
             for bone in ob.pose.bones:
                 if bone.custom_shape == widget:
                     matchBone = bone
-
     return matchBone
 
 
