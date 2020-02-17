@@ -53,16 +53,20 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         row.operator("bonewidget.toggle_collection_visibilty",
                      icon=icon, text=text)
 
+        layout = self.layout
+        layout.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR', text="Symmetrize Shape")
+        layout.operator("bonewidget.match_bone_transforms",
+                        icon='GROUP_BONE', text="Match Bone Transforms")
+
 
 class BONEWIDGET_MT_bw_specials(Menu):
     bl_label = "Bone Widget Specials"
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR')
-        layout.operator("bonewidget.match_bone_transforms", icon='GROUP_BONE')
-        layout.operator("bonewidget.add_widgets", icon="ADD", text="Add Widgets")
-        layout.operator("bonewidget.remove_widgets", icon="REMOVE", text="Remove Widgets")
+        layout.operator("bonewidget.add_widgets", icon="ADD", text="Add Widget to library")
+        layout.operator("bonewidget.remove_widgets", icon="REMOVE",
+                        text="Remove Widget from library")
 
 
 classes = (

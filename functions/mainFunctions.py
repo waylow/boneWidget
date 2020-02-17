@@ -20,14 +20,6 @@ def get_view_layer_collection(context):
     collection = context.view_layer.layer_collection.children[bw_collection_name]
     return collection
 
-def hide_bw_collection(context):
-    #find the collection (already know this)
-    bw_collection_name = context.preferences.addons["boneWidget"].preferences.bonewidget_collection_name
-    collection = context.view_layer.layer_collection.children[bw_collection_name]
-    #toggle
-    collection = get_view_layer_collection(C)
-    collection.hide_viewport = True
-
 
 def boneMatrix(widget, matchBone):
     widget.matrix_local = matchBone.bone.matrix_local
@@ -110,11 +102,10 @@ def symmetrizeWidget(bone, collection):
     if mirrorWidget:
         mirrorWidget.name = mirrorWidget.name+"_old"
         mirrorWidget.data.name = mirrorWidget.data.name+"_old"
-        # don't unlink
-        '''
+        # unlink/delete old widget
         if C.scene.objects.get(mirrorWidget.name):
-            C.scene.objects.unlink(mirrorWidget)
-        '''
+            D.objects.remove(mirrorWidget)
+
     newData = widget.data.copy()
     for vert in newData.vertices:
         vert.co = numpy.array(vert.co)*(-1, 1, 1)
@@ -124,7 +115,6 @@ def symmetrizeWidget(bone, collection):
     newData.update()
     newObject.name = bw_widget_prefix + mirrorBone.name
     collection.objects.link(newObject)
-    # C.scene.objects.link(newObject)
     newObject.matrix_local = mirrorBone.bone.matrix_local
     newObject.scale = [mirrorBone.bone.length, mirrorBone.bone.length, mirrorBone.bone.length]
 
