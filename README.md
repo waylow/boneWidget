@@ -5,6 +5,8 @@
 ----------
 2.8 list of bugs/todos:
 
+-doesn't delete old widget when replacing with a new version
+
 Symmetrize errors:
 -if the widget names end with .001 etc it will throw an error
 -if no objects are selected it will throw an error

@@ -15,6 +15,12 @@ def get_collection(context):
     return collection
 
 
+def get_view_layer_collection(context):
+    bw_collection_name = context.preferences.addons["boneWidget"].preferences.bonewidget_collection_name
+    collection = context.view_layer.layer_collection.children[bw_collection_name]
+    return collection
+
+
 def boneMatrix(widget, matchBone):
     widget.matrix_local = matchBone.bone.matrix_local
     # need to make this take the armature scale into account
@@ -131,17 +137,9 @@ def editWidget(active_bone):
     bpy.ops.object.mode_set(mode='OBJECT')
     C.active_object.select_set(False)
 
-    '''
-    if C.space_data.lock_camera_and_layers == False :
-        visibleLayers = numpy.array(bpy.context.space_data.layers)+widget.layers-armature.layers
-        bpy.context.space_data.layers = visibleLayers.tolist()
-
-    else :
-        visibleLayers = numpy.array(bpy.context.scene.layers)+widget.layers-armature.layers
-        bpy.context.scene.layers = visibleLayers.tolist()
-    '''
-    collection = get_collection(C)
+    collection = get_view_layer_collection(C)
     collection.hide_viewport = False
+
     if C.space_data.local_view:
         bpy.ops.view3d.localview()
 
@@ -161,16 +159,7 @@ def returnToArmature(widget):
     if C.active_object.mode == 'EDIT':
         bpy.ops.object.mode_set(mode='OBJECT')
 
-    '''
-    if C.space_data.lock_camera_and_layers == False :
-        visibleLayers = numpy.array(bpy.context.space_data.layers)-widget.layers+armature.layers
-        bpy.context.space_data.layers = visibleLayers.tolist()
-
-    else :
-        visibleLayers = numpy.array(bpy.context.scene.layers)-widget.layers+armature.layers
-        bpy.context.scene.layers = visibleLayers.tolist()
-    '''
-    collection = get_collection(C)
+    collection = get_view_layer_collection(C)
     collection.hide_viewport = True
     if C.space_data.local_view:
         bpy.ops.view3d.localview()
