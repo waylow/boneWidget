@@ -3,7 +3,7 @@ import numpy
 from .jsonFunctions import objectDataToDico
 
 
-def get_collection(context):
+def getCollection(context):
     bw_collection_name = context.preferences.addons["boneWidget"].preferences.bonewidget_collection_name
     collection = context.scene.collection.children.get(bw_collection_name)
     if collection:
@@ -15,7 +15,7 @@ def get_collection(context):
     return collection
 
 
-def get_view_layer_collection(context):
+def getViewLayerCollection(context):
     bw_collection_name = context.preferences.addons["boneWidget"].preferences.bonewidget_collection_name
     collection = context.view_layer.layer_collection.children[bw_collection_name]
     return collection
@@ -125,6 +125,30 @@ def symmetrizeWidget(bone, collection):
     mirrorBone.bone.show_wire = True
 
 
+def deleteUnusedWidgets():  # CURRENTLY WORKING ON THIS function
+    C = bpy.context
+    D = bpy.data
+
+    bw_collection_name = C.preferences.addons["boneWidget"].preferences.bonewidget_collection_name
+    #bw_widget_prefix = C.preferences.addons["boneWidget"].preferences.widget_prefix
+
+    widgetList = []
+    # loop through bones
+    # create a widget_list
+    # loop through objects in collection
+    # delete unused
+
+    for ob in C.scene.objects:
+        if ob.type == 'ARMATURE':
+            for bone in ob.pose.bones:
+                if bone.custom_shape:
+                    widgetList.append(bone.custom_shape)
+    for widget in C.scene.collection.children[bw_collection_name].all_objects:
+        if widget not in widgetList:
+            print('Deleting ' + widget.name)
+            D.objects.remove(widget)
+
+
 def editWidget(active_bone):
     C = bpy.context
     D = bpy.data
@@ -134,7 +158,7 @@ def editWidget(active_bone):
     bpy.ops.object.mode_set(mode='OBJECT')
     C.active_object.select_set(False)
 
-    collection = get_view_layer_collection(C)
+    collection = getViewLayerCollection(C)
     collection.hide_viewport = False
 
     if C.space_data.local_view:
@@ -156,7 +180,7 @@ def returnToArmature(widget):
     if C.active_object.mode == 'EDIT':
         bpy.ops.object.mode_set(mode='OBJECT')
 
-    collection = get_view_layer_collection(C)
+    collection = getViewLayerCollection(C)
     collection.hide_viewport = True
     if C.space_data.local_view:
         bpy.ops.view3d.localview()

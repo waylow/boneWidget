@@ -1,7 +1,7 @@
 import bpy
 from .functions import (
     readWidgets,
-    get_view_layer_collection,
+    getViewLayerCollection,
 )
 from bpy.types import Menu
 
@@ -42,7 +42,7 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         else:
             row.operator("bonewidget.return_to_armature", icon="LOOP_BACK", text='To bone')
 
-        collection = get_view_layer_collection(context)
+        collection = getViewLayerCollection(context)
         if collection.hide_viewport:
             icon = "HIDE_ON"
             text = "Unhide Collection"
@@ -57,6 +57,8 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         layout.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR', text="Symmetrize Shape")
         layout.operator("bonewidget.match_bone_transforms",
                         icon='GROUP_BONE', text="Match Bone Transforms")
+        layout.operator("bonewidget.delete_unused_widgets",
+                        icon='GROUP_BONE', text="Delete Unused Widgets")
 
 
 class BONEWIDGET_MT_bw_specials(Menu):

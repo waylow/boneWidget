@@ -12,8 +12,10 @@ from .functions import (
     addRemoveWidgets,
     readWidgets,
     objectDataToDico,
-    get_collection,
-    get_view_layer_collection,
+    getCollection,
+    getViewLayerCollection,
+    deleteUnusedWidgets,
+
 )
 from bpy.types import Operator
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
@@ -62,7 +64,7 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         wgts = readWidgets()
         for bone in bpy.context.selected_pose_bones:
             createWidget(bone, wgts[context.scene.widget_list], self.relative_size, self.global_size, [
-                         1, 1, 1], self.slide, get_collection(context))
+                         1, 1, 1], self.slide, getCollection(context))
 
         return {'FINISHED'}
 
@@ -134,7 +136,7 @@ class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        collection = get_collection(context)
+        collection = getCollection(context)
         widgetsAndBones = findMatchBones()[0]
         activeObject = findMatchBones()[1]
         widgetsAndBones = findMatchBones()[0]
@@ -198,8 +200,22 @@ class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.pose)
 
     def execute(self, context):
-        collection = get_view_layer_collection(context)
+        collection = getViewLayerCollection(context)
         collection.hide_viewport = not collection.hide_viewport
+        return {'FINISHED'}
+
+
+class BONEWIDGET_OT_deleteUnusedWidgets(bpy.types.Operator):
+    """Delete unused objects in the WDGT collection"""
+    bl_idname = "bonewidget.delete_unused_widgets"
+    bl_label = "Delete Unused"
+
+    @classmethod
+    def poll(cls, context):
+        return (context.object and context.object.type == 'ARMATURE' and context.object.pose)
+
+    def execute(self, context):
+        deleteUnusedWidgets()
         return {'FINISHED'}
 
 
@@ -212,6 +228,7 @@ classes = (
     BONEWIDGET_OT_editWidget,
     BONEWIDGET_OT_createWidget,
     BONEWIDGET_OT_toggleCollectionVisibility,
+    BONEWIDGET_OT_deleteUnusedWidgets,
 )
 
 
