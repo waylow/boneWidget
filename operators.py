@@ -15,6 +15,7 @@ from .functions import (
     getCollection,
     getViewLayerCollection,
     deleteUnusedWidgets,
+    clearBoneWidgets,
 
 )
 from bpy.types import Operator
@@ -219,6 +220,20 @@ class BONEWIDGET_OT_deleteUnusedWidgets(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_clearBoneWidgets(bpy.types.Operator):
+    """Clear widgets from selected pose bones"""
+    bl_idname = "bonewidget.clear_widgets"
+    bl_label = "Clear Widgets"
+
+    @classmethod
+    def poll(cls, context):
+        return (context.object and context.object.type == 'ARMATURE' and context.object.pose)
+
+    def execute(self, context):
+        clearBoneWidgets()
+        return {'FINISHED'}
+
+
 classes = (
     BONEWIDGET_OT_removeWidgets,
     BONEWIDGET_OT_addWidgets,
@@ -229,6 +244,7 @@ classes = (
     BONEWIDGET_OT_createWidget,
     BONEWIDGET_OT_toggleCollectionVisibility,
     BONEWIDGET_OT_deleteUnusedWidgets,
+    BONEWIDGET_OT_clearBoneWidgets,
 )
 
 

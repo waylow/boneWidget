@@ -59,6 +59,8 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
                         icon='GROUP_BONE', text="Match Bone Transforms")
         layout.operator("bonewidget.delete_unused_widgets",
                         icon='GROUP_BONE', text="Delete Unused Widgets")
+        layout.operator("bonewidget.clear_widgets",
+                        icon='GROUP_BONE', text="Clear Bone Widgets")
 
 
 class BONEWIDGET_MT_bw_specials(Menu):

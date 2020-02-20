@@ -125,18 +125,13 @@ def symmetrizeWidget(bone, collection):
     mirrorBone.bone.show_wire = True
 
 
-def deleteUnusedWidgets():  # CURRENTLY WORKING ON THIS function
+def deleteUnusedWidgets():
     C = bpy.context
     D = bpy.data
 
     bw_collection_name = C.preferences.addons["boneWidget"].preferences.bonewidget_collection_name
-    #bw_widget_prefix = C.preferences.addons["boneWidget"].preferences.widget_prefix
 
     widgetList = []
-    # loop through bones
-    # create a widget_list
-    # loop through objects in collection
-    # delete unused
 
     for ob in C.scene.objects:
         if ob.type == 'ARMATURE':
@@ -243,3 +238,16 @@ def findMatchBones():
         activeObject = fromWidgetFindBone(C.object)
         armature = activeObject.id_data
     return (widgetsAndBones, activeObject, armature)
+
+
+def clearBoneWidgets():
+    C = bpy.context
+    D = bpy.data
+
+    # find current bone
+    if bpy.context.object.type == 'ARMATURE':
+        for bone in C.selected_pose_bones:
+            if bone.custom_shape:
+                # clear Shape
+                bone.custom_shape = None
+                bone.custom_shape_transform = None
