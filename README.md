@@ -17,11 +17,11 @@ I need to think about how to solve this.
 -doesn't work correctly when there is a "custom shape transforms" (it adds it to this bone instead)
 
 Future stuff:
--add function to clear widget from bone
+-add function to clear widget from bone [DONE]
 -add operator to show/hide the collections [DONE]
 -add operator that will resync the names of the wdgts to the bones
 (sometimes you change them so it would be a nice feature)
--add operator to delete unused wdgts [done]
+-add operator to delete unused wdgts [DONE]
 -add property to be able to rotate the widgets
 
 -improve the ui

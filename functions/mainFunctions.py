@@ -240,14 +240,32 @@ def findMatchBones():
     return (widgetsAndBones, activeObject, armature)
 
 
+def resyncWidgetNames():
+    C = bpy.context
+    D = bpy.data
+
+    bw_collection_name = C.preferences.addons["boneWidget"].preferences.bonewidget_collection_name
+    bw_widget_prefix = C.preferences.addons["boneWidget"].preferences.widget_prefix
+
+    widgetsAndBones = {}
+
+    if bpy.context.object.type == 'ARMATURE':
+        for bone in C.active_object.pose.bones:
+            if bone.custom_shape:
+                widgetsAndBones[bone] = bone.custom_shape
+
+    for k, v in widgetsAndBones.items():
+        if k.name != (bw_widget_prefix + k.name):
+            # change widget name
+            D.objects[v.name].name = str(bw_widget_prefix + k.name)
+
+
 def clearBoneWidgets():
     C = bpy.context
     D = bpy.data
 
-    # find current bone
     if bpy.context.object.type == 'ARMATURE':
         for bone in C.selected_pose_bones:
             if bone.custom_shape:
-                # clear Shape
                 bone.custom_shape = None
                 bone.custom_shape_transform = None

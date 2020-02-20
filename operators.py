@@ -16,7 +16,7 @@ from .functions import (
     getViewLayerCollection,
     deleteUnusedWidgets,
     clearBoneWidgets,
-
+    resyncWidgetNames,
 )
 from bpy.types import Operator
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
@@ -209,7 +209,7 @@ class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
 class BONEWIDGET_OT_deleteUnusedWidgets(bpy.types.Operator):
     """Delete unused objects in the WDGT collection"""
     bl_idname = "bonewidget.delete_unused_widgets"
-    bl_label = "Delete Unused"
+    bl_label = "Delete Unused Widgets"
 
     @classmethod
     def poll(cls, context):
@@ -234,6 +234,20 @@ class BONEWIDGET_OT_clearBoneWidgets(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_resyncWidgetNames(bpy.types.Operator):
+    """Clear widgets from selected pose bones"""
+    bl_idname = "bonewidget.resync_widget_names"
+    bl_label = "Resync Widget Names"
+
+    @classmethod
+    def poll(cls, context):
+        return (context.object and context.object.type == 'ARMATURE' and context.object.pose)
+
+    def execute(self, context):
+        resyncWidgetNames()
+        return {'FINISHED'}
+
+
 classes = (
     BONEWIDGET_OT_removeWidgets,
     BONEWIDGET_OT_addWidgets,
@@ -245,6 +259,7 @@ classes = (
     BONEWIDGET_OT_toggleCollectionVisibility,
     BONEWIDGET_OT_deleteUnusedWidgets,
     BONEWIDGET_OT_clearBoneWidgets,
+    BONEWIDGET_OT_resyncWidgetNames,
 )
 
 

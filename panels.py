@@ -58,9 +58,11 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         layout.operator("bonewidget.match_bone_transforms",
                         icon='GROUP_BONE', text="Match Bone Transforms")
         layout.operator("bonewidget.delete_unused_widgets",
-                        icon='GROUP_BONE', text="Delete Unused Widgets")
+                        icon='TRASH', text="Delete Unused Widgets")
         layout.operator("bonewidget.clear_widgets",
-                        icon='GROUP_BONE', text="Clear Bone Widgets")
+                        icon='X', text="Clear Bone Widgets")
+        layout.operator("bonewidget.resync_widget_names",
+                        icon='FILE_REFRESH', text="Resync Widget Names")
 
 
 class BONEWIDGET_MT_bw_specials(Menu):
