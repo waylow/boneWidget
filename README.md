@@ -14,14 +14,14 @@ Symmetrize errors:
 General errors:
 -at the moment it will only match the bone matrix when the armature is at a scale of 1.0  This is because the old id_data used to point to the object, but now it points to the data object.
 I need to think about how to solve this.
--doesn't work correctly when there is a "custom shape transforms" (it adds it to this bone instead)
+-doesn't work correctly when there is a "custom shape transforms" [resolved]
 
 Future stuff:
 -add function to clear widget from bone [DONE]
 -add operator to show/hide the collections [DONE]
--add operator that will resync the names of the wdgts to the bones
+-add operator that will resync the names of the wdgts to the bones [DONE]
 (sometimes you change them so it would be a nice feature)
--add operator to delete unused wdgts [DONE]
+-add operator to delete unused widgets [DONE]
 -add property to be able to rotate the widgets
 
 -improve the ui
