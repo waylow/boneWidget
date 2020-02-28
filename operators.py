@@ -47,9 +47,17 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
     slide: FloatProperty(
         name="Slide",
         default=0.0,
-        subtype='DISTANCE',
-        unit='LENGTH',
+        subtype='NONE',
+        unit='NONE',
         description="Slide widget along y axis"
+    )
+    rotation: FloatVectorProperty(
+        name="Rotation",
+        description="Rotate the widget NOT YET WORKING",
+        default=(0.0, 0.0, 0.0),
+        subtype='EULER',
+        unit='ROTATION',
+        precision=1,
     )
 
     def draw(self, context):
@@ -60,12 +68,14 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         row.prop(self, "global_size", expand=False)
         row = layout.row(align=True)
         row.prop(self, "slide")
+        row = layout.row()
+        row.prop(self, "rotation", expand=True)
 
     def execute(self, context):
         wgts = readWidgets()
         for bone in bpy.context.selected_pose_bones:
             createWidget(bone, wgts[context.scene.widget_list], self.relative_size, self.global_size, [
-                         1, 1, 1], self.slide, getCollection(context))
+                         1, 1, 1], self.slide, self.rotation, getCollection(context))
 
         return {'FINISHED'}
 

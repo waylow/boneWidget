@@ -42,16 +42,21 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         else:
             row.operator("bonewidget.return_to_armature", icon="LOOP_BACK", text='To bone')
 
-        collection = getViewLayerCollection(context)
-        if collection.hide_viewport:
-            icon = "HIDE_ON"
-            text = "Unhide Collection"
-        else:
-            icon = "HIDE_OFF"
-            text = "Hide Collection"
-        row = layout.row()
-        row.operator("bonewidget.toggle_collection_visibilty",
-                     icon=icon, text=text)
+        try:
+            collection = getViewLayerCollection(context)
+        except:
+            collection = None
+
+        if collection != None:
+            if collection.hide_viewport:
+                icon = "HIDE_ON"
+                text = "Unhide Collection"
+            else:
+                icon = "HIDE_OFF"
+                text = "Hide Collection"
+            row = layout.row()
+            row.operator("bonewidget.toggle_collection_visibilty",
+                         icon=icon, text=text)
 
         layout = self.layout
         layout.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR', text="Symmetrize Shape")
@@ -60,7 +65,7 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         layout.operator("bonewidget.delete_unused_widgets",
                         icon='TRASH', text="Delete Unused Widgets")
         layout.operator("bonewidget.clear_widgets",
-                        icon='X', text="Clear Bone Widgets")
+                        icon='X', text="Clear Bone Widget")
         layout.operator("bonewidget.resync_widget_names",
                         icon='FILE_REFRESH', text="Resync Widget Names")
 

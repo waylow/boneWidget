@@ -1,5 +1,7 @@
 import bpy
 import numpy
+from math import pi
+from mathutils import Matrix
 from .jsonFunctions import objectDataToDico
 
 
@@ -41,7 +43,7 @@ def fromWidgetFindBone(widget):
     return matchBone
 
 
-def createWidget(bone, widget, relative, size, scale, slide, collection):
+def createWidget(bone, widget, relative, size, scale, slide, rotation, collection):
     C = bpy.context
     D = bpy.data
     bw_widget_prefix = C.preferences.addons["boneWidget"].preferences.widget_prefix
@@ -65,8 +67,22 @@ def createWidget(bone, widget, relative, size, scale, slide, collection):
     else:
         boneLength = (1/bone.bone.length)
 
+    # add the verts
     newData.from_pydata(numpy.array(widget['vertices'])*[size*scale[0]*boneLength, size*scale[2]
-                                                         * boneLength, size*scale[1]*boneLength]+[0, slide, 0], widget['edges'], widget['faces'])
+                                                         * boneLength, size*scale[1]*boneLength], widget['edges'], widget['faces'])
+
+    # Create tranform matrices (slide vector and rotation)
+    widget_matrix = Matrix()
+    trans = Matrix.Translation((0, slide, 0))
+    rot = rotation.to_matrix().to_4x4()
+
+    # Translate then rotate the matrix
+    widget_matrix = widget_matrix @ trans
+    widget_matrix = widget_matrix @ rot
+
+    # transform the widget with this matrix
+    newData.transform(widget_matrix)
+
     newData.update(calc_edges=True)
 
     newObject = D.objects.new(bw_widget_prefix + bone.name, newData)
@@ -256,7 +272,6 @@ def resyncWidgetNames():
 
     for k, v in widgetsAndBones.items():
         if k.name != (bw_widget_prefix + k.name):
-            # change widget name
             D.objects[v.name].name = str(bw_widget_prefix + k.name)
 
 
