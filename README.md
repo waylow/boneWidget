@@ -14,6 +14,8 @@ Symmetrize errors:
 General errors:
 -at the moment it will only match the bone matrix when the armature is at a scale of 1.0  This is because the old id_data used to point to the object, but now it points to the data object.
 I need to think about how to solve this.
+-also doesn't match bone transforms if armature not at 0,0,0
+
 -doesn't work correctly when there is a "custom shape transforms" [resolved]
 
 Future stuff:
