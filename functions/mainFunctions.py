@@ -8,13 +8,22 @@ from .jsonFunctions import objectDataToDico
 def getCollection(context):
     bw_collection_name = context.preferences.addons["boneWidget"].preferences.bonewidget_collection_name
     collection = context.scene.collection.children.get(bw_collection_name)
-    if collection:
+    if collection:  # if it already exists
         return collection
+
     collection = bpy.data.collections.get(bw_collection_name)
-    if not collection:
+
+    if collection:  # if it exists but not linked to scene
+        context.scene.collection.children.link(collection)
+        return collection
+
+    else:  # create a new collection
         collection = bpy.data.collections.new(bw_collection_name)
-    context.scene.collection.children.link(collection)
-    return collection
+        context.scene.collection.children.link(collection)
+        # hide new collection
+        viewlayer_collection = context.view_layer.layer_collection.children[collection.name]
+        viewlayer_collection.hide_viewport = True
+        return collection
 
 
 def getViewLayerCollection(context):
@@ -25,11 +34,7 @@ def getViewLayerCollection(context):
 
 def boneMatrix(widget, matchBone):
     widget.matrix_local = matchBone.bone.matrix_local
-    # need to make this take the armature scale into account
-    # id_data below now points to the armature data rather than the object
-    # widget.matrix_world = bpy.context.active_pose_bone.id_data.matrix_world @ matchBone.bone.matrix_local
-    # widget.matrix_world = matchBone.matrix_world @ matchBone.bone.matrix_local
-    widget.scale = [matchBone.bone.length, matchBone.bone.length, matchBone.bone.length]
+    widget.matrix_world = bpy.context.active_object.matrix_world @ matchBone.bone.matrix_local
     widget.data.update()
 
 
@@ -89,11 +94,10 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
 
     newObject.data = newData
     newObject.name = bw_widget_prefix + bone.name
-    # C.scene.collection.objects.link(newObject)
     collection.objects.link(newObject)
-    # When it creates the widget it still doesn't take the armature scale into account
-    newObject.matrix_world = matrixBone.bone.matrix_local
-    newObject.scale = [matrixBone.bone.length, matrixBone.bone.length, matrixBone.bone.length]
+
+    newObject.matrix_world = bpy.context.active_object.matrix_world @ matrixBone.bone.matrix_local
+    #newObject.scale = [matrixBone.bone.length, matrixBone.bone.length, matrixBone.bone.length]
     layer = bpy.context.view_layer
     layer.update()
 
