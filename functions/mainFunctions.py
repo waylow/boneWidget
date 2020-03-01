@@ -34,7 +34,7 @@ def getViewLayerCollection(context):
 
 def boneMatrix(widget, matchBone):
     widget.matrix_local = matchBone.bone.matrix_local
-    widget.matrix_world = bpy.context.active_object.matrix_world @ matchBone.bone.matrix_local
+    widget.matrix_world = matchBone.id_data.matrix_world @ matchBone.bone.matrix_local
     widget.data.update()
 
 
