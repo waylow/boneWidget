@@ -17,7 +17,7 @@ General errors:
 
 -doesn't work correctly when there is a "custom shape transforms" [resolved]
 
--match Bone Transforms works when bone is selected but not when the widget is selected
+-match Bone Transforms works when bone is selected but not when the widget is selected [resolved]
 
 Future stuff:
 -add function to clear widget from bone [DONE]
@@ -26,7 +26,7 @@ Future stuff:
 -add operator to delete unused widgets [DONE]
 -add property to be able to rotate the widgets [DONE]
 
--improve the ui
+-improve the ui [Done]
 
 -add some default widgets
     -line, cube, plane, half cube, circle, gear, triangle

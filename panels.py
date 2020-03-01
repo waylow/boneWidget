@@ -42,6 +42,19 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         else:
             row.operator("bonewidget.return_to_armature", icon="LOOP_BACK", text='To bone')
 
+        layout = self.layout
+        layout.separator()
+        layout.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR', text="Symmetrize Shape")
+        layout.operator("bonewidget.match_bone_transforms",
+                        icon='GROUP_BONE', text="Match Bone Transforms")
+        layout.operator("bonewidget.resync_widget_names",
+                        icon='FILE_REFRESH', text="Resync Widget Names")
+        layout.separator()
+        layout.operator("bonewidget.clear_widgets",
+                        icon='X', text="Clear Bone Widget")
+        layout.operator("bonewidget.delete_unused_widgets",
+                        icon='TRASH', text="Delete Unused Widgets")
+
         try:
             collection = getViewLayerCollection(context)
         except:
@@ -55,19 +68,10 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
                 icon = "HIDE_OFF"
                 text = "Hide Collection"
             row = layout.row()
+            row.separator()
+            row = layout.row()
             row.operator("bonewidget.toggle_collection_visibilty",
                          icon=icon, text=text)
-
-        layout = self.layout
-        layout.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR', text="Symmetrize Shape")
-        layout.operator("bonewidget.match_bone_transforms",
-                        icon='GROUP_BONE', text="Match Bone Transforms")
-        layout.operator("bonewidget.delete_unused_widgets",
-                        icon='TRASH', text="Delete Unused Widgets")
-        layout.operator("bonewidget.clear_widgets",
-                        icon='X', text="Clear Bone Widget")
-        layout.operator("bonewidget.resync_widget_names",
-                        icon='FILE_REFRESH', text="Resync Widget Names")
 
 
 class BONEWIDGET_MT_bw_specials(Menu):
