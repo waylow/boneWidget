@@ -21,7 +21,7 @@ Created by Manuel Rais and Christophe Seux
 bl_info = {
     "name": "Bone Widget",
     "author": "Manuel Rais, Christophe Seux, Bassam Kurdali, Wayne Dixon",
-    "version": (1, 3),
+    "version": (1, 4),
     "blender": (2, 80, 0),
     "location": "",
     "description": "",
@@ -34,7 +34,6 @@ bl_info = {
 from . import operators
 from . import panels
 from . import prefs
-#from .functions import readWidgets
 
 import bpy
 import os
