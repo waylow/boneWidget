@@ -62,14 +62,16 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout
-        row = layout.row(align=True)
+        layout.use_property_split = True
+        col = layout.column()
+        row = col.row(align=True)
         row.prop(self, "relative_size")
-        row = layout.row(align=True)
+        row = col.row(align=True)
         row.prop(self, "global_size", expand=False)
-        row = layout.row(align=True)
+        row = col.row(align=True)
         row.prop(self, "slide")
-        row = layout.row()
-        row.prop(self, "rotation", expand=True)
+        row = col.row(align=True)
+        row.prop(self, "rotation", text="Rotation")
 
     def execute(self, context):
         wgts = readWidgets()
