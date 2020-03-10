@@ -3,6 +3,9 @@
 2.7 explanation : https://vimeo.com/184159913
 
 ----------
+To do:
+
+
 v1.4 Release notes
 -add function to clear widget from bone [DONE]
 -add operator to show/hide the collections [DONE]
@@ -10,7 +13,12 @@ v1.4 Release notes
 -add operator to delete unused widgets [DONE]
 -add property to be able to rotate the widgets [DONE]
 -improve the ui [Done]
--add some default widgets (line, cube, half cube, circle, gear, triangle)
+-add some default widgets (line, cube, half cube, circle, gear, triangle) [DONE]
+
+Current Bugs:
+-create widget uses the wrong matrix when 'custom bone transform' is enabled
+(but symetrize widget works)  
+
 
 v1.3 Release Notes:
 -updated to work with latest 2.8 api

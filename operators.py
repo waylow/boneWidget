@@ -33,9 +33,9 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         return (context.object and context.object.mode == 'POSE')
 
     relative_size: BoolProperty(
-        name="Relative size",
+        name="Scale to Bone length",
         default=True,
-        description="Widget size proportionnal to bone size"
+        description="Scale Widget to bone length"
     )
 
     global_size: FloatProperty(
@@ -124,20 +124,20 @@ class BONEWIDGET_OT_matchBoneTransforms(bpy.types.Operator):
     def execute(self, context):
         if bpy.context.mode == "POSE":
             for bone in bpy.context.selected_pose_bones:
-                if bone.custom_shape_transform and bone.custom_shape:
-                    boneMatrix(bone.custom_shape, bone.custom_shape_transform)
-                elif bone.custom_shape:
-                    boneMatrix(bone.custom_shape, bone)
+                # if bone.custom_shape_transform and bone.custom_shape:
+                    #boneMatrix(bone.custom_shape, bone.custom_shape_transform)
+                # elif bone.custom_shape:
+                boneMatrix(bone.custom_shape, bone)
 
         else:
             for ob in bpy.context.selected_objects:
                 if ob.type == 'MESH':
                     matchBone = fromWidgetFindBone(ob)
                     if matchBone:
-                        if matchBone.custom_shape_transform:
-                            boneMatrix(ob, matchBone.custom_shape_transform)
-                        else:
-                            boneMatrix(ob, matchBone)
+                        # if matchBone.custom_shape_transform:
+                        #boneMatrix(ob, matchBone.custom_shape_transform)
+                        # else:
+                        boneMatrix(ob, matchBone)
 
         return {'FINISHED'}
 

@@ -1,5 +1,5 @@
 '''
-Copyright (C) 2019 Manuel Rais
+Copyright (C) 2020 Manuel Rais
 manu@g-lul.com
 
 Created by Manuel Rais and Christophe Seux
@@ -23,8 +23,8 @@ bl_info = {
     "author": "Manuel Rais, Christophe Seux, Bassam Kurdali, Wayne Dixon",
     "version": (1, 4),
     "blender": (2, 80, 0),
-    "location": "",
-    "description": "",
+    "location": "UI > Properties Panel",
+    "description": "Easily Create Bone Widgets",
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",

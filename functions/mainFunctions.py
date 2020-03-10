@@ -35,6 +35,8 @@ def getViewLayerCollection(context):
 def boneMatrix(widget, matchBone):
     widget.matrix_local = matchBone.bone.matrix_local
     widget.matrix_world = matchBone.id_data.matrix_world @ matchBone.bone.matrix_local
+    if matchBone.use_custom_shape_bone_size:
+        widget.scale = [matchBone.bone.length, matchBone.bone.length, matchBone.bone.length]
     widget.data.update()
 
 
@@ -53,10 +55,10 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
     D = bpy.data
     bw_widget_prefix = C.preferences.addons["boneWidget"].preferences.widget_prefix
 
-    if bone.custom_shape_transform:
-        matrixBone = bone.custom_shape_transform
-    else:
-        matrixBone = bone
+    # if bone.custom_shape_transform:
+    #matrixBone = bone.custom_shape_transform
+    # else:
+    matrixBone = bone
 
     if bone.custom_shape:
         bone.custom_shape.name = bone.custom_shape.name+"_old"
@@ -97,7 +99,7 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
     collection.objects.link(newObject)
 
     newObject.matrix_world = bpy.context.active_object.matrix_world @ matrixBone.bone.matrix_local
-    #newObject.scale = [matrixBone.bone.length, matrixBone.bone.length, matrixBone.bone.length]
+    newObject.scale = [matrixBone.bone.length, matrixBone.bone.length, matrixBone.bone.length]
     layer = bpy.context.view_layer
     layer.update()
 
