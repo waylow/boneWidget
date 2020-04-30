@@ -3,8 +3,12 @@
 2.7 explanation : https://vimeo.com/184159913
 
 ----------
-To do:
+Current Bugs:
+-CRASH "DELETE UNUSED WIDGETS" is used
+-fails if the bone has a custom transform shape
 
+v1.5 Release notes
+-fixed the symmetrize error if the .L and .R were sharing the same shape and you tried to symmetrize
 
 v1.4 Release notes
 -add function to clear widget from bone [DONE]
@@ -14,10 +18,8 @@ v1.4 Release notes
 -add property to be able to rotate the widgets [DONE]
 -improve the ui [Done]
 -add some default widgets (line, cube, half cube, circle, gear, triangle) [DONE]
+-fixed bug when 'custom bone transform' is enabled, size is incorrect [DONE]
 
-Current Bugs:
--create widget uses the wrong matrix when 'custom bone transform' is enabled
-(but symetrize widget works)  
 
 
 v1.3 Release Notes:
