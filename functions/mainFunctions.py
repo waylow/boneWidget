@@ -121,7 +121,7 @@ def symmetrizeWidget(bone, collection):
 
     mirrorWidget = mirrorBone.custom_shape
 
-    if mirrorWidget:
+    if mirrorWidget != widget:
         mirrorWidget.name = mirrorWidget.name+"_old"
         mirrorWidget.data.name = mirrorWidget.data.name+"_old"
         # unlink/delete old widget
@@ -163,7 +163,7 @@ def deleteUnusedWidgets():
     for widget in C.scene.collection.children[bw_collection_name].all_objects:
         if widget not in widgetList:
             print('Deleting ' + widget.name)
-            D.objects.remove(widget)
+            # D.objects.remove(widget)
 
 
 def editWidget(active_bone):
