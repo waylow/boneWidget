@@ -3,24 +3,26 @@
 2.7 explanation : https://vimeo.com/184159913
 
 ----------
-Current Bugs:
--CRASH "DELETE UNUSED WIDGETS" is used
--fails if the bone has a custom transform shape
+To Do:
+-[feature] Find an easy way to add a selected mesh as the shape (rather than from the library)
+
+v1.6 Release Notes
+-Fixed the "DELETE UNUSED WIDGETS" function (was crashing because the context was wrong)
+
 
 v1.5 Release notes
 -fixed the symmetrize error if the .L and .R were sharing the same shape and you tried to symmetrize
 
+
 v1.4 Release notes
--add function to clear widget from bone [DONE]
--add operator to show/hide the collections [DONE]
--add operator that will resync the names of the wdgts to the bones [DONE]
--add operator to delete unused widgets [DONE]
--add property to be able to rotate the widgets [DONE]
--improve the ui [Done]
--add some default widgets (line, cube, half cube, circle, gear, triangle) [DONE]
--fixed bug when 'custom bone transform' is enabled, size is incorrect [DONE]
-
-
+-add function to clear widget from bone
+-add operator to show/hide the collections
+-add operator that will resync the names of the wdgts to the bones
+-add operator to delete unused widgets
+-add property to be able to rotate the widgets
+-improve the ui
+-add some default widgets (line, cube, half cube, circle, gear, triangle)
+-fixed bug when 'custom bone transform' is enabled, size is incorrect
 
 v1.3 Release Notes:
 -updated to work with latest 2.8 api

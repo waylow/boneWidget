@@ -155,15 +155,22 @@ def deleteUnusedWidgets():
 
     widgetList = []
 
-    for ob in C.scene.objects:
+    for ob in D.objects:
         if ob.type == 'ARMATURE':
             for bone in ob.pose.bones:
                 if bone.custom_shape:
                     widgetList.append(bone.custom_shape)
-    for widget in C.scene.collection.children[bw_collection_name].all_objects:
-        if widget not in widgetList:
-            print('Deleting ' + widget.name)
-            # D.objects.remove(widget)
+
+    unwantedList = [
+        ob for ob in C.scene.collection.children[bw_collection_name].all_objects if ob not in widgetList]
+    # save the current context mode
+    mode = C.mode
+    # jump into object mode
+    bpy.ops.object.mode_set(mode='OBJECT')
+    # delete unwanted widgets
+    bpy.ops.object.delete({"selected_objects": unwantedList})
+    # jump back to current mode
+    bpy.ops.object.mode_set(mode=mode)
 
 
 def editWidget(active_bone):
