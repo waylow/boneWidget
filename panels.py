@@ -3,9 +3,10 @@ from .functions import (
     readWidgets,
     getViewLayerCollection,
 )
-from bpy.types import Menu
+from .bl_class_registry import BlClassRegistry
+from .menus import BONEWIDGET_MT_bw_specials
 
-
+@BlClassRegistry()
 class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     bl_label = "Bone Widget"
     bl_category = "Rig Tools"
@@ -60,7 +61,7 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         except:
             collection = None
 
-        if collection != None:
+        if collection is not None:
             if collection.hide_viewport:
                 icon = "HIDE_ON"
                 text = "Unhide Collection"
@@ -73,30 +74,3 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
             row.operator("bonewidget.toggle_collection_visibilty",
                          icon=icon, text=text)
 
-
-class BONEWIDGET_MT_bw_specials(Menu):
-    bl_label = "Bone Widget Specials"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.operator("bonewidget.add_widgets", icon="ADD", text="Add Widget to library")
-        layout.operator("bonewidget.remove_widgets", icon="REMOVE",
-                        text="Remove Widget from library")
-
-
-classes = (
-    BONEWIDGET_MT_bw_specials,
-    BONEWIDGET_PT_posemode_panel,
-)
-
-
-def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
-
-
-def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
