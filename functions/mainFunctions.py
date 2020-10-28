@@ -5,6 +5,7 @@ from mathutils import Matrix
 from .jsonFunctions import objectDataToDico
 from .. import __package__
 
+
 def getCollection(context):
     bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
     collection = context.scene.collection.children.get(bw_collection_name)
@@ -55,28 +56,28 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
     D = bpy.data
     bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
 
-    # if bone.custom_shape_transform:
-    #matrixBone = bone.custom_shape_transform
-    # else:
+#     if bone.custom_shape_transform:
+#    matrixBone = bone.custom_shape_transform
+#     else:
     matrixBone = bone
 
     if bone.custom_shape:
-        bone.custom_shape.name = bone.custom_shape.name+"_old"
-        bone.custom_shape.data.name = bone.custom_shape.data.name+"_old"
+        bone.custom_shape.name = bone.custom_shape.name + "_old"
+        bone.custom_shape.data.name = bone.custom_shape.data.name + "_old"
         if C.scene.collection.objects.get(bone.custom_shape.name):
             C.scene.collection.objects.unlink(bone.custom_shape)
 
     # make the data name include the prefix
     newData = D.meshes.new(bw_widget_prefix + bone.name)
 
-    if relative == True:
+    if relative is True:
         boneLength = 1
     else:
-        boneLength = (1/bone.bone.length)
+        boneLength = (1 / bone.bone.length)
 
     # add the verts
-    newData.from_pydata(numpy.array(widget['vertices'])*[size*scale[0]*boneLength, size*scale[2]
-                                                         * boneLength, size*scale[1]*boneLength], widget['edges'], widget['faces'])
+    newData.from_pydata(numpy.array(widget['vertices']) * [size * scale[0] * boneLength, size * scale[2]
+                        * boneLength, size * scale[1] * boneLength], widget['edges'], widget['faces'])
 
     # Create tranform matrices (slide vector and rotation)
     widget_matrix = Matrix()
@@ -111,41 +112,61 @@ def symmetrizeWidget(bone, collection):
     C = bpy.context
     D = bpy.data
     bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
-
+    
     widget = bone.custom_shape
 
-    if findMirrorObject(bone).custom_shape_transform:
-        mirrorBone = findMirrorObject(bone).custom_shape_transform
+    if findMirrorObject(bone) is not None:
+        if findMirrorObject(bone).custom_shape_transform:
+            mirrorBone = findMirrorObject(bone).custom_shape_transform
+        else:
+            mirrorBone = findMirrorObject(bone)
+
+        mirrorWidget = mirrorBone.custom_shape
+
+        if mirrorWidget:
+            if mirrorWidget != widget:
+                mirrorWidget.name = mirrorWidget.name + "_old"
+                mirrorWidget.data.name = mirrorWidget.data.name + "_old"
+                # unlink/delete old widget
+                if C.scene.objects.get(mirrorWidget.name):
+                    D.objects.remove(mirrorWidget)
+
+        newData = widget.data.copy()
+        for vert in newData.vertices:
+            vert.co = numpy.array(vert.co) * (-1, 1, 1)
+
+        newObject = widget.copy()
+        newObject.data = newData
+        newData.update()
+        newObject.name = bw_widget_prefix + mirrorBone.name
+        collection.objects.link(newObject)
+        newObject.matrix_local = mirrorBone.bone.matrix_local
+        newObject.scale = [mirrorBone.bone.length, mirrorBone.bone.length, mirrorBone.bone.length]
+
+        layer = bpy.context.view_layer
+        layer.update()
+
+        mirrorBone.custom_shape = newObject
+        mirrorBone.bone.show_wire = True
     else:
-        mirrorBone = findMirrorObject(bone)
+        pass
 
-    mirrorWidget = mirrorBone.custom_shape
 
-    if mirrorWidget:
-        if mirrorWidget != widget:
-            mirrorWidget.name = mirrorWidget.name+"_old"
-            mirrorWidget.data.name = mirrorWidget.data.name+"_old"
-            # unlink/delete old widget
-            if C.scene.objects.get(mirrorWidget.name):
-                D.objects.remove(mirrorWidget)
+def symmetrizeWidget_helper(bone, collection, activeObject, widgetsAndBones):
+    C = bpy.context
 
-    newData = widget.data.copy()
-    for vert in newData.vertices:
-        vert.co = numpy.array(vert.co)*(-1, 1, 1)
+    bw_symmetry_suffix = C.preferences.addons[__package__].preferences.symmetry_suffix
+    bw_symmetry_suffix = bw_symmetry_suffix.split(";")
 
-    newObject = widget.copy()
-    newObject.data = newData
-    newData.update()
-    newObject.name = bw_widget_prefix + mirrorBone.name
-    collection.objects.link(newObject)
-    newObject.matrix_local = mirrorBone.bone.matrix_local
-    newObject.scale = [mirrorBone.bone.length, mirrorBone.bone.length, mirrorBone.bone.length]
+    suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
+    suffix_2 = bw_symmetry_suffix[1].replace(" ", "")
 
-    layer = bpy.context.view_layer
-    layer.update()
-
-    mirrorBone.custom_shape = newObject
-    mirrorBone.bone.show_wire = True
+    if activeObject.name.endswith(suffix_1):
+        if bone.name.endswith(suffix_1) and widgetsAndBones[bone]:
+            symmetrizeWidget(bone, collection)
+    elif activeObject.name.endswith(suffix_2):
+        if bone.name.endswith(suffix_2) and widgetsAndBones[bone]:
+            symmetrizeWidget(bone, collection)
 
 
 def deleteUnusedWidgets():
@@ -217,21 +238,36 @@ def returnToArmature(widget):
 
 
 def findMirrorObject(object):
-    if object.name.endswith("L"):
-        suffix = 'R'
-    elif object.name.endswith("R"):
-        suffix = 'L'
-    elif object.name.endswith("l"):
-        suffix = 'r'
-    elif object.name.endswith("r"):
-        suffix = 'l'
+    C = bpy.context
+    D = bpy.data
+
+    bw_symmetry_suffix = C.preferences.addons[__package__].preferences.symmetry_suffix
+    bw_symmetry_suffix = bw_symmetry_suffix.split(";")
+
+    suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
+    suffix_2 = bw_symmetry_suffix[1].replace(" ", "")
+
+    if object.name.endswith(suffix_1):
+        suffix = suffix_2
+        suffix_length = len(suffix_1)
+
+    elif object.name.endswith(suffix_2):
+        suffix = suffix_1
+        suffix_length = len(suffix_2)
+
+    elif object.name.endswith(suffix_1.lower()):
+        suffix = suffix_2.lower()
+        suffix_length = len(suffix_1)
+    elif object.name.endswith(suffix_2.lower()):
+        suffix = suffix_1.lower()
+        suffix_length = len(suffix_2)
     else:  # what if the widget ends in .001?
         print('Object suffix unknown using blank')
         suffix = ''
 
     objectName = list(object.name)
-    objectBaseName = objectName[:-1]
-    mirroredObjectName = "".join(objectBaseName)+suffix
+    objectBaseName = objectName[:-suffix_length]
+    mirroredObjectName = "".join(objectBaseName) + suffix
 
     if object.id_data.type == 'ARMATURE':
         return object.id_data.pose.bones.get(mirroredObjectName)
@@ -242,12 +278,18 @@ def findMirrorObject(object):
 def findMatchBones():
     C = bpy.context
     D = bpy.data
+    
+    bw_symmetry_suffix = C.preferences.addons[__package__].preferences.symmetry_suffix
+    bw_symmetry_suffix = bw_symmetry_suffix.split(";")
+
+    suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
+    suffix_2 = bw_symmetry_suffix[1].replace(" ", "")
 
     widgetsAndBones = {}
 
     if bpy.context.object.type == 'ARMATURE':
         for bone in C.selected_pose_bones:
-            if bone.name.endswith("L") or bone.name.endswith("R"):
+            if bone.name.endswith(suffix_1) or bone.name.endswith(suffix_2):
                 widgetsAndBones[bone] = bone.custom_shape
                 mirrorBone = findMirrorObject(bone)
                 if mirrorBone:
