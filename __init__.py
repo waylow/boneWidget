@@ -20,8 +20,8 @@ Created by Manuel Rais and Christophe Seux
 
 bl_info = {
     "name": "Bone Widget",
-    "author": "Manuel Rais, Christophe Seux, Bassam Kurdali, Wayne Dixon",
-    "version": (1, 6),
+    "author": "Manuel Rais, Christophe Seux, Bassam Kurdali, Wayne Dixon, Blender Defender",
+    "version": (1, 7),
     "blender": (2, 80, 0),
     "location": "UI > Properties Panel",
     "description": "Easily Create Bone Widgets",
@@ -30,22 +30,66 @@ bl_info = {
     "tracker_url": "",
     "category": "Rigging"}
 
+if "bpy" in locals():
+    import importlib
+    utils.bl_class_registry.BlClassRegistry.cleanup()
+    importlib.reload(prefs)
+    importlib.reload(panels)
+    importlib.reload(menus)
 
-from . import operators
-from . import panels
-from . import prefs
+else:
+    import bpy
+    from . import bl_class_registry
+    from . import operators
+    from . import panels
+    from . import prefs
+    from . import menus
 
 import bpy
 import os
 
 
+def get_user_preferences(context):
+    if hasattr(context, "user_preferences"):
+        return context.user_preferences
+
+    return context.preferences
+
+
+def check_version(major, minor, _):
+    """
+    Check blender version
+    """
+
+    if bpy.app.version[0] == major and bpy.app.version[1] == minor:
+        return 0
+    if bpy.app.version[0] > major:
+        return 1
+    if bpy.app.version[1] > minor:
+        return 1
+    return -1
+
+
 def register():
     operators.register()
-    panels.register()
-    prefs.register()
+    menus.register()
+    bl_class_registry.BlClassRegistry.register()
+
+    # Apply preferences of the panel location.
+    context = bpy.context
+    pref = get_user_preferences(context).addons[__package__].preferences
+    # Only default panel location is available in < 2.80
+    if check_version(2, 80, 0) < 0:
+        pref.panel_category = "Rig Tools"
+    prefs.BoneWidgetPreferences.panel_category_update_fn(pref, context)
 
 
 def unregister():
     operators.unregister()
-    panels.unregister()
-    prefs.unregister()
+    menus.unregister()
+    # TODO: Unregister by BlClassRegistry
+    bl_class_registry.BlClassRegistry.unregister()
+
+
+if __name__ == "__main__":
+    register()
