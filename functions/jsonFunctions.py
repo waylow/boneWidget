@@ -2,7 +2,7 @@ import bpy
 import os
 import json
 import numpy
-
+from .. import __package__
 
 def objectDataToDico(object):
     verts = []
@@ -50,7 +50,7 @@ def addRemoveWidgets(context, addOrRemove, items, widgets):
         widget_items.append(widget_item[1])
 
     if addOrRemove == 'add':
-        bw_widget_prefix = bpy.context.preferences.addons["boneWidget"].preferences.widget_prefix
+        bw_widget_prefix = bpy.context.preferences.addons[__package__].preferences.widget_prefix
         for ob in widgets:
             if ob.name.startswith(bw_widget_prefix):
                 ob_name = ob.name[len(bw_widget_prefix):]
