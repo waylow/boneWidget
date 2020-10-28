@@ -32,7 +32,7 @@ bl_info = {
 
 if "bpy" in locals():
     import importlib
-    utils.bl_class_registry.BlClassRegistry.cleanup()
+    bl_class_registry.BlClassRegistry.cleanup()
     importlib.reload(prefs)
     importlib.reload(panels)
     importlib.reload(menus)
