@@ -4,6 +4,7 @@ import json
 import numpy
 from .. import __package__
 
+
 def objectDataToDico(object):
     verts = []
     depsgraph = bpy.context.evaluated_depsgraph_get()
