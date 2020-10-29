@@ -194,6 +194,8 @@ def deleteUnusedWidgets():
     # jump back to current mode
     bpy.ops.object.mode_set(mode=mode)
 
+    return unwantedList
+
 
 def editWidget(active_bone):
     C = bpy.context
@@ -225,6 +227,8 @@ def returnToArmature(widget):
 
     if C.active_object.mode == 'EDIT':
         bpy.ops.object.mode_set(mode='OBJECT')
+        
+    bpy.ops.object.select_all(action='DESELECT')
 
     collection = getViewLayerCollection(C)
     collection.hide_viewport = True
@@ -340,3 +344,68 @@ def clearBoneWidgets():
             if bone.custom_shape:
                 bone.custom_shape = None
                 bone.custom_shape_transform = None
+
+
+def selectObject():
+    C = bpy.context
+    D = bpy.data
+
+    bpy.ops.object.mode_set(mode='OBJECT')
+    C.active_object.select_set(False)
+
+
+def confirmWidget(context, active_bone, active_armature):
+
+    C = bpy.context
+    D = bpy.data
+
+    active_collection = getCollection(context)
+    active_object = C.active_object
+    bw_widget_prefix = context.preferences.addons[__package__].preferences.widget_prefix
+    name = bw_widget_prefix + active_bone.name
+
+    mesh = active_object.data.copy()
+    mesh.name = name
+    ob = D.objects.new(name, mesh)
+    active_collection.objects.link(ob)
+
+    # active_object.name = name
+
+    active_bone.custom_shape = ob
+
+    bpy.ops.object.select_all(action='DESELECT')
+
+    bpy.context.view_layer.objects.active = active_armature
+    bpy.ops.object.mode_set(mode='POSE')
+
+    return active_object
+
+
+def writeTemp(arm, bone):
+    import os
+    loc = os.path.join(os.path.expanduser("~"), "temp.txt")
+
+    myfile = open(loc, "w")
+    myfile.write(arm + "," + bone)
+    myfile.close()
+
+
+def readTemp():
+    import os
+    loc = os.path.join(os.path.expanduser("~"), "temp.txt")
+
+    myfile = open(loc, "r")
+    arm_bone = myfile.read()
+    myfile.close()
+    os.remove(loc)
+    return arm_bone
+
+
+def logOperation(LoggingLevel, LoggingText):
+    from .functions.logger import logtofile
+    import os
+    if not os.path.exists(os.path.join(os.path.expanduser("~"), "Bone Widget Logs")):
+        os.makedirs(os.path.join(os.path.expanduser("~"), "Bone Widget Logs"))
+    path = os.path.join(os.path.expanduser("~"), "Bone Widget Logs", 'BoneWidget.log')
+
+    logtofile(path, LoggingLevel, LoggingText)
