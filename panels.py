@@ -6,6 +6,7 @@ from .functions import (
 from .bl_class_registry import BlClassRegistry
 from .menus import BONEWIDGET_MT_bw_specials
 
+
 @BlClassRegistry()
 class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     bl_label = "Bone Widget"
@@ -56,6 +57,16 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         layout.operator("bonewidget.delete_unused_widgets",
                         icon='TRASH', text="Delete Unused Widgets")
 
+        import os
+        if bpy.context.mode.title() == 'Pose':
+            layout.operator("bonewidget.select_object",
+                            text="Select Object as widget shape",
+                            icon='RESTRICT_SELECT_OFF')
+        elif bpy.context.mode.title() == 'Object' and os.path.exists(os.path.join(os.path.expanduser("~"), "temp.txt")):
+            layout.operator("bonewidget.confirm_widget",
+                            text="Confirm selected Object as widget shape",
+                            icon='CHECKMARK')
+
         try:
             collection = getViewLayerCollection(context)
         except:
@@ -73,4 +84,3 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
             row = layout.row()
             row.operator("bonewidget.toggle_collection_visibilty",
                          icon=icon, text=text)
-
