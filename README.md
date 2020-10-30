@@ -7,6 +7,23 @@
 - [ ] Update the video explanation
 - [ ] Fix the errors when bones are sharing data (in a rig that already has widgets)
 
+## v1.7 Release Notes
+* Fix: Allow rename of Addons-Folder
+* Fix: Fixed the symmetrize error if the .L or the .R didn't have a widget
+* Fix: Symmetrize Operator caused Error when clicking in Object mode
+* Fix: Return to Armature: Didn't unselect widget-object before returning to armature
+* Fix: Edit Widget: Show only if active bone has a widget
+* Feature: Widgets renamed: Gear --> Gear_complex, Root --> Root_1
+* Feature: New Widgets: 3 Axes, 6 Axes, Arrow_double_sided, Arrow_head, Chest, Clavicle, Eyes_Target, FK_Limb, Gear_simple,
+Roll, Root_2, Torso
+* Feature: New Property: Panel Category
+* Feature: New Property: Bone Widget symmetry suffix
+* Feature: Add selected Mesh as widget-shape
+* Feature: Added Logger
+
+Note: This version was only tested on Windows. Please write to help.bonewidget@gmail.com
+if an error occurs on your OS (Please include error message)
+
 ## v1.6 Release Notes
 * Fixed the "DELETE UNUSED WIDGETS" function (was crashing because the context was wrong)
 
