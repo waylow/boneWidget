@@ -383,7 +383,10 @@ def confirmWidget(context, active_bone, active_armature):
 
 def writeTemp(arm, bone):
     import os
-    loc = os.path.join(os.path.expanduser("~"), "temp.txt")
+    path = os.path.join(os.path.expanduser("~"), "Blender Addons Data", "bonewidget")
+    if not os.path.exists(path):
+        os.makedirs(path)
+    loc = os.path.join(path, "temp.txt")
 
     myfile = open(loc, "w")
     myfile.write(arm + "," + bone)
@@ -392,7 +395,10 @@ def writeTemp(arm, bone):
 
 def readTemp():
     import os
-    loc = os.path.join(os.path.expanduser("~"), "temp.txt")
+    path = os.path.join(os.path.expanduser("~"), "Blender Addons Data", "bonewidget")
+    if not os.path.exists(path):
+        os.makedirs(path)
+    loc = os.path.join(path, "temp.txt")
 
     myfile = open(loc, "r")
     arm_bone = myfile.read()
@@ -404,8 +410,9 @@ def readTemp():
 def logOperation(LoggingLevel, LoggingText):
     from .functions.logger import logtofile
     import os
-    if not os.path.exists(os.path.join(os.path.expanduser("~"), "Bone Widget Logs")):
-        os.makedirs(os.path.join(os.path.expanduser("~"), "Bone Widget Logs"))
-    path = os.path.join(os.path.expanduser("~"), "Bone Widget Logs", 'BoneWidget.log')
+    path = os.path.join(os.path.expanduser("~"), "Blender Addons Data", "bonewidget", "Bone Widget Logs")
+    if not os.path.exists(path):
+        os.makedirs(path)
+    loc = os.path.join(path, 'BoneWidget.log')
 
-    logtofile(path, LoggingLevel, LoggingText)
+    logtofile(loc, LoggingLevel, LoggingText)

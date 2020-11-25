@@ -58,11 +58,12 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
                         icon='TRASH', text="Delete Unused Widgets")
 
         import os
+        path = os.path.join(os.path.expanduser("~"), "Blender Addons Data", "bonewidget", "temp.txt")
         if bpy.context.mode.title() == 'Pose':
             layout.operator("bonewidget.select_object",
                             text="Select Object as widget shape",
                             icon='RESTRICT_SELECT_OFF')
-        elif bpy.context.mode.title() == 'Object' and os.path.exists(os.path.join(os.path.expanduser("~"), "temp.txt")):
+        elif bpy.context.mode.title() == 'Object' and os.path.exists(path):
             layout.operator("bonewidget.confirm_widget",
                             text="Confirm selected Object as widget shape",
                             icon='CHECKMARK')

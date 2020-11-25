@@ -310,7 +310,7 @@ class BONEWIDGET_OT_selectObject(bpy.types.Operator):
         active_armature = self.active_armature(context)
         active_bone = self.active_bone(context)
         writeTemp(active_armature, active_bone)
-        logOperation("info", 'Write armature name: {} and bone name: {} to file temp.txt'.format(active_armature, active_bone))
+        logOperation("info", 'Write armature name: "{}" and bone name: "{}" to file temp.txt'.format(active_armature, active_bone))
         selectObject()
         return {'FINISHED'}
 
@@ -336,7 +336,7 @@ class BONEWIDGET_OT_confirmWidget(bpy.types.Operator):
 
         cW = confirmWidget(context, active_bone, active_armature)
 
-        logOperation("info", "Duplicate Object {} and set duplicate as custom shape for Bone {} in Armature {}.".format(cW, active_bone, active_armature))
+        logOperation("info", 'Duplicate Object "{}" and set duplicate as custom shape for Bone "{}" in Armature "{}".'.format(cW, active_bone, active_armature))
         return {'FINISHED'}
 
                      
