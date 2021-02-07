@@ -1,5 +1,5 @@
 [![Donate](https://img.shields.io/badge/Funding%20Goal%3A%20%24560%20(4%20Days%20Developer%20Time)-%240-red?style=for-the-badge)](https://www.paypal.com/donate?hosted_button_id=TV9HL7YRHZR7U)  
-![GitHub](https://img.shields.io/github/license/BlenderDefender/boneWidget?color=green&style=for-the-badge)
+
 ![GitHub issues](https://img.shields.io/github/issues/BlenderDefender/boneWidget?style=for-the-badge)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/BlenderDefender/boneWidget?style=for-the-badge)
 # boneWidget
