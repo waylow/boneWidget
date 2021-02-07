@@ -9,13 +9,13 @@
 - [ ] Fix the errors when bones are sharing data (in a rig that already has widgets)
 
 ## v1.7 Release Notes
-* Fixed symmetrizeWidget (was crashing because of assigning name to None object, removed multiple redundent calls of the findMirrorObject)
+* Fixed symmetrizeWidget (was crashing because of assigning name to None object, removed multiple redundant calls of the findMirrorObject)
 * Optimized addRemoveWidgets (now it doesn't overwrites library if a widget with the same name already exists in the library)
 * Optimized BONEWIDGET_OT_matchSymmetrizeShape
 * Optimized BONEWIDGET_OT_addWidgets
 * Changed prefs from WDGT_ and WDGT_shapes to WGT_...
-* Fixed wrong displaying of shapes list after adding/deleting them to/from library. If a new widget has beed added to the library, it becomes selected and displays in the
-  shapes list. If a widget has beed removed from the library, a first element from the list will be selected.
+* Fixed wrong displaying of shapes list after adding/deleting them to/from library. If a new widget has been added to the library, it becomes selected and displays in the
+  shapes list. If a widget has been removed from the library, a first element from the list will be selected.
 
 ## v1.6 Release Notes
 * Fixed the "DELETE UNUSED WIDGETS" function (was crashing because the context was wrong)
