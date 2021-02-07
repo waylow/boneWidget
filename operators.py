@@ -150,20 +150,16 @@ class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
 
     def execute(self, context):
         collection = getCollection(context)
-        widgetsAndBones = findMatchBones()[0]
-        activeObject = findMatchBones()[1]
-        widgetsAndBones = findMatchBones()[0]
+        widgetsAndBones, activeObject, armature = findMatchBones()
 
         if not activeObject:
             self.report({"INFO"}, "No active bone or object")
             return {'FINISHED'}
 
+        if activeObject.name.endswith(("L","R")):
+            suffix = activeObject.name.rsplit(".", 1)[1]
         for bone in widgetsAndBones:
-            if activeObject.name.endswith("L"):
-                if bone.name.endswith("L") and widgetsAndBones[bone]:
-                    symmetrizeWidget(bone, collection)
-            elif activeObject.name.endswith("R"):
-                if bone.name.endswith("R") and widgetsAndBones[bone]:
+                if bone.name.endswith(suffix) and widgetsAndBones[bone]:
                     symmetrizeWidget(bone, collection)
 
         return {'FINISHED'}
@@ -186,8 +182,10 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
 
         if not objects:
             self.report({'INFO'}, 'Select Meshes or Pose_bones')
-
-        addRemoveWidgets(context, "add", bpy.types.Scene.widget_list[1]['items'], objects)
+        else:
+            ret = addRemoveWidgets(context, "add", bpy.types.Scene.widget_list[1]['items'], objects)
+            if ret:
+                self.report({'WARNING'}, ret)
 
         return {'FINISHED'}
 
@@ -219,7 +217,7 @@ class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_deleteUnusedWidgets(bpy.types.Operator):
-    """Delete unused objects in the WDGT collection"""
+    """Delete unused objects in the WGT collection"""
     bl_idname = "bonewidget.delete_unused_widgets"
     bl_label = "Delete Unused Widgets"
 

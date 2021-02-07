@@ -114,14 +114,13 @@ def symmetrizeWidget(bone, collection):
 
     widget = bone.custom_shape
 
-    if findMirrorObject(bone).custom_shape_transform:
-        mirrorBone = findMirrorObject(bone).custom_shape_transform
-    else:
-        mirrorBone = findMirrorObject(bone)
+    mirrorBone = findMirrorObject(bone)
+    if mirrorBone.custom_shape_transform:
+        mirrorBone = mirrorBone.custom_shape_transform
 
     mirrorWidget = mirrorBone.custom_shape
 
-    if mirrorWidget != widget:
+    if mirrorWidget is not None and mirrorWidget != widget:
         mirrorWidget.name = mirrorWidget.name+"_old"
         mirrorWidget.data.name = mirrorWidget.data.name+"_old"
         # unlink/delete old widget
@@ -225,7 +224,7 @@ def findMirrorObject(object):
     elif object.name.endswith("r"):
         suffix = 'l'
     else:  # what if the widget ends in .001?
-        print('Object suffix unknown using blank')
+        print('Object suffix unknown, using blank')
         suffix = ''
 
     objectName = list(object.name)
@@ -246,7 +245,7 @@ def findMatchBones():
 
     if bpy.context.object.type == 'ARMATURE':
         for bone in C.selected_pose_bones:
-            if bone.name.endswith("L") or bone.name.endswith("R"):
+            if bone.name.endswith(("L","R")):
                 widgetsAndBones[bone] = bone.custom_shape
                 mirrorBone = findMirrorObject(bone)
                 if mirrorBone:
@@ -257,7 +256,7 @@ def findMatchBones():
     else:
         for shape in C.selected_objects:
             bone = fromWidgetFindBone(shape)
-            if bone.name.endswith("L") or bone.name.endswith("R"):
+            if bone.name.endswith(("L","R")):
                 widgetsAndBones[fromWidgetFindBone(shape)] = shape
 
                 mirrorShape = findMirrorObject(shape)
