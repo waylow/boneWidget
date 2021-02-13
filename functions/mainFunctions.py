@@ -266,7 +266,7 @@ def findMirrorObject(object):
         suffix = suffix_1.lower()
         suffix_length = len(suffix_2)
     else:  # what if the widget ends in .001?
-        print('Object suffix unknown using blank')
+        print('Object suffix unknown, using blank')
         suffix = ''
 
     objectName = list(object.name)
@@ -304,7 +304,7 @@ def findMatchBones():
     else:
         for shape in C.selected_objects:
             bone = fromWidgetFindBone(shape)
-            if bone.name.endswith("L") or bone.name.endswith("R"):
+            if bone.name.endswith(("L","R")):
                 widgetsAndBones[fromWidgetFindBone(shape)] = shape
 
                 mirrorShape = findMirrorObject(shape)
