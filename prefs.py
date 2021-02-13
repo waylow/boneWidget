@@ -14,7 +14,7 @@ class BoneWidgetPreferences(AddonPreferences):
     widget_prefix: StringProperty(
         name="Bone Widget prefix",
         description="Choose a prefix for the widget objects",
-        default="WDGT_",
+        default="WGT_",
     )
 
 #    symmetry suffix (will try to implement this later --> implemented)
@@ -28,7 +28,7 @@ class BoneWidgetPreferences(AddonPreferences):
     bonewidget_collection_name: StringProperty(
         name="Bone Widget collection name",
         description="Choose a name for the collection the widgets will appear",
-        default="WDGT_shapes",
+        default="WGT_shapes",
     )
 
     def panel_category_update_fn(self, context):

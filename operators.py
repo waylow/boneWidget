@@ -241,7 +241,7 @@ class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_deleteUnusedWidgets(bpy.types.Operator):
-    """Delete unused objects in the WDGT collection"""
+    """Delete unused objects in the WGT collection"""
     bl_idname = "bonewidget.delete_unused_widgets"
     bl_label = "Delete Unused Widgets"
 
