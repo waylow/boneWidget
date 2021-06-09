@@ -3,9 +3,11 @@ from .functions import (
     readWidgets,
     getViewLayerCollection,
 )
-from bpy.types import Menu
+from .bl_class_registry import BlClassRegistry
+from .menus import BONEWIDGET_MT_bw_specials
 
 
+@BlClassRegistry()
 class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     bl_label = "Bone Widget"
     bl_category = "Rig Tools"
@@ -22,7 +24,7 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         itemsSort.append((key, key, ""))
 
     bpy.types.Scene.widget_list = bpy.props.EnumProperty(
-        name="Shape", items=itemsSort, description="Shape")
+        items=itemsSort, name="Shape", description="Shape")
 
     def draw(self, context):
         layout = self.layout
@@ -55,12 +57,23 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         layout.operator("bonewidget.delete_unused_widgets",
                         icon='TRASH', text="Delete Unused Widgets")
 
+        import os
+        path = os.path.join(os.path.expanduser("~"), "Blender Addons Data", "bonewidget", "temp.txt")
+        if bpy.context.mode.title() == 'Pose':
+            layout.operator("bonewidget.select_object",
+                            text="Select Object as widget shape",
+                            icon='RESTRICT_SELECT_OFF')
+        elif bpy.context.mode.title() == 'Object' and os.path.exists(path):
+            layout.operator("bonewidget.confirm_widget",
+                            text="Confirm selected Object as widget shape",
+                            icon='CHECKMARK')
+
         try:
             collection = getViewLayerCollection(context)
         except:
             collection = None
 
-        if collection != None:
+        if collection is not None:
             if collection.hide_viewport:
                 icon = "HIDE_ON"
                 text = "Unhide Collection"
@@ -72,31 +85,3 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
             row = layout.row()
             row.operator("bonewidget.toggle_collection_visibilty",
                          icon=icon, text=text)
-
-
-class BONEWIDGET_MT_bw_specials(Menu):
-    bl_label = "Bone Widget Specials"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.operator("bonewidget.add_widgets", icon="ADD", text="Add Widget to library")
-        layout.operator("bonewidget.remove_widgets", icon="REMOVE",
-                        text="Remove Widget from library")
-
-
-classes = (
-    BONEWIDGET_MT_bw_specials,
-    BONEWIDGET_PT_posemode_panel,
-)
-
-
-def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
-
-
-def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
