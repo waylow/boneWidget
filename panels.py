@@ -23,7 +23,7 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     for key in sorted(items):
         itemsSort.append((key, key, ""))
 
-    bpy.types.Scene.widget_list = bpy.props.EnumProperty(
+    bpy.types.Scene.widget_list: bpy.props.EnumProperty(
         items=itemsSort, name="Shape", description="Shape")
 
     def draw(self, context):
