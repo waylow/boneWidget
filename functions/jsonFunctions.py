@@ -85,7 +85,7 @@ def addRemoveWidgets(context, addOrRemove, items, widgets):
         for w in sorted(widget_items):
             widget_itemsSorted.append((w, w, ""))
 
-        bpy.types.Scene.widget_list = bpy.props.EnumProperty(
+        bpy.types.Scene.widget_list: bpy.props.EnumProperty(
             items=widget_itemsSorted, name="Shape", description="Shape")
         bpy.context.scene.widget_list = activeShape
         writeWidgets(wgts)
