@@ -7,7 +7,7 @@ from .bl_class_registry import BlClassRegistry
 from .menus import BONEWIDGET_MT_bw_specials
 
 
-@BlClassRegistry()
+#@BlClassRegistry()
 class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     bl_label = "Bone Widget"
     bl_category = "Rig Tools"
@@ -85,3 +85,20 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
             row = layout.row()
             row.operator("bonewidget.toggle_collection_visibilty",
                          icon=icon, text=text)
+            
+classes = (
+    #BONEWIDGET_MT_bw_specials,
+    BONEWIDGET_PT_posemode_panel,
+)
+
+
+def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
+
+
+def unregister():
+    from bpy.utils import unregister_class
+    for cls in classes:
+        unregister_class(cls)
