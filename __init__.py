@@ -21,8 +21,8 @@ Created by Manuel Rais and Christophe Seux
 bl_info = {
     "name": "Bone Widget",
     "author": "Manuel Rais, Christophe Seux, Bassam Kurdali, Wayne Dixon, Blender Defender, Max Nadolny",
-    "version": (1, 7),
-    "blender": (2, 80, 0),
+    "version": (1, 8),
+    "blender": (2, 93, 0),
     "location": "UI > Properties Panel",
     "description": "Easily Create Bone Widgets",
     "warning": "",

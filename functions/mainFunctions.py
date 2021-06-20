@@ -27,9 +27,13 @@ def getCollection(context):
         return collection
 
 
-def getViewLayerCollection(context):
+def getViewLayerCollection(context, widget):
     bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-    collection = context.view_layer.layer_collection.children[bw_collection_name]
+    try:
+        collection = context.view_layer.layer_collection.children[bw_collection_name]
+    except KeyError:
+        #need to find the collection it is actually in
+        collection = context.view_layer.layer_collection.children[bpy.data.objects[widget.name].users_collection[0].name]
     return collection
 
 
@@ -112,7 +116,7 @@ def symmetrizeWidget(bone, collection):
     C = bpy.context
     D = bpy.data
     bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
-    
+
     widget = bone.custom_shape
 
     if findMirrorObject(bone) is not None:
@@ -206,7 +210,7 @@ def editWidget(active_bone):
     bpy.ops.object.mode_set(mode='OBJECT')
     C.active_object.select_set(False)
 
-    collection = getViewLayerCollection(C)
+    collection = getViewLayerCollection(C, widget)
     collection.hide_viewport = False
 
     if C.space_data.local_view:
@@ -227,10 +231,10 @@ def returnToArmature(widget):
 
     if C.active_object.mode == 'EDIT':
         bpy.ops.object.mode_set(mode='OBJECT')
-        
+
     bpy.ops.object.select_all(action='DESELECT')
 
-    collection = getViewLayerCollection(C)
+    collection = getViewLayerCollection(C, widget)
     collection.hide_viewport = True
     if C.space_data.local_view:
         bpy.ops.view3d.localview()
@@ -282,7 +286,7 @@ def findMirrorObject(object):
 def findMatchBones():
     C = bpy.context
     D = bpy.data
-    
+
     bw_symmetry_suffix = C.preferences.addons[__package__].preferences.symmetry_suffix
     bw_symmetry_suffix = bw_symmetry_suffix.split(";")
 

@@ -101,9 +101,11 @@ class BONEWIDGET_OT_editWidget(bpy.types.Operator):
 
     def execute(self, context):
         active_bone = context.active_pose_bone
-        editWidget(active_bone)
-        logOperation("info", 'Edit Widget of Bone {} '.format(active_bone))
-
+        try:
+            editWidget(active_bone)
+            logOperation("info", 'Edit Widget of Bone {} '.format(active_bone))
+        except KeyError:
+            self.report({'INFO'}, 'This widget is the Widget Collection')
         return {'FINISHED'}
 
 

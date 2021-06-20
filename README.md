@@ -1,10 +1,10 @@
-[![Donate](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FBlenderDefender%2FBlenderDefender%2Fshields_endpoint%2FBONEWIDGET.json)](https://www.paypal.com/donate?hosted_button_id=TXWH8AL9UJDUJ)
-![GitHub License](https://img.shields.io/github/license/BlenderDefender/boneWidget?color=brightgreen&style=for-the-badge)
-![GitHub issues](https://img.shields.io/github/issues/BlenderDefender/boneWidget?style=for-the-badge)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/BlenderDefender/boneWidget?style=for-the-badge)
-# boneWidget
+# Bone Widget
 
 2.7 explanation : https://vimeo.com/184159913
+
+## v1.8 Release Notes:
+* Fix: updated to work with Blender 2.93
+* Fix: If you are editing a Widget that already exists, it now will use the collection where it is actually located rather than trying to find it in the user preferences settings (fixes error)
 
 
 ## v1.7 Release Notes
