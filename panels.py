@@ -23,17 +23,13 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     for key in sorted(items):
         itemsSort.append((key, key, ""))
 
-    bpy.types.Scene.widget_list: bpy.props.EnumProperty(
+    bpy.types.Scene.widget_list = bpy.props.EnumProperty(
         items=itemsSort, name="Shape", description="Shape")
 
     def draw(self, context):
         layout = self.layout
         row = layout.row(align=True)
-
-        if len(bpy.types.Scene.widget_list[1]['items']) < 6:
-            row.prop(context.scene, "widget_list", expand=True)
-        else:
-            row.prop(context.scene, "widget_list", expand=False, text="")
+        row.prop(context.scene, "widget_list", expand=False, text="")
 
         row = layout.row(align=True)
         row.menu("BONEWIDGET_MT_bw_specials", icon='DOWNARROW_HLT', text="")
