@@ -286,7 +286,7 @@ class BONEWIDGET_OT_resyncWidgetNames(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_selectObject(bpy.types.Operator):
-    """Select object as widget for selected bone"""
+    """Select mesh object as widget for active bone"""
     bl_idname = "bonewidget.select_object"
     bl_label = "Select Object as Widget"
 
@@ -316,9 +316,9 @@ class BONEWIDGET_OT_selectObject(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_confirmWidget(bpy.types.Operator):
-    """Set selected object as widget for selected bone"""
+    """Set active mesh object as widget for selected bone"""
     bl_idname = "bonewidget.confirm_widget"
-    bl_label = "Confirm selected Object as widget shape"
+    bl_label = "Confirm selected Object as Widget Shape"
 
     @classmethod
     def poll(cls, context):
@@ -339,7 +339,7 @@ class BONEWIDGET_OT_confirmWidget(bpy.types.Operator):
         logOperation("info", 'Duplicate Object "{}" and set duplicate as custom shape for Bone "{}" in Armature "{}".'.format(cW, active_bone, active_armature))
         return {'FINISHED'}
 
-                     
+
 classes = (
     BONEWIDGET_OT_removeWidgets,
     BONEWIDGET_OT_addWidgets,
@@ -356,7 +356,7 @@ classes = (
     BONEWIDGET_OT_confirmWidget,
 )
 
-                     
+
 def register():
     from bpy.utils import register_class
     for cls in classes:

@@ -14,10 +14,10 @@ class BoneWidgetPreferences(AddonPreferences):
     widget_prefix: StringProperty(
         name="Bone Widget prefix",
         description="Choose a prefix for the widget objects",
-        default="WGT_",
+        default="WGT-",
     )
 
-#    symmetry suffix (will try to implement this later --> implemented)
+    # symmetry suffix
     symmetry_suffix: StringProperty(
         name="Bone Widget symmetry suffix",
         description="Choose a naming convention for the symmetrical widgets, seperate by semicolon.",
@@ -28,7 +28,7 @@ class BoneWidgetPreferences(AddonPreferences):
     bonewidget_collection_name: StringProperty(
         name="Bone Widget collection name",
         description="Choose a name for the collection the widgets will appear",
-        default="WGT_shapes",
+        default="WGTS",
     )
 
     def panel_category_update_fn(self, context):
@@ -47,7 +47,7 @@ class BoneWidgetPreferences(AddonPreferences):
         default="Rig Tools",
         update=panel_category_update_fn,
     )
-    
+
     def draw(self, context):
         layout = self.layout
 
@@ -59,7 +59,7 @@ class BoneWidgetPreferences(AddonPreferences):
         row = layout.row()
         row = layout.row()
         row.prop(self, "symmetry_suffix", text="Symmetry suffix")
-        
+
         row = layout.row()
 
         row = layout.row()
