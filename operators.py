@@ -214,8 +214,7 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         if not objects:
             self.report({'INFO'}, 'Select Meshes or Pose_bones')
             logOperation("warning", "Error when trying to add item to Widgets List: No Mesh or Pose Bone selected!")
-
-        addRemoveWidgets(context, "add", bpy.types.Scene.widget_list[1]['items'], objects)
+        addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects)
 
         return {'FINISHED'}
 
@@ -227,7 +226,7 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
 
     def execute(self, context):
         objects = bpy.context.scene.widget_list
-        unwantedList = addRemoveWidgets(context, "remove", bpy.types.Scene.widget_list[1]['items'], objects)
+        unwantedList = addRemoveWidgets(context, "remove", bpy.types.Scene.widget_list.keywords['items'], objects)
         logOperation("info", 'Deleted Widgets: {} from Widgets list.'.format(objects))
         return {'FINISHED'}
 

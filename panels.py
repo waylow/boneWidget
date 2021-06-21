@@ -15,6 +15,7 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_idname = 'VIEW3D_PT_bw_posemode_panel'
 
+
     items = []
     for key, value in readWidgets().items():
         items.append(key)
