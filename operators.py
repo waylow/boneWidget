@@ -193,6 +193,12 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
     bl_idname = "bonewidget.add_widgets"
     bl_label = "Add Widgets"
 
+    @classmethod
+    def poll(cls, context):
+        return (context.object and context.object.type == 'MESH' and context.object.mode == 'OBJECT'
+                and context.active_object is not None)
+
+
     def execute(self, context):
         objects = []
         if bpy.context.mode == "POSE":
