@@ -105,7 +105,7 @@ class BONEWIDGET_OT_editWidget(bpy.types.Operator):
             editWidget(active_bone)
             logOperation("info", 'Edit Widget of Bone {} '.format(active_bone))
         except KeyError:
-            self.report({'INFO'}, 'This widget is the Widget Collection')
+            self.report({'INFO'}, 'This widget is the not in the Widget Collection')
         return {'FINISHED'}
 
 
