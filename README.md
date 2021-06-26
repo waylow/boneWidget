@@ -2,9 +2,40 @@
 
 2.7 explanation : https://vimeo.com/184159913
 
+### To do:
+- Where has the 'hide collection' operator gone
+- make the 'symmetrize widget' operator check if the bone/widget has a mirrored side first before doing anything else.  At the moment it will create the collection if it doesn't exist (this is new issue because I let the user edit an existing widget that isn't in the default location - if the widget already existed that is)
+
+- the select object as widget should also match the transforms after creation
+- let the user change the widget suffix to a prefix for a different naming convention
+- extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
+Maybe there can be a way of extracting them and making them real objects.
+- The match Bone Transforms does not work well when the bone scale is not at 1.0
+
+
 ## v1.8 Release Notes:
-* Fix: updated to work with Blender 2.93
-* Fix: If you are editing a Widget that already exists, it now will use the collection where it is actually located rather than trying to find it in the user preferences settings (fixes error)
+* Fix: updated to work with Blender 2.93/3.0
+* Functionality change: If you are editing a Widget that already exists, it now will use the collection where it is actually located rather than trying to find it in the user preferences settings (fixes error if the collection was called something different)
+* Removed PayPal funding links
+* Removed Logger
+
+### Edited Widgets
+* Resized '3 Axes' widget to better match a default size of 1 blender unit (and sits over the 6 axes nicely)
+* Renamed 'FK_Limb' to 'FK Limb 1'
+* Renamed 'Arm' widget to 'FK Limb 2'
+* Renamed widgets to exclude the underscore (for consistency)
+* Lowered the resolution of the 'Chest' widget (makes it difficult to edit when it was so high poly). Resized it to 1 blender unit in the Y and aligned it to the +y axis by default
+* Aligned "Eye Target" to the Y axis, renamed to "Eye Target 1", resized.
+* Added "Eye Target 2" shape
+* Straightened the "Clavicle" shape (makes it more flexible)
+* Gear Complex/Gear Simple - aligned to world space
+* Rename Finger to "Paddle 1"
+* Added a variation of "Paddle" with a round end
+* Aligned "Plane" with the Y axis (will 'slide' in a logical direction out of the box)
+* Rotated "Roll" slightly so it looks symmetrical, Renamed to "Roll 1"
+* Added "Roll 2"
+* Added "Arrow Single Straight" and "Arrow Double Straight"
+* Added "Saddle" shape - useful for chests and head controls as a starting point
 
 
 ## v1.7 Release Notes
@@ -21,8 +52,6 @@ Roll, Root_2, Torso
 * Feature: Add selected Mesh as widget-shape
 * Feature: Added Logger
 
-Note: This version was only tested on Windows. Please write to help.bonewidget@gmail.com
-if an error occurs on your OS (Please include error message)
 
 ## v1.6 Release Notes
 * Fixed the "DELETE UNUSED WIDGETS" function (was crashing because the context was wrong)
