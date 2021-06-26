@@ -409,14 +409,3 @@ def readTemp():
     myfile.close()
     os.remove(loc)
     return arm_bone
-
-
-def logOperation(LoggingLevel, LoggingText):
-    from .functions.logger import logtofile
-    import os
-    path = os.path.join(os.path.expanduser("~"), "Blender Addons Data", "bonewidget", "Bone Widget Logs")
-    if not os.path.exists(path):
-        os.makedirs(path)
-    loc = os.path.join(path, 'BoneWidget.log')
-
-    logtofile(loc, LoggingLevel, LoggingText)
