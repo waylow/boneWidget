@@ -167,7 +167,8 @@ class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
             for bone in widgetsAndBones:
                 symmetrizeWidget_helper(bone, collection, activeObject, widgetsAndBones)
         except Exception as e:
-            pass
+            self.report({'INFO'}, "There is nothing to mirror to")
+            #pass
 
         return {'FINISHED'}
 
