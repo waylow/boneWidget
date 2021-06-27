@@ -27,17 +27,10 @@ def getCollection(context):
         return collection
 
 
-def getViewLayerCollection(context, widget):
-    bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+def getViewLayerCollection(context, widget = None):
+    collection = context.view_layer.layer_collection.children[bpy.data.objects[widget.name].users_collection[0].name]
+    collection.exclude = False
 
-    try:
-        collection = context.view_layer.layer_collection.children[bw_collection_name]
-
-    except KeyError:
-        # if it's not in the preference lovation, need to find the collection it is actually in
-        collection = context.view_layer.layer_collection.children[bpy.data.objects[widget.name].users_collection[0].name]
-    # set 'excluded' to False before returning the value
-    bpy.context.layer_collection.children[collection.name].exclude = False
     return collection
 
 

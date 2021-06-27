@@ -20,8 +20,6 @@ from .functions import (
     resyncWidgetNames,
     selectObject,
     confirmWidget,
-    writeTemp,
-    readTemp,
 )
 from bpy.types import Operator
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
@@ -225,6 +223,7 @@ class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
     def execute(self, context):
         collection = getViewLayerCollection(context)
         collection.hide_viewport = not collection.hide_viewport
+        collection.exclude = False
         return {'FINISHED'}
 
 
@@ -294,7 +293,6 @@ class BONEWIDGET_OT_selectObject(bpy.types.Operator):
     def execute(self, context):
         active_armature = self.active_armature(context)
         active_bone = self.active_bone(context)
-        writeTemp(active_armature, active_bone)
         selectObject()
         return {'FINISHED'}
 

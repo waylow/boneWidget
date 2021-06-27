@@ -56,11 +56,11 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
 
         import os
         path = os.path.join(os.path.expanduser("~"), "Blender Addons Data", "bonewidget", "temp.txt")
-        if bpy.context.mode.title() == 'Pose':
+        if bpy.context.mode == 'POSE':
             layout.operator("bonewidget.select_object",
                             text="Select Object as Widget Shape",
                             icon='RESTRICT_SELECT_OFF')
-        elif bpy.context.mode.title() == 'Object' and os.path.exists(path):
+        elif bpy.context.mode == 'OBJECT':
             layout.operator("bonewidget.confirm_widget",
                             text="Confirm selected Object as Widget Shape",
                             icon='CHECKMARK')
