@@ -21,6 +21,7 @@ Maybe there can be a way of extracting them and making them real objects.
 * changed the default collection name and widget names to better match with Rigify (not my preferred naming convention but its better to have more consistency)
 * Removed PayPal funding links
 * Removed Logger
+* Fix: If collection is 'excluded' in the outliner it now re-enables it
 
 ### Edited Widgets
 * Resized '3 Axes' widget to better match a default size of 1 blender unit (and sits over the 6 axes nicely)
