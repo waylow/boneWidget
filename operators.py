@@ -147,14 +147,16 @@ class BONEWIDGET_OT_matchBoneTransforms(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
-    """Symmetrize to the opposite side, if it is named with a .L or .R"""
+    """Symmetrize to the opposite side ONLY if it is named with a .L or .R"""
     bl_idname = "bonewidget.symmetrize_shape"
     bl_label = "Symmetrize"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         try:
-            collection = getCollection(context)
+            #collection = getCollection(context)
+            widget = bpy.context.active_pose_bone.custom_shape
+            collection = getViewLayerCollection(context, widget)
             widgetsAndBones = findMatchBones()[0]
             activeObject = findMatchBones()[1]
             widgetsAndBones = findMatchBones()[0]
