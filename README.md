@@ -2,12 +2,12 @@
 
 2.7 explanation : https://vimeo.com/184159913
 
-### To do:
+### To Do:
 - Add documentation with images to this readme file
-- let the user change the widget suffix to a prefix for a different naming convention
-- extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
+- [Feature] Let the user change the widget suffix to a prefix for a different naming convention
+- [Feature] Extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
 Maybe there can be a way of extracting them and making them real objects.
-- The match Bone Transforms does not work well when the bone scale is not at 1.0
+- [Bug] The match Bone Transforms does not work well when the bone scale is not at 1.0
 
 
 ## v1.8 Release Notes:
@@ -19,15 +19,15 @@ Maybe there can be a way of extracting them and making them real objects.
 * Functionality change: I rewrote the way to add the selected object as a widget without having to read and write to a text file
 * Fix: If collection is 'excluded' in the outliner it now re-enables it
 
-### Edited Widgets
+### Widget Edits (from v1.7)
 * Resized '3 Axes' widget to better match a default size of 1 blender unit (and sits over the 6 axes nicely)
 * Renamed 'FK_Limb' to 'FK Limb 1'
 * Renamed 'Arm' widget to 'FK Limb 2'
 * Renamed widgets to exclude the underscore (for consistency)
 * Lowered the resolution of the 'Chest' widget (makes it difficult to edit when it was so high poly). Resized it to 1 blender unit in the Y and aligned it to the +y axis by default
-* lowered the resolution of "Arrow Double Curved"
-* added a thicker version if the arrow called "Roll 3"
-* lowered the resolution of "Torso"
+* Lowered the resolution of "Arrow Double Curved"
+* Added a thicker version if the arrow called "Roll 3"
+* Lowered the resolution of "Torso"
 * Added "Torso 1" shape
 * Aligned "Eye Target" to the Y axis, renamed to "Eye Target 1", resized.
 * Added "Eye Target 2" shape
@@ -36,13 +36,13 @@ Maybe there can be a way of extracting them and making them real objects.
 * Rename Finger to "Paddle (square)"
 * Added a variation of "Paddle (rounded)" with a round end
 * Aligned "Plane" with the Y axis (will 'slide' in a logical direction out of the box)
-* added a "Plane (rounded)" which has rounded corners
+* Added a "Plane (rounded)" which has rounded corners
 * Rotated "Roll" slightly so it looks symmetrical, Renamed to "Roll 1"
 * Added "Roll 2"
 * Added "Arrow Single Straight" and "Arrow Double Straight"
 * Added "Saddle" shape - useful for chests and head controls as a starting point
 * Added "Rhomboid" shape
-* flipped "Arrow Head" and renamed to "Pyramid"
+* Flipped "Arrow Head" and renamed to "Pyramid"
 
 
 ## v1.7 Release Notes
