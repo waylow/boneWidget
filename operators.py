@@ -147,7 +147,7 @@ class BONEWIDGET_OT_matchBoneTransforms(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
-    """Symmetrize to the opposite side ONLY if it is named with a .L or .R"""
+    """Symmetrize to the opposite side ONLY if it is named with a .L or .R (default settings)"""
     bl_idname = "bonewidget.symmetrize_shape"
     bl_label = "Symmetrize"
     bl_options = {'REGISTER', 'UNDO'}

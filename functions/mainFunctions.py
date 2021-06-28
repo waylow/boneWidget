@@ -389,8 +389,5 @@ def addObjectAsWidget(context, collection):
         active_bone.custom_shape = widget
         active_bone.bone.show_wire = True
 
-        #deal with the visibility of the collection and deselect things
-
-        #add report message
-
-    return
+        #deselect original object
+        widget_object.select_set(False)
