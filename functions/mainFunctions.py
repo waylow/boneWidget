@@ -28,9 +28,16 @@ def getCollection(context):
 
 
 def getViewLayerCollection(context, widget = None):
-    collection = context.view_layer.layer_collection.children[bpy.data.objects[widget.name].users_collection[0].name]
-    collection.exclude = False
+    bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+    collection = context.view_layer.layer_collection.children[bw_collection_name]
+    try:
+        collection = context.view_layer.layer_collection.children[bw_collection_name]
+    except KeyError:
+        #need to find the collection it is actually in
+        collection = context.view_layer.layer_collection.children[bpy.data.objects[widget.name].users_collection[0].name]
 
+    # make sure the collection is not excluded
+    collection.exclude = False
     return collection
 
 
@@ -347,62 +354,43 @@ def clearBoneWidgets():
                 bone.custom_shape_transform = None
 
 
-def selectObject():
-    C = bpy.context
-    D = bpy.data
+def addObjectAsWidget(context, collection):
+    sel = bpy.context.selected_objects
+    #bw_collection = context.preferences.addons[__package__].preferences.bonewidget_collection_name
 
-    bpy.ops.object.mode_set(mode='OBJECT')
-    C.active_object.select_set(False)
+    if sel[1].type == 'MESH':
+        active_bone = context.active_pose_bone
+        widget_object = sel[1]
 
+        # deal with any existing shape
+        if active_bone.custom_shape:
+            active_bone.custom_shape.name = active_bone.custom_shape.name + "_old"
+            active_bone.custom_shape.data.name = active_bone.custom_shape.data.name + "_old"
+            if C.scene.collection.objects.get(active_bone.custom_shape.name):
+                C.scene.collection.objects.unlink(active_bone.custom_shape)
 
-def confirmWidget(context, active_bone, active_armature):
+        #duplicate shape
+        widget = widget_object.copy()
+        widget.data = widget.data.copy()
+        # reamame it
+        bw_widget_prefix = context.preferences.addons[__package__].preferences.widget_prefix
+        widget_name = bw_widget_prefix + active_bone.name
+        widget.name = widget_name
+        widget.data.name = widget_name
+        # link it
+        collection.objects.link(widget)
 
-    C = bpy.context
-    D = bpy.data
+        # match transforms
+        widget.matrix_world = bpy.context.active_object.matrix_world @ active_bone.bone.matrix_local
+        widget.scale = [active_bone.bone.length, active_bone.bone.length, active_bone.bone.length]
+        layer = bpy.context.view_layer
+        layer.update()
 
-    active_collection = getCollection(context)
-    active_object = C.active_object
-    bw_widget_prefix = context.preferences.addons[__package__].preferences.widget_prefix
-    name = bw_widget_prefix + active_bone.name
+        active_bone.custom_shape = widget
+        active_bone.bone.show_wire = True
 
-    mesh = active_object.data.copy()
-    mesh.name = name
-    ob = D.objects.new(name, mesh)
-    active_collection.objects.link(ob)
+        #deal with the visibility of the collection and deselect things
 
-    # active_object.name = name
+        #add report message
 
-    active_bone.custom_shape = ob
-
-    bpy.ops.object.select_all(action='DESELECT')
-
-    bpy.context.view_layer.objects.active = active_armature
-    bpy.ops.object.mode_set(mode='POSE')
-
-    return active_object
-
-
-def writeTemp(arm, bone):
-    import os
-    path = os.path.join(os.path.expanduser("~"), "Blender Addons Data", "bonewidget")
-    if not os.path.exists(path):
-        os.makedirs(path)
-    loc = os.path.join(path, "temp.txt")
-
-    myfile = open(loc, "w")
-    myfile.write(arm + "," + bone)
-    myfile.close()
-
-
-def readTemp():
-    import os
-    path = os.path.join(os.path.expanduser("~"), "Blender Addons Data", "bonewidget")
-    if not os.path.exists(path):
-        os.makedirs(path)
-    loc = os.path.join(path, "temp.txt")
-
-    myfile = open(loc, "r")
-    arm_bone = myfile.read()
-    myfile.close()
-    os.remove(loc)
-    return arm_bone
+    return

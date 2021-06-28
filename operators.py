@@ -18,8 +18,7 @@ from .functions import (
     deleteUnusedWidgets,
     clearBoneWidgets,
     resyncWidgetNames,
-    selectObject,
-    confirmWidget,
+    addObjectAsWidget,
 )
 from bpy.types import Operator
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
@@ -213,7 +212,7 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
-    """HideUnhide the bone widget collection"""
+    """Show/hide the bone widget collection"""
     bl_idname = "bonewidget.toggle_collection_visibilty"
     bl_label = "Collection Visibilty"
 
@@ -269,9 +268,9 @@ class BONEWIDGET_OT_resyncWidgetNames(bpy.types.Operator):
         resyncWidgetNames()
         return {'FINISHED'}
 
-
+'''
 class BONEWIDGET_OT_selectObject(bpy.types.Operator):
-    """Select mesh object as widget for active bone"""
+    """Select object as widget for selected bone"""
     bl_idname = "bonewidget.select_object"
     bl_label = "Select Object as Widget"
 
@@ -294,14 +293,16 @@ class BONEWIDGET_OT_selectObject(bpy.types.Operator):
     def execute(self, context):
         active_armature = self.active_armature(context)
         active_bone = self.active_bone(context)
+        writeTemp(active_armature, active_bone)
+        logOperation("info", 'Write armature name: "{}" and bone name: "{}" to file temp.txt'.format(active_armature, active_bone))
         selectObject()
         return {'FINISHED'}
 
 
 class BONEWIDGET_OT_confirmWidget(bpy.types.Operator):
-    """Set active mesh object as widget for selected bone"""
+    """Set selected object as widget for selected bone"""
     bl_idname = "bonewidget.confirm_widget"
-    bl_label = "Confirm selected Object as Widget Shape"
+    bl_label = "Confirm selected Object as widget shape"
 
     @classmethod
     def poll(cls, context):
@@ -319,8 +320,23 @@ class BONEWIDGET_OT_confirmWidget(bpy.types.Operator):
 
         cW = confirmWidget(context, active_bone, active_armature)
 
-        return {'FINISHED'}
+        logOperation("info", 'Duplicate Object "{}" and set duplicate as custom shape for Bone "{}" in Armature "{}".'.format(cW, active_bone, active_armature))
 
+        return {'FINISHED'}
+'''
+
+class BONEWIDGET_OT_addObjectAsWidget(bpy.types.Operator):
+    """Add selected object as widget for active bone."""
+    bl_idname = "bonewidget.add_as_widget"
+    bl_label = "Confirm selected Object as widget shape"
+
+    @classmethod
+    def poll(cls, context):
+        return (len(context.selected_objects) == 2 and context.object.mode == 'POSE')
+
+    def execute(self, context):
+        addObjectAsWidget(context, getCollection(context))
+        return {'FINISHED'}
 
 classes = (
     BONEWIDGET_OT_removeWidgets,
@@ -334,8 +350,7 @@ classes = (
     BONEWIDGET_OT_deleteUnusedWidgets,
     BONEWIDGET_OT_clearBoneWidgets,
     BONEWIDGET_OT_resyncWidgetNames,
-    BONEWIDGET_OT_selectObject,
-    BONEWIDGET_OT_confirmWidget,
+    BONEWIDGET_OT_addObjectAsWidget,
 )
 
 

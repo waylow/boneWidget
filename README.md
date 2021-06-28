@@ -5,8 +5,8 @@
 ### To do:
 - Add documentation with images in the readme file
 - make the 'symmetrize widget' operator check if the bone/widget has a mirrored side first before doing anything else.  At the moment it will create the collection if it doesn't exist (this is new issue because I let the user edit an existing widget that isn't in the default location - if the widget already existed that is)
+- fix the getCollection function
 
-- the "select object as widget" should also match the transforms after creation
 
 
 - let the user change the widget suffix to a prefix for a different naming convention
@@ -21,6 +21,7 @@ Maybe there can be a way of extracting them and making them real objects.
 * changed the default collection name and widget names to better match with Rigify (not my preferred naming convention but its better to have more consistency)
 * Removed PayPal funding links
 * Removed Logger
+* Functionality change: I rewrote the way to add the selected object as a widget without having to read and write to a text file
 * Fix: If collection is 'excluded' in the outliner it now re-enables it
 
 ### Edited Widgets

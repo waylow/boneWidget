@@ -54,26 +54,23 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         layout.operator("bonewidget.delete_unused_widgets",
                         icon='TRASH', text="Delete Unused Widgets")
 
-        import os
-        path = os.path.join(os.path.expanduser("~"), "Blender Addons Data", "bonewidget", "temp.txt")
         if bpy.context.mode == 'POSE':
-            layout.operator("bonewidget.select_object",
-                            text="Select Object as Widget Shape",
+            layout.operator("bonewidget.add_as_widget",
+                            text="Use Selected Object",
                             icon='RESTRICT_SELECT_OFF')
-        elif bpy.context.mode == 'OBJECT':
-            layout.operator("bonewidget.confirm_widget",
-                            text="Confirm selected Object as Widget Shape",
-                            icon='CHECKMARK')
 
+        # if the bw collection exists, show the visibility toggle
+        bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+        collection = context.scene.collection.children.get(bw_collection_name)
         try:
-            collection = getViewLayerCollection(context)
+            collection = context.view_layer.layer_collection.children[bw_collection_name]
         except:
             collection = None
 
         if collection is not None:
             if collection.hide_viewport:
                 icon = "HIDE_ON"
-                text = "Unhide Collection"
+                text = "Show Collection"
             else:
                 icon = "HIDE_OFF"
                 text = "Hide Collection"
