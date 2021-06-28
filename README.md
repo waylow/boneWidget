@@ -3,12 +3,7 @@
 2.7 explanation : https://vimeo.com/184159913
 
 ### To do:
-- Add documentation with images in the readme file
-- make the 'symmetrize widget' operator check if the bone/widget has a mirrored side first before doing anything else.  At the moment it will create the collection if it doesn't exist (this is new issue because I let the user edit an existing widget that isn't in the default location - if the widget already existed that is)
-- fix the getCollection function
-
-
-
+- Add documentation with images to this readme file
 - let the user change the widget suffix to a prefix for a different naming convention
 - extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
 Maybe there can be a way of extracting them and making them real objects.
