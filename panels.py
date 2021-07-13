@@ -1,14 +1,20 @@
 import bpy
-from .functions import readWidgets
-from bpy.types import Menu
+from .functions import (
+    readWidgets,
+    getViewLayerCollection,
+)
+from .bl_class_registry import BlClassRegistry
+from .menus import BONEWIDGET_MT_bw_specials
 
 
+@BlClassRegistry()
 class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     bl_label = "Bone Widget"
-    bl_category = "RIG Tools"
+    bl_category = "Rig Tools"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_idname = 'VIEW3D_PT_bw_posemode_panel'
+
 
     items = []
     for key, value in readWidgets().items():
@@ -19,16 +25,12 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         itemsSort.append((key, key, ""))
 
     bpy.types.Scene.widget_list = bpy.props.EnumProperty(
-        name="Shape", items=itemsSort, description="Shape")
+        items=itemsSort, name="Shape", description="Shape")
 
     def draw(self, context):
         layout = self.layout
         row = layout.row(align=True)
-
-        if len(bpy.types.Scene.widget_list[1]['items']) < 6:
-            row.prop(context.scene, "widget_list", expand=True)
-        else:
-            row.prop(context.scene, "widget_list", expand=False, text="")
+        row.prop(context.scene, "widget_list", expand=False, text="")
 
         row = layout.row(align=True)
         row.menu("BONEWIDGET_MT_bw_specials", icon='DOWNARROW_HLT', text="")
@@ -39,31 +41,41 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         else:
             row.operator("bonewidget.return_to_armature", icon="LOOP_BACK", text='To bone')
 
-
-class BONEWIDGET_MT_bw_specials(Menu):
-    bl_label = "Bone Widget Specials"
-
-    def draw(self, context):
         layout = self.layout
-        layout.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR')
-        layout.operator("bonewidget.match_bone_transforms", icon='GROUP_BONE')
-        layout.operator("bonewidget.add_widgets", icon="ADD", text="Add Widgets")
-        layout.operator("bonewidget.remove_widgets", icon="REMOVE", text="Remove Widgets")
+        layout.separator()
+        layout.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR', text="Symmetrize Shape")
+        layout.operator("bonewidget.match_bone_transforms",
+                        icon='GROUP_BONE', text="Match Bone Transforms")
+        layout.operator("bonewidget.resync_widget_names",
+                        icon='FILE_REFRESH', text="Resync Widget Names")
+        layout.separator()
+        layout.operator("bonewidget.clear_widgets",
+                        icon='X', text="Clear Bone Widget")
+        layout.operator("bonewidget.delete_unused_widgets",
+                        icon='TRASH', text="Delete Unused Widgets")
 
+        if bpy.context.mode == 'POSE':
+            layout.operator("bonewidget.add_as_widget",
+                            text="Use Selected Object",
+                            icon='RESTRICT_SELECT_OFF')
 
-classes = (
-    BONEWIDGET_MT_bw_specials,
-    BONEWIDGET_PT_posemode_panel,
-)
+        # if the bw collection exists, show the visibility toggle
+        bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+        collection = context.scene.collection.children.get(bw_collection_name)
+        try:
+            collection = context.view_layer.layer_collection.children[bw_collection_name]
+        except:
+            collection = None
 
-
-def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
-
-
-def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
+        if collection is not None:
+            if collection.hide_viewport:
+                icon = "HIDE_ON"
+                text = "Show Collection"
+            else:
+                icon = "HIDE_OFF"
+                text = "Hide Collection"
+            row = layout.row()
+            row.separator()
+            row = layout.row()
+            row.operator("bonewidget.toggle_collection_visibilty",
+                         icon=icon, text=text)
