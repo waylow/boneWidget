@@ -33,6 +33,8 @@ bl_info = {
 if "bpy" in locals():
     import importlib
     bl_class_registry.BlClassRegistry.cleanup()
+    importlib.reload(keymaps)
+    importlib.reload(operators)
     importlib.reload(prefs)
     importlib.reload(panels)
     importlib.reload(menus)
@@ -40,9 +42,10 @@ if "bpy" in locals():
 else:
     import bpy
     from . import bl_class_registry
+    from . import keymaps
     from . import operators
-    from . import panels
     from . import prefs
+    from . import panels
     from . import menus
 
 import bpy
@@ -74,6 +77,7 @@ def register():
     operators.register()
     menus.register()
     bl_class_registry.BlClassRegistry.register()
+    keymaps.register()
 
     # Apply preferences of the panel location.
     context = bpy.context
@@ -89,6 +93,7 @@ def unregister():
     menus.unregister()
     # TODO: Unregister by BlClassRegistry
     bl_class_registry.BlClassRegistry.unregister()
+    keymaps.unregister()
 
 
 if __name__ == "__main__":
