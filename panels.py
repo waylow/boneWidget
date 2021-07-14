@@ -1,20 +1,16 @@
 import bpy
+
 from .functions import (
     readWidgets,
-    getViewLayerCollection,
 )
-from .bl_class_registry import BlClassRegistry
-from .menus import BONEWIDGET_MT_bw_specials
 
 
-@BlClassRegistry()
 class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     bl_label = "Bone Widget"
     bl_category = "Rig Tools"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_idname = 'VIEW3D_PT_bw_posemode_panel'
-
 
     items = []
     for key, value in readWidgets().items():
@@ -39,7 +35,7 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
         if bpy.context.mode == "POSE":
             row.operator("bonewidget.edit_widget", icon="OUTLINER_DATA_MESH")
         else:
-            row.operator("bonewidget.return_to_armature", icon="LOOP_BACK", text='To bone')
+            row.operator("bonewidget.return_to_armature", icon="LOOP_BACK", text='To Bone')
 
         layout = self.layout
         layout.separator()

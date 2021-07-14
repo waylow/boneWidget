@@ -1,12 +1,10 @@
 import bpy
-from bpy.types import AddonPreferences
 from bpy.props import StringProperty
+from bpy.types import AddonPreferences
 
-from .bl_class_registry import BlClassRegistry
 from .panels import BONEWIDGET_PT_posemode_panel
 
 
-@BlClassRegistry()
 class BoneWidgetPreferences(AddonPreferences):
     bl_idname = __package__
 
@@ -50,19 +48,16 @@ class BoneWidgetPreferences(AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
+        wm: bpy.types.WindowManager = context.window_manager
 
-        row = layout.row()
-        col = row.column()
-        col.prop(self, "widget_prefix", text="Widget Prefix")
-        col.prop(self, "bonewidget_collection_name", text="Collection name")
-
-        row = layout.row()
-        row = layout.row()
-        row.prop(self, "symmetry_suffix", text="Symmetry suffix")
-
-        row = layout.row()
-
-        row = layout.row()
-        col = row.column()
-        col.label(text="Set the category to show Bone-Widgets panel:")
+        col = layout.column()
         col.prop(self, "panel_category")
+        ki = wm.keyconfigs.user.keymaps["Pose"].keymap_items["wm.call_menu_pie"]
+        col.prop(ki, property="type", text="Pie Menu Shortcut", full_event=True)
+
+        col = layout.column()
+        col.prop(self, "widget_prefix", text="Widget Prefix")
+        col.prop(self, "bonewidget_collection_name", text="Collection Name")
+
+        col = layout.column()
+        col.prop(self, "symmetry_suffix", text="Symmetry Suffix")

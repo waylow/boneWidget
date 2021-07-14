@@ -49,7 +49,6 @@ else:
     from . import menus
 
 import bpy
-import os
 
 
 def get_user_preferences(context):
@@ -73,9 +72,20 @@ def check_version(major, minor, _):
     return -1
 
 
+classes = [
+    panels.BONEWIDGET_PT_posemode_panel,
+    menus.BONEWIDGET_MT_bw_specials,
+    menus.BONEWIDGET_MT_pie,
+    prefs.BoneWidgetPreferences,
+]
+
+
 def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
+
     operators.register()
-    menus.register()
     bl_class_registry.BlClassRegistry.register()
     keymaps.register()
 
@@ -89,11 +99,14 @@ def register():
 
 
 def unregister():
-    operators.unregister()
-    menus.unregister()
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(cls)
+
+    keymaps.unregister()
     # TODO: Unregister by BlClassRegistry
     bl_class_registry.BlClassRegistry.unregister()
-    keymaps.unregister()
+    operators.unregister()
 
 
 if __name__ == "__main__":

@@ -15,9 +15,8 @@ def register():
         return
 
     wm = bpy.context.window_manager
-    km = wm.keyconfigs.addon.keymaps.new('Pose', space_type='EMPTY')
-
-    kmi = km.keymap_items.new('wm.call_menu_pie', type='E', value='PRESS')
+    km = wm.keyconfigs.addon.keymaps.new("Pose", space_type="EMPTY")
+    kmi = km.keymap_items.new("wm.call_menu_pie", type="E", value="PRESS")
     kmi.properties.name = menus.BONEWIDGET_MT_pie.bl_idname
 
     addon_keymaps.append(km)

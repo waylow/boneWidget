@@ -1,7 +1,4 @@
-import bpy
 from bpy.types import Menu
-
-from .operators import BONEWIDGET_OT_createWidget, BONEWIDGET_OT_editWidget
 
 
 class BONEWIDGET_MT_bw_specials(Menu):
@@ -23,23 +20,11 @@ class BONEWIDGET_MT_pie(Menu):
 
         pie = layout.menu_pie()
 
-        pie.operator(BONEWIDGET_OT_createWidget.bl_idname, icon='ADD', text=BONEWIDGET_OT_createWidget.bl_label)
-        pie.operator(BONEWIDGET_OT_editWidget.bl_idname, icon='GREASEPENCIL', text=BONEWIDGET_OT_editWidget.bl_label)
-
-
-classes = (
-    BONEWIDGET_MT_bw_specials,
-    BONEWIDGET_MT_pie,
-)
-
-
-def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
-
-
-def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
+        if context.mode == "POSE":
+            pie.operator("bonewidget.create_widget", icon="OBJECT_DATAMODE")
+            pie.operator("bonewidget.edit_widget", icon="GREASEPENCIL")
+            pie.operator("bonewidget.clear_widgets", icon="X")
+            pie.prop(context.scene, "widget_list", expand=False, text="")
+        elif context.mode in {"OBJECT", "EDIT"}:
+            pie.separator()
+            pie.operator("bonewidget.return_to_armature", icon="LOOP_BACK", text="To Bone")
