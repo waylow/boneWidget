@@ -43,6 +43,15 @@ def getViewLayerCollection(context, widget = None):
     bw_collection_name = getPreferences(context).bonewidget_collection_name
     viewlayer_collection = None
 
+    if widget is not None:
+        lc_list = [context.view_layer.layer_collection]
+        while len(lc_list) > 0:
+            lc = lc_list.pop()
+            if widget.name in lc.collection.objects:
+                viewlayer_collection = lc
+            else:
+                lc_list.extend(child_lc for child_lc in lc.children)
+
     if viewlayer_collection is None:
         try:
             viewlayer_collection = context.view_layer.layer_collection.children[bw_collection_name]
@@ -228,8 +237,15 @@ def editWidget(active_bone):
     bpy.ops.object.mode_set(mode='OBJECT')
     C.active_object.select_set(False)
 
+    # we may get a customshape setup where it's hidden at collection or viewlayer_collection level.
     viewlayer_collection = getViewLayerCollection(C, widget)
+    collection = viewlayer_collection.collection
+    viewlayer_collection.hide_viewport = False
     collection.hide_viewport = False
+
+    # if widget is unlinked from scene, relink to default widget collection
+    if widget.name not in collection.objects:
+        collection.objects.link(widget)
 
     if C.space_data.local_view:
         bpy.ops.view3d.localview()
