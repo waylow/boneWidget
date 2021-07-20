@@ -3,42 +3,56 @@ import numpy
 from math import pi
 from mathutils import Matrix
 from .jsonFunctions import objectDataToDico
+
 from .. import __package__
 
 
+def getPreferences(context):
+    return getPreferences(context)
+
+
+def createViewLayerCollection(context):
+    bw_collection_name = getPreferences(context).bonewidget_collection_name
+    collection = bpy.data.collections.new(bw_collection_name)
+    context.scene.collection.children.link(collection)
+    # hide new collection
+    viewlayer_collection = context.view_layer.layer_collection.children[collection.name]
+    viewlayer_collection.hide_viewport = True
+
+    return viewlayer_collection
+
+
 def getCollection(context):
-    bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+    bw_collection_name = getPreferences(context).bonewidget_collection_name
     collection = context.scene.collection.children.get(bw_collection_name)
     if collection:  # if it already exists
         return collection
 
     collection = bpy.data.collections.get(bw_collection_name)
-
     if collection:  # if it exists but not linked to scene
         context.scene.collection.children.link(collection)
         return collection
 
     else:  # create a new collection
-        collection = bpy.data.collections.new(bw_collection_name)
-        context.scene.collection.children.link(collection)
-        # hide new collection
-        viewlayer_collection = context.view_layer.layer_collection.children[collection.name]
-        viewlayer_collection.hide_viewport = True
+        viewlayer_collection = createViewLayerCollection(context)
+        collection = viewlayer_collection.collection
         return collection
 
 
 def getViewLayerCollection(context, widget = None):
-    bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-    collection = context.view_layer.layer_collection.children[bw_collection_name]
-    try:
-        collection = context.view_layer.layer_collection.children[bw_collection_name]
-    except KeyError:
-        #need to find the collection it is actually in
-        collection = context.view_layer.layer_collection.children[bpy.data.objects[widget.name].users_collection[0].name]
+    bw_collection_name = getPreferences(context).bonewidget_collection_name
+    viewlayer_collection = None
+
+    if viewlayer_collection is None:
+        try:
+            viewlayer_collection = context.view_layer.layer_collection.children[bw_collection_name]
+        except KeyError:
+            # if there's no viewlayer_collection found, create one.
+            viewlayer_collection = createViewLayerCollection(context)
 
     # make sure the collection is not excluded
-    collection.exclude = False
-    return collection
+    viewlayer_collection.exclude = False
+    return viewlayer_collection
 
 
 def boneMatrix(widget, matchBone):
@@ -214,7 +228,7 @@ def editWidget(active_bone):
     bpy.ops.object.mode_set(mode='OBJECT')
     C.active_object.select_set(False)
 
-    collection = getViewLayerCollection(C, widget)
+    viewlayer_collection = getViewLayerCollection(C, widget)
     collection.hide_viewport = False
 
     if C.space_data.local_view:
@@ -238,8 +252,8 @@ def returnToArmature(widget):
 
     bpy.ops.object.select_all(action='DESELECT')
 
-    collection = getViewLayerCollection(C, widget)
-    collection.hide_viewport = True
+    viewlayer_collection = getViewLayerCollection(C, widget)
+    viewlayer_collection.hide_viewport = True
     if C.space_data.local_view:
         bpy.ops.view3d.localview()
     bpy.context.view_layer.objects.active = armature
@@ -356,7 +370,7 @@ def clearBoneWidgets():
 
 def addObjectAsWidget(context, collection):
     sel = bpy.context.selected_objects
-    #bw_collection = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+    #bw_collection = getPreferences(context).bonewidget_collection_name
 
     if sel[1].type == 'MESH':
         active_bone = context.active_pose_bone
@@ -373,7 +387,7 @@ def addObjectAsWidget(context, collection):
         widget = widget_object.copy()
         widget.data = widget.data.copy()
         # reamame it
-        bw_widget_prefix = context.preferences.addons[__package__].preferences.widget_prefix
+        bw_widget_prefix = getPreferences(context).widget_prefix
         widget_name = bw_widget_prefix + active_bone.name
         widget.name = widget_name
         widget.data.name = widget_name
