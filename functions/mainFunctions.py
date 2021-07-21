@@ -8,7 +8,7 @@ from .. import __package__
 
 
 def getPreferences(context):
-    return getPreferences(context)
+    return context.preferences.addons[__package__].preferences
 
 
 def createViewLayerCollection(context):
