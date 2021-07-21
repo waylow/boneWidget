@@ -259,6 +259,12 @@ def editWidget(active_bone):
     bpy.ops.object.mode_set(mode='EDIT')
 
 
+def copyWidget(active_bone, selected_bones):
+    for bone in selected_bones:
+        if bone != active_bone:
+            bone.custom_shape = active_bone.custom_shape
+
+
 def returnToArmature(widget):
     C = bpy.context
     D = bpy.data

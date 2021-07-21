@@ -39,6 +39,8 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
 
         layout = self.layout
         layout.separator()
+        layout.operator("bonewidget.copy_widget",
+                        icon='DUPLICATE', text="Copy Widget")
         layout.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR', text="Symmetrize Shape")
         layout.operator("bonewidget.match_bone_transforms",
                         icon='GROUP_BONE', text="Match Bone Transforms")

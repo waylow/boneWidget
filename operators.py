@@ -102,6 +102,22 @@ class BONEWIDGET_OT_editWidget(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_copyWidget(bpy.types.Operator):
+    """Copy the widget of active bone to all selected bones"""
+    bl_idname = "bonewidget.copy_widget"
+    bl_label = "Copy"
+
+    @classmethod
+    def poll(cls, context):
+        return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE'
+                and context.active_pose_bone.custom_shape is not None and len(context.selected_pose_bones) > 1)
+
+    def execute(self, context):
+        active_bone = context.active_pose_bone
+        functions.copyWidget(active_bone, context.selected_pose_bones)
+        return {'FINISHED'}
+
+
 class BONEWIDGET_OT_returnToArmature(bpy.types.Operator):
     """Switch back to the armature"""
     bl_idname = "bonewidget.return_to_armature"
@@ -347,6 +363,7 @@ classes = (
     BONEWIDGET_OT_matchBoneTransforms,
     BONEWIDGET_OT_returnToArmature,
     BONEWIDGET_OT_editWidget,
+    BONEWIDGET_OT_copyWidget,
     BONEWIDGET_OT_createWidget,
     BONEWIDGET_OT_toggleCollectionVisibility,
     BONEWIDGET_OT_deleteUnusedWidgets,

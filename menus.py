@@ -25,6 +25,7 @@ class BONEWIDGET_MT_pie(Menu):
             pie.operator("bonewidget.edit_widget", icon="GREASEPENCIL")
             pie.operator("bonewidget.clear_widgets", icon="X")
             pie.prop(context.scene, "widget_list", expand=False, text="")
+            pie.operator("bonewidget.copy_widget", icon="DUPLICATE")
             pie.operator("bonewidget.delete_unused_widgets", icon="TRASH")
         elif context.mode in {"OBJECT", "EDIT"}:
             pie.separator()
