@@ -98,7 +98,7 @@ class BONEWIDGET_OT_editWidget(bpy.types.Operator):
         try:
             editWidget(active_bone)
         except KeyError:
-            self.report({'INFO'}, 'This widget is the not in the Widget Collection')
+            self.report({'INFO'}, 'This widget is not in the Widget Collection')
         return {'FINISHED'}
 
 
