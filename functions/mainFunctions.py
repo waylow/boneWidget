@@ -13,8 +13,13 @@ def getPreferences(context):
 
 def createViewLayerCollection(context):
     bw_collection_name = getPreferences(context).bonewidget_collection_name
-    collection = bpy.data.collections.new(bw_collection_name)
+
+    # if it exists but not linked to scene
+    collection = bpy.data.collections.get(bw_collection_name)
+    if collection is None:
+        collection = bpy.data.collections.new(bw_collection_name)
     context.scene.collection.children.link(collection)
+
     # hide new collection
     viewlayer_collection = context.view_layer.layer_collection.children[collection.name]
     viewlayer_collection.hide_viewport = True
@@ -23,20 +28,9 @@ def createViewLayerCollection(context):
 
 
 def getCollection(context):
-    bw_collection_name = getPreferences(context).bonewidget_collection_name
-    collection = context.scene.collection.children.get(bw_collection_name)
-    if collection:  # if it already exists
-        return collection
-
-    collection = bpy.data.collections.get(bw_collection_name)
-    if collection:  # if it exists but not linked to scene
-        context.scene.collection.children.link(collection)
-        return collection
-
-    else:  # create a new collection
-        viewlayer_collection = createViewLayerCollection(context)
-        collection = viewlayer_collection.collection
-        return collection
+    viewlayer_collection = getViewLayerCollection(context)
+    collection = viewlayer_collection.collection
+    return collection
 
 
 def getViewLayerCollection(context, widget=None, query=False):
