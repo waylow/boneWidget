@@ -27,9 +27,11 @@ def createViewLayerCollection(context):
     return viewlayer_collection
 
 
-def getCollection(context):
-    viewlayer_collection = getViewLayerCollection(context)
-    collection = viewlayer_collection.collection
+def getCollection(context, query=False):
+    viewlayer_collection = getViewLayerCollection(context, query=query)
+    collection = None
+    if viewlayer_collection is not None: # anticipate query
+        collection = viewlayer_collection.collection
     return collection
 
 
@@ -205,9 +207,8 @@ def deleteUnusedWidgets():
     C = bpy.context
     D = bpy.data
 
-    bw_collection_name = getPreferences(C).bonewidget_collection_name
-    m_collection = C.scene.collection
-    if bw_collection_name not in m_collection.children:
+    collection = getCollection(C, query=True)
+    if collection is None:
         return []
 
     widgetList = []
@@ -218,8 +219,7 @@ def deleteUnusedWidgets():
                 if bone.custom_shape:
                     widgetList.append(bone.custom_shape)
 
-    unwantedList = [
-        ob for ob in m_collection.children[bw_collection_name].all_objects if ob not in widgetList]
+    unwantedList = [ob for ob in collection.all_objects if ob not in widgetList]
     # save the current context mode
     mode = C.mode
     # jump into object mode
