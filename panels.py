@@ -1,8 +1,6 @@
 import bpy
 
-from .functions import (
-    readWidgets,
-)
+from . import functions
 
 
 class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
@@ -13,7 +11,7 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     bl_idname = 'VIEW3D_PT_bw_posemode_panel'
 
     items = []
-    for key, value in readWidgets().items():
+    for key, value in functions.readWidgets().items():
         items.append(key)
 
     itemsSort = []
@@ -58,12 +56,7 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
                             icon='RESTRICT_SELECT_OFF')
 
         # if the bw collection exists, show the visibility toggle
-        bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-        collection = context.scene.collection.children.get(bw_collection_name)
-        try:
-            collection = context.view_layer.layer_collection.children[bw_collection_name]
-        except:
-            collection = None
+        collection = functions.getViewLayerCollection(context, query=True)
 
         if collection is not None:
             if collection.hide_viewport:

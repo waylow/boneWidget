@@ -39,9 +39,16 @@ def getCollection(context):
         return collection
 
 
-def getViewLayerCollection(context, widget = None):
+def getViewLayerCollection(context, widget=None, query=False):
     bw_collection_name = getPreferences(context).bonewidget_collection_name
     viewlayer_collection = None
+
+    # prioritize search from widget if specified, otherwise look at current object first.
+    if widget is None and context.object and context.object.type == "ARMATURE":
+        for bone in context.object.pose.bones:
+            widget = bone.custom_shape
+            if widget is not None:
+                break
 
     if widget is not None:
         lc_list = [context.view_layer.layer_collection]
@@ -53,14 +60,14 @@ def getViewLayerCollection(context, widget = None):
                 lc_list.extend(child_lc for child_lc in lc.children)
 
     if viewlayer_collection is None:
-        try:
-            viewlayer_collection = context.view_layer.layer_collection.children[bw_collection_name]
-        except KeyError:
+        viewlayer_collection = context.view_layer.layer_collection.children.get(bw_collection_name)
+        if viewlayer_collection is None and not query:
             # if there's no viewlayer_collection found, create one.
             viewlayer_collection = createViewLayerCollection(context)
 
     # make sure the collection is not excluded
-    viewlayer_collection.exclude = False
+    if not query:
+        viewlayer_collection.exclude = False
     return viewlayer_collection
 
 
