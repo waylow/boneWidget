@@ -85,7 +85,7 @@ def fromWidgetFindBone(widget):
 def createWidget(bone, widget, relative, size, scale, slide, rotation, collection):
     C = bpy.context
     D = bpy.data
-    bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    bw_widget_prefix = getPreferences(C).widget_prefix
 
 #     if bone.custom_shape_transform:
 #    matrixBone = bone.custom_shape_transform
@@ -142,7 +142,7 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
 def symmetrizeWidget(bone, collection):
     C = bpy.context
     D = bpy.data
-    bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    bw_widget_prefix = getPreferences(C).widget_prefix
 
     widget = bone.custom_shape
 
@@ -186,7 +186,7 @@ def symmetrizeWidget(bone, collection):
 def symmetrizeWidget_helper(bone, collection, activeObject, widgetsAndBones):
     C = bpy.context
 
-    bw_symmetry_suffix = C.preferences.addons[__package__].preferences.symmetry_suffix
+    bw_symmetry_suffix = getPreferences(C).symmetry_suffix
     bw_symmetry_suffix = bw_symmetry_suffix.split(";")
 
     suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
@@ -204,7 +204,7 @@ def deleteUnusedWidgets():
     C = bpy.context
     D = bpy.data
 
-    bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
+    bw_collection_name = getPreferences(C).bonewidget_collection_name
     m_collection = C.scene.collection
     if bw_collection_name not in m_collection.children:
         return []
@@ -292,7 +292,7 @@ def findMirrorObject(object):
     C = bpy.context
     D = bpy.data
 
-    bw_symmetry_suffix = C.preferences.addons[__package__].preferences.symmetry_suffix
+    bw_symmetry_suffix = getPreferences(C).symmetry_suffix
     bw_symmetry_suffix = bw_symmetry_suffix.split(";")
 
     suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
@@ -330,7 +330,7 @@ def findMatchBones():
     C = bpy.context
     D = bpy.data
 
-    bw_symmetry_suffix = C.preferences.addons[__package__].preferences.symmetry_suffix
+    bw_symmetry_suffix = getPreferences(C).symmetry_suffix
     bw_symmetry_suffix = bw_symmetry_suffix.split(";")
 
     suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
@@ -367,8 +367,8 @@ def resyncWidgetNames():
     C = bpy.context
     D = bpy.data
 
-    bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
-    bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    bw_collection_name = getPreferences(C).bonewidget_collection_name
+    bw_widget_prefix = getPreferences(C).widget_prefix
 
     widgetsAndBones = {}
 

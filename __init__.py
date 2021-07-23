@@ -32,13 +32,14 @@ bl_info = {
 
 if "bpy" in locals():
     import importlib
+
     bl_class_registry.BlClassRegistry.cleanup()
     importlib.reload(keymaps)
     importlib.reload(operators)
     importlib.reload(prefs)
     importlib.reload(panels)
     importlib.reload(menus)
-
+    importlib.reload(functions)
 else:
     import bpy
     from . import bl_class_registry
@@ -47,15 +48,9 @@ else:
     from . import prefs
     from . import panels
     from . import menus
+    from . import functions
 
 import bpy
-
-
-def get_user_preferences(context):
-    if hasattr(context, "user_preferences"):
-        return context.user_preferences
-
-    return context.preferences
 
 
 def check_version(major, minor, _):
@@ -91,11 +86,11 @@ def register():
 
     # Apply preferences of the panel location.
     context = bpy.context
-    pref = get_user_preferences(context).addons[__package__].preferences
+    preferences = functions.getPreferences(context)
     # Only default panel location is available in < 2.80
     if check_version(2, 80, 0) < 0:
-        pref.panel_category = "Rig Tools"
-    prefs.BoneWidgetPreferences.panel_category_update_fn(pref, context)
+        preferences.panel_category = "Rig Tools"
+    prefs.BoneWidgetPreferences.panel_category_update_fn(preferences, context)
 
 
 def unregister():
