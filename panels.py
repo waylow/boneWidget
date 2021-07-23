@@ -57,16 +57,17 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
 
         # if the bw collection exists, show the visibility toggle
         collection = functions.getViewLayerCollection(context, query=True)
-
         if collection is not None:
-            if collection.hide_viewport:
-                icon = "HIDE_ON"
-                text = "Show Collection"
-            else:
-                icon = "HIDE_OFF"
-                text = "Hide Collection"
             row = layout.row()
             row.separator()
             row = layout.row()
+            hide_viewport = collection.hide_viewport
+            icon, text = widgetDataFromVisibility(hide_viewport)
             row.operator("bonewidget.toggle_collection_visibilty",
                          icon=icon, text=text)
+
+
+def widgetDataFromVisibility(hide_viewport):
+    icon, text = ("HIDE_ON", "Show Collection") if hide_viewport else \
+        ("HIDE_OFF", "Hide Collection")
+    return icon, text
