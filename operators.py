@@ -139,10 +139,10 @@ class BONEWIDGET_OT_matchBoneTransforms(bpy.types.Operator):
                 if ob.type == 'MESH':
                     matchBone = fromWidgetFindBone(ob)
                     if matchBone:
-                    #     if matchBone.custom_shape_transform:
-                    #     boneMatrix(ob, matchBone.custom_shape_transform)
-                    #     else:
-                        boneMatrix(ob, matchBone)
+                        if matchBone.custom_shape_transform:
+                            boneMatrix(ob, matchBone.custom_shape_transform)
+                        else:
+                            boneMatrix(ob, matchBone)
         return {'FINISHED'}
 
 
