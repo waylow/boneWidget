@@ -98,7 +98,7 @@ class BONEWIDGET_OT_editWidget(bpy.types.Operator):
         try:
             editWidget(active_bone)
         except KeyError:
-            self.report({'INFO'}, 'This widget is the not in the Widget Collection')
+            self.report({'INFO'}, 'This widget is the Widget Collection')
         return {'FINISHED'}
 
 
@@ -129,9 +129,6 @@ class BONEWIDGET_OT_matchBoneTransforms(bpy.types.Operator):
     def execute(self, context):
         if bpy.context.mode == "POSE":
             for bone in bpy.context.selected_pose_bones:
-            #     if bone.custom_shape_transform and bone.custom_shape:
-            #    boneMatrix(bone.custom_shape, bone.custom_shape_transform)
-            #     elif bone.custom_shape:
                 boneMatrix(bone.custom_shape, bone)
 
         else:
@@ -139,10 +136,7 @@ class BONEWIDGET_OT_matchBoneTransforms(bpy.types.Operator):
                 if ob.type == 'MESH':
                     matchBone = fromWidgetFindBone(ob)
                     if matchBone:
-                        if matchBone.custom_shape_transform:
-                            boneMatrix(ob, matchBone.custom_shape_transform)
-                        else:
-                            boneMatrix(ob, matchBone)
+                        boneMatrix(ob, matchBone)
         return {'FINISHED'}
 
 

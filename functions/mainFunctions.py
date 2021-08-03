@@ -29,12 +29,13 @@ def getCollection(context):
 
 def getViewLayerCollection(context, widget = None):
     bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-    collection = context.view_layer.layer_collection.children[bw_collection_name]
+    #collection = context.view_layer.layer_collection.children[bw_collection_name]
     try:
         collection = context.view_layer.layer_collection.children[bw_collection_name]
     except KeyError:
         #need to find the collection it is actually in
-        collection = context.view_layer.layer_collection.children[bpy.data.objects[widget.name].users_collection[0].name]
+        #collection = context.view_layer.layer_collection.children[bpy.data.objects[widget.name].users_collection[0].name]
+        collection = bpy.data.collections[bpy.data.objects[widget.name].users_collection[0].name]
 
     # make sure the collection is not excluded
     collection.exclude = False
@@ -42,10 +43,24 @@ def getViewLayerCollection(context, widget = None):
 
 
 def boneMatrix(widget, matchBone):
+    if widget == None:
+        return
     widget.matrix_local = matchBone.bone.matrix_local
     widget.matrix_world = matchBone.id_data.matrix_world @ matchBone.bone.matrix_local
+    if matchBone.custom_shape_transform:
+        #if it has a tranform override apply this to the widget loc and rot
+        org_scale = widget.matrix_world.to_scale()
+        org_scale_mat = Matrix.Scale(1, 4, org_scale)
+        target_matrix = matchBone.custom_shape_transform.id_data.matrix_world @ matchBone.custom_shape_transform.bone.matrix_local
+        loc = target_matrix.to_translation()
+        loc_mat  = Matrix.Translation(loc)
+        rot = target_matrix.to_euler().to_matrix()
+        widget.matrix_world = loc_mat @ rot.to_4x4() @ org_scale_mat
+
     if matchBone.use_custom_shape_bone_size:
-        widget.scale = [matchBone.bone.length, matchBone.bone.length, matchBone.bone.length]
+        ob_scale = bpy.context.scene.objects[matchBone.id_data.name].scale
+        widget.scale = [matchBone.bone.length * ob_scale[0], matchBone.bone.length * ob_scale[1], matchBone.bone.length * ob_scale[2]]
+        #widget.scale = [matchBone.bone.length, matchBone.bone.length, matchBone.bone.length]
     widget.data.update()
 
 
