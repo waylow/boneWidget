@@ -35,10 +35,12 @@ def getViewLayerCollection(context, widget = None):
     except KeyError:
         #need to find the collection it is actually in
         #collection = context.view_layer.layer_collection.children[bpy.data.objects[widget.name].users_collection[0].name]
+
         collection = bpy.data.collections[bpy.data.objects[widget.name].users_collection[0].name]
 
-    # make sure the collection is not excluded
-    collection.exclude = False
+    # make sure the collection is not hidden (can't get it to work if it's excluded)
+    collection.hide_viewport = False
+
     return collection
 
 
@@ -137,7 +139,6 @@ def symmetrizeWidget(bone, collection):
     bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
 
     widget = bone.custom_shape
-
     if findMirrorObject(bone) is not None:
         if findMirrorObject(bone).custom_shape_transform:
             mirrorBone = findMirrorObject(bone).custom_shape_transform
@@ -145,7 +146,6 @@ def symmetrizeWidget(bone, collection):
             mirrorBone = findMirrorObject(bone)
 
         mirrorWidget = mirrorBone.custom_shape
-
         if mirrorWidget:
             if mirrorWidget != widget:
                 mirrorWidget.name = mirrorWidget.name + "_old"
@@ -162,7 +162,7 @@ def symmetrizeWidget(bone, collection):
         newObject.data = newData
         newData.update()
         newObject.name = bw_widget_prefix + mirrorBone.name
-        collection.objects.link(newObject)
+        D.collections[collection.name].objects.link(newObject)
         newObject.matrix_local = mirrorBone.bone.matrix_local
         newObject.scale = [mirrorBone.bone.length, mirrorBone.bone.length, mirrorBone.bone.length]
 
@@ -171,6 +171,7 @@ def symmetrizeWidget(bone, collection):
 
         mirrorBone.custom_shape = newObject
         mirrorBone.bone.show_wire = True
+
     else:
         pass
 
