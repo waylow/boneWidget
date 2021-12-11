@@ -24,7 +24,8 @@ This is the active shape from Bone Widget Library.
 Choose the shape you want to add from the list here.
 
 ### BW Specials Menu:
-![Image](images/bone_widget_UI.png)
+
+<img src="images/bone_widget_UI.png" alt="drawing" width="700"/>
 
 #### Add to Widget library
 
@@ -58,7 +59,6 @@ You can rotate the widget by these values at the time of creation.  This can sav
 
 #### Edit:
 This will jump into edit mode for the custom bone shape and allow you to edit it.
-
 
 
 #### Match bone Transforms:
