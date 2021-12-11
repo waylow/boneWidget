@@ -7,13 +7,24 @@ Bone Widget is a blender add-on to assist with making custom bone shapes. It has
 
 It ships with many shapes pre-made but you can also add your own to the library to make rigging easier.
 
+## Installation:
+
+1. Download the zipped code here from Github.
+
+2. In Blender, open Preferences->Addons->Install. Navigate to where you saved the zip file and click install.
+3. Enable the Addon with the checkbox.
+4. The UI will appear in the properties panel (n panel) in the 3d viewport.
 
 ## UI Panel
+
+
+
 ### Shape:
 This is the active shape from Bone Widget Library.
-Choose the shape you want to add to the bone here.
+Choose the shape you want to add from the list here.
 
 ### BW Specials Menu:
+![Image](images/bone_widget_UI.png)
 
 #### Add to Widget library
 
