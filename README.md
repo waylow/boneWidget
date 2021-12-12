@@ -59,9 +59,9 @@ This will slide the position of the widget along the Y axis (or length) of the b
 You can rotate the widget by these values at the time of creation.  This can save you from having to jump into edit mode to rotate a widget to better align with your situation.
 
 
-#### Edit/Jump to Bone:
+#### Edit/To Bone:
 When in pose mode, this will jump into edit mode for the custom bone shape and allow you to edit it.
-When you have the shape selected (object or edit mode), this button will display as "Jump to Bone".  That will take you back to pose mode, if that mesh object is in face a custom shape.
+When you have the shape selected (object or edit mode), this button will display as "To Bone".  That will take you back to pose mode, if that mesh object is in face a custom shape.
 
 #### Match bone Transforms:
 If the widgets get out of alignment with the location of the bone itself, this operator will snap the selected widget to the matrix of the bone.  It works if you have the bone(s) selected or if you have the widget object(s) selected.
@@ -93,17 +93,18 @@ As the name would suggest this will toggle the visibility of the widget collecti
 
 ### To Do:
 - complete the documentation with images to this readme file
+- [Enhancement] Doesn't work well with Rigify naming scheme (solve this)
 - [Feature] Let the user change the widget suffix to a prefix for a different naming convention
 - [Feature] Extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
 Maybe there can be a way of extracting them and making them real objects.
 - [Bug] The match Bone Transforms does not work well when the bone scale is not at 1.0
-- [Bug] if the collection doesn't exist you can't edit widgets
 - [enhancement] doesn't work well with Rigify
-- [bug] collection needs to be in the master scene for the addon to find it.
 
 Possible bugs:
 What if the widget isn’t actually in the file? Ie - not a real object
 
+## v1.9 Release Notes:
+- [Fix] widget collection no longer needs to be in the master scene for the addon to find it.
 
 ## v1.8 Release Notes:
 * Fix: updated to work with Blender 2.93/3.0

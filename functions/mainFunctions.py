@@ -28,20 +28,33 @@ def getCollection(context):
 
 
 def getViewLayerCollection(context, widget = None):
-    bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-    #collection = context.view_layer.layer_collection.children[bw_collection_name]
-    try:
-        collection = context.view_layer.layer_collection.children[bw_collection_name]
-    except KeyError:
-        #need to find the collection it is actually in
-        #collection = context.view_layer.layer_collection.children[bpy.data.objects[widget.name].users_collection[0].name]
+    widget_collection = bpy.data.collections[bpy.data.objects[widget.name].users_collection[0].name]
 
-        collection = bpy.data.collections[bpy.data.objects[widget.name].users_collection[0].name]
+    # function to recirsivsly search through the view layers
+    def recurLayerCollection(layer_collection, collection_name):
+        found = None
+        if (layer_collection.name == collection_name):
+            return layer_collection
+        for layer in layer_collection.children:
+            found = recurLayerCollection(layer, collection_name)
+            if found:
+                return found
 
-    # make sure the collection is not hidden (can't get it to work if it's excluded)
-    collection.hide_viewport = False
+    #save current active layer_collection
+    saved_layer_collection = bpy.context.view_layer.layer_collection
+    # actually find the view_layer we want
+    layer_collection = recurLayerCollection(saved_layer_collection, widget_collection.name)
+    # make sure the collection (data level) is not hidden
+    widget_collection.hide_viewport = False
 
-    return collection
+    # change the active view layer
+    bpy.context.view_layer.active_layer_collection = layer_collection
+    # make sure it isn't excluded so it can be edited
+    layer_collection.exclude = False
+    #return the active view layer to what it was
+    bpy.context.view_layer.active_layer_collection = saved_layer_collection
+
+    return layer_collection
 
 
 def boneMatrix(widget, matchBone):
