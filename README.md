@@ -44,7 +44,9 @@ Select the shape you want to remove from the list.  And click this. Boom, it is 
 #### Create:
 Select a bone (or bones), choose the shape from the drop down menu, then press create.
 This will create a widget object for each of the selected bones.  The widget objects will be placed in a collection that is specified in the user preferences.  You can also specify the prefix for the widget names there too.
-Redo panel
+
+#### Redo panel
+<img src="images/bone_widget_redo_panel.png" alt="drawing" width="400">
 
 #### Scale to bone length:
 When enabled the Global Size will be multiplied by the bone length.  (ie - the widget  will be relative size to the size of the bone)
