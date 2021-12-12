@@ -59,9 +59,9 @@ This will slide the position of the widget along the Y axis (or length) of the b
 You can rotate the widget by these values at the time of creation.  This can save you from having to jump into edit mode to rotate a widget to better align with your situation.
 
 
-#### Edit:
-This will jump into edit mode for the custom bone shape and allow you to edit it.
-
+#### Edit/Jump to Bone:
+When in pose mode, this will jump into edit mode for the custom bone shape and allow you to edit it.
+When you have the shape selected (object or edit mode), this button will display as "Jump to Bone".  That will take you back to pose mode, if that mesh object is in face a custom shape.
 
 #### Match bone Transforms:
 If the widgets get out of alignment with the location of the bone itself, this operator will snap the selected widget to the matrix of the bone.  It works if you have the bone(s) selected or if you have the widget object(s) selected.
@@ -80,6 +80,10 @@ This will clear the custom bone shapes from all the selected bones.
 
 #### Delete Unused Widgets:
 This operator will loop through the widget collection and delete anything that isn't being used.  This helps keep things tidy.
+
+#### Use Selected Object:
+If you want to apply a mesh object that is already in your scene as a custom shape, you can use this option.
+First select the mesh shape you want to use (object mode), then shift select the armature, switch into pose mode and make sure you select any bone(s) you want this shape to be applied to.  Then press the button.
 
 
 #### Hide/Show Collection:
