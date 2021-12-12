@@ -211,7 +211,7 @@ def deleteUnusedWidgets():
     D = bpy.data
 
     bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
-
+    collection = recurLayerCollection(C.scene.collection, bw_collection_name)
     widgetList = []
 
     for ob in D.objects:
@@ -221,7 +221,7 @@ def deleteUnusedWidgets():
                     widgetList.append(bone.custom_shape)
 
     unwantedList = [
-        ob for ob in C.scene.collection.children[bw_collection_name].all_objects if ob not in widgetList]
+        ob for ob in collection.all_objects if ob not in widgetList]
     # save the current context mode
     mode = C.mode
     # jump into object mode
