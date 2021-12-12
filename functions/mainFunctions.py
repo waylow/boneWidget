@@ -8,7 +8,8 @@ from .. import __package__
 
 def getCollection(context):
     bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-    collection = context.scene.collection.children.get(bw_collection_name)
+    #collection = context.scene.collection.children.get(bw_collection_name)
+    collection = recurLayerCollection(context.scene.collection, bw_collection_name)
     if collection:  # if it already exists
         return collection
 
@@ -394,8 +395,8 @@ def addObjectAsWidget(context, collection):
         if active_bone.custom_shape:
             active_bone.custom_shape.name = active_bone.custom_shape.name + "_old"
             active_bone.custom_shape.data.name = active_bone.custom_shape.data.name + "_old"
-            if C.scene.collection.objects.get(active_bone.custom_shape.name):
-                C.scene.collection.objects.unlink(active_bone.custom_shape)
+            if context.scene.collection.objects.get(active_bone.custom_shape.name):
+                context.scene.collection.objects.unlink(active_bone.custom_shape)
 
         #duplicate shape
         widget = widget_object.copy()
