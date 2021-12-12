@@ -43,7 +43,8 @@ Select the shape you want to remove from the list.  And click this. Boom, it is 
 
 #### Create:
 Select a bone (or bones), choose the shape from the drop down menu, then press create.
-This will create a widget object for each of the selected bones.  The widget objects will be placed in a collection that is specified in the user preferences.  You can also specify the prefix for the widget names there too.
+This will create a widget object for each of the selected bones.  The widget objects will be placed in the collection that is specified in the user preferences.
+
 
 #### Redo panel
 <img src="images/bone_widget_redo_panel.png" alt="drawing" width="400">
@@ -62,6 +63,11 @@ You can rotate the widget by these values at the time of creation.  This can sav
 #### Edit/To Bone:
 When in pose mode, this will jump into edit mode for the custom bone shape and allow you to edit it.
 When you have the shape selected (object or edit mode), this button will display as "To Bone".  That will take you back to pose mode, if that mesh object is in face a custom shape.
+
+<b>Note on Creating and Editing Shapes:</b><br>
+When you 'Create' a shape, it will always be placed in the collection set in the user preferences.<br>
+If you 'Edit' a shape, it will stay in whatever collection that widget was already located.
+
 
 #### Match bone Transforms:
 If the widgets get out of alignment with the location of the bone itself, this operator will snap the selected widget to the matrix of the bone.  It works if you have the bone(s) selected or if you have the widget object(s) selected.
@@ -87,7 +93,9 @@ First select the mesh shape you want to use (object mode), then shift select the
 
 
 #### Hide/Show Collection:
-As the name would suggest this will toggle the visibility of the widget collection.
+As the name would suggest this will toggle the visibility of the widget collection.  
+<b>Note:</b>
+This will only toggle the visibility of the designated widget collection (set in the preferences).  If the rig uses a
 
 
 
@@ -98,13 +106,11 @@ As the name would suggest this will toggle the visibility of the widget collecti
 - [Feature] Extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
 Maybe there can be a way of extracting them and making them real objects.
 - [Bug] The match Bone Transforms does not work well when the bone scale is not at 1.0
-- [enhancement] doesn't work well with Rigify
 
-Possible bugs:
-What if the widget isn’t actually in the file? Ie - not a real object
 
 ## v1.9 Release Notes:
 - [Fix] widget collection no longer needs to be in the master scene for the addon to find it.
+- [Fix] All the related functions now search for the collection recursively so the structure of the Widget Collection location doesn't matter.
 
 ## v1.8 Release Notes:
 * Fix: updated to work with Blender 2.93/3.0
@@ -113,7 +119,7 @@ What if the widget isn’t actually in the file? Ie - not a real object
 * Removed PayPal funding links
 * Removed Logger
 * Functionality change: I rewrote the way to add the selected object as a widget without having to read and write to a text file
-* Fix: If collection is 'excluded' in the outliner it now re-enables it
+* Fix: If collection is 'excluded' in the outliner it now re-enables it.
 
 ### Widget Edits (from v1.7)
 * Resized '3 Axes' widget to better match a default size of 1 blender unit (and sits over the 6 axes nicely)
