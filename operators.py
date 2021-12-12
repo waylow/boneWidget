@@ -15,6 +15,7 @@ from .functions import (
     objectDataToDico,
     getCollection,
     getViewLayerCollection,
+    recurLayerCollection,
     deleteUnusedWidgets,
     clearBoneWidgets,
     resyncWidgetNames,
@@ -217,9 +218,16 @@ class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
 
     def execute(self, context):
-        collection = getViewLayerCollection(context)
-        collection.hide_viewport = not collection.hide_viewport
-        collection.exclude = False
+        bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+        bw_collection = recurLayerCollection(bpy.context.view_layer.layer_collection, bw_collection_name)
+
+        #bw_collection = context.scene.collection.children.get(bw_collection_name)
+        bw_collection.hide_viewport = not bw_collection.hide_viewport
+        #need to recursivly search for the view_layer
+        bw_collection.exclude = False
+        # collection = getViewLayerCollection(context)
+        # collection.hide_viewport = not collection.hide_viewport
+        # collection.exclude = False
         return {'FINISHED'}
 
 

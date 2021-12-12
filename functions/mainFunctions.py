@@ -27,19 +27,18 @@ def getCollection(context):
         return collection
 
 
+def recurLayerCollection(layer_collection, collection_name):
+    found = None
+    if (layer_collection.name == collection_name):
+        return layer_collection
+    for layer in layer_collection.children:
+        found = recurLayerCollection(layer, collection_name)
+        if found:
+            return found
+
+
 def getViewLayerCollection(context, widget = None):
     widget_collection = bpy.data.collections[bpy.data.objects[widget.name].users_collection[0].name]
-
-    # function to recirsivsly search through the view layers
-    def recurLayerCollection(layer_collection, collection_name):
-        found = None
-        if (layer_collection.name == collection_name):
-            return layer_collection
-        for layer in layer_collection.children:
-            found = recurLayerCollection(layer, collection_name)
-            if found:
-                return found
-
     #save current active layer_collection
     saved_layer_collection = bpy.context.view_layer.layer_collection
     # actually find the view_layer we want

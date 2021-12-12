@@ -2,6 +2,7 @@ import bpy
 from .functions import (
     readWidgets,
     getViewLayerCollection,
+    recurLayerCollection,
 )
 from .bl_class_registry import BlClassRegistry
 from .menus import BONEWIDGET_MT_bw_specials
@@ -61,14 +62,10 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
 
         # if the bw collection exists, show the visibility toggle
         bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-        collection = context.scene.collection.children.get(bw_collection_name)
-        try:
-            collection = context.view_layer.layer_collection.children[bw_collection_name]
-        except:
-            collection = None
+        bw_collection = recurLayerCollection(bpy.context.view_layer.layer_collection, bw_collection_name)
 
-        if collection is not None:
-            if collection.hide_viewport:
+        if bw_collection is not None:
+            if bw_collection.hide_viewport:
                 icon = "HIDE_ON"
                 text = "Show Collection"
             else:
