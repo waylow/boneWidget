@@ -147,24 +147,25 @@ class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
     bl_label = "Symmetrize"
     bl_options = {'REGISTER', 'UNDO'}
 
+    @classmethod
+    def poll(cls, context):
+        return (context.object and context.object.type == 'ARMATURE'
+                and context.object.mode in ['POSE'])
+
+
     def execute(self, context):
-        try:
-            #collection = getCollection(context)
-            widget = bpy.context.active_pose_bone.custom_shape
-            collection = getViewLayerCollection(context, widget)
-            widgetsAndBones = findMatchBones()[0]
-            activeObject = findMatchBones()[1]
-            widgetsAndBones = findMatchBones()[0]
+        widget = bpy.context.active_pose_bone.custom_shape
+        collection = getViewLayerCollection(context, widget)
+        widgetsAndBones = findMatchBones()[0]
+        activeObject = findMatchBones()[1]
+        widgetsAndBones = findMatchBones()[0]
 
-            if not activeObject:
-                self.report({"INFO"}, "No active bone or object")
-                return {'FINISHED'}
+        if not activeObject:
+            self.report({"INFO"}, "No active bone or object")
+            return {'FINISHED'}
 
-            for bone in widgetsAndBones:
-                symmetrizeWidget_helper(bone, collection, activeObject, widgetsAndBones)
-        except Exception as e:
-            self.report({'INFO'}, "There is nothing to mirror to")
-            #pass
+        for bone in widgetsAndBones:
+            symmetrizeWidget_helper(bone, collection, activeObject, widgetsAndBones)
 
         return {'FINISHED'}
 

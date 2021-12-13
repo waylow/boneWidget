@@ -106,11 +106,13 @@ This will only toggle the visibility of the designated widget collection (set in
 - [Feature] Extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
 Maybe there can be a way of extracting them and making them real objects.
 - [Bug] The match Bone Transforms does not work well when the bone scale is not at 1.0
+- [Enchantment] Rewrite the mirrorShape function so it will work when you have the mesh shape selected (not just the bone in pose mode)
 
 
 ## v1.9 Release Notes:
 - [Fix] widget collection no longer needs to be in the master scene for the addon to find it.
 - [Fix] All the related functions now search for the collection recursively so the structure of the Widget Collection location doesn't matter.
+- [Fix] change the mirrorShape function to only display in pose mode to avoid errors.
 
 ## v1.8 Release Notes:
 * Fix: updated to work with Blender 2.93/3.0
