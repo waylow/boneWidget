@@ -1,6 +1,7 @@
 # Bone Widget
 
-2.7 video explanation : https://vimeo.com/184159913
+Video explanation:
+https://vimeo.com/657697982
 
 ## Description:
 Bone Widget is a blender add-on to assist with making custom bone shapes. It has an editable library of shapes that make it easy to apply to any rig.
