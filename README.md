@@ -1,6 +1,7 @@
 # Bone Widget
 
-2.7 video explanation : https://vimeo.com/184159913
+Video explanation:
+https://vimeo.com/657697982
 
 ## Description:
 Bone Widget is a blender add-on to assist with making custom bone shapes. It has an editable library of shapes that make it easy to apply to any rig.
@@ -95,18 +96,18 @@ First select the mesh shape you want to use (object mode), then shift select the
 #### Hide/Show Collection:
 As the name would suggest this will toggle the visibility of the widget collection.  
 <b>Note:</b>
-This will only toggle the visibility of the designated widget collection (set in the preferences).  If the rig uses a
+This will only toggle the visibility of the designated widget collection (set in the preferences).
 
 
 
 ### To Do:
-- complete the documentation with images to this readme file
 - [Enhancement] Doesn't work well with Rigify naming scheme (solve this)
 - [Feature] Let the user change the widget suffix to a prefix for a different naming convention
 - [Feature] Extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
 Maybe there can be a way of extracting them and making them real objects.
 - [Bug] The match Bone Transforms does not work well when the bone scale is not at 1.0
-- [Enchantment] Rewrite the mirrorShape function so it will work when you have the mesh shape selected (not just the bone in pose mode)
+- [Bug] if the bone is using an override transform, it will use this bone by mistake.  It should just use the matrix for the transforms but override the main bone.
+- [Enhancement] Rewrite the mirrorShape function so it will work when you have the mesh shape selected (not just the bone in pose mode)
 
 
 ## v1.9 Release Notes:
