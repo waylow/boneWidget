@@ -11,7 +11,7 @@ from .menus import BONEWIDGET_MT_bw_specials
 @BlClassRegistry()
 class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
     bl_label = "Bone Widget"
-    bl_category = "Rig Tools"
+    bl_category = "Rigging"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_idname = 'VIEW3D_PT_bw_posemode_panel'

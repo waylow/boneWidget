@@ -44,7 +44,7 @@ class BoneWidgetPreferences(AddonPreferences):
     panel_category: bpy.props.StringProperty(
         name="Panel Category",
         description="Category to show Bone-Widgets panel",
-        default="Rig Tools",
+        default="Rigging",
         update=panel_category_update_fn,
     )
 

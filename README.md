@@ -106,12 +106,13 @@ This will only toggle the visibility of the designated widget collection (set in
 - [Feature] Extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
 Maybe there can be a way of extracting them and making them real objects.
 - [Bug] The match Bone Transforms does not work well when the bone scale is not at 1.0
-- [Bug] if the bone is using an override transform, it will use this bone by mistake.  It should just use the matrix for the transforms but override the main bone.
+
 - [Enhancement] Rewrite the mirrorShape function so it will work when you have the mesh shape selected (not just the bone in pose mode)
 
 
 ##v2.0 Release Notes:
-- changed the name of the n panel to 'Rigging' rather than 'Rig Tools'
+- changed the default name of the n panel to 'Rigging' rather than 'Rig Tools'
+- [fixed Bug] if the bone was using an override transform, it will use this bone mirror the widget to rather than just taking that bone's matrix
 
 ## v1.9 Release Notes:
 - [Fix] widget collection no longer needs to be in the master scene for the addon to find it.

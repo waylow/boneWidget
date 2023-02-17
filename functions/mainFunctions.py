@@ -182,7 +182,7 @@ def symmetrizeWidget(bone, collection):
         layer = bpy.context.view_layer
         layer.update()
 
-        mirrorBone.custom_shape = newObject
+        findMirrorObject(bone).custom_shape = newObject
         mirrorBone.bone.show_wire = True
 
     else:
