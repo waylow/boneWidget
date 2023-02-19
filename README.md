@@ -101,18 +101,19 @@ This will only toggle the visibility of the designated widget collection (set in
 
 
 ### To Do:
-- [Enhancement] Doesn't work well with Rigify naming scheme (solve this)
 - [Feature] Let the user change the widget suffix to a prefix for a different naming convention
 - [Feature] Extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
 Maybe there can be a way of extracting them and making them real objects.
 - [Bug] The match Bone Transforms does not work well when the bone scale is not at 1.0
 
-- [Enhancement] Rewrite the mirrorShape function so it will work when you have the mesh shape selected (not just the bone in pose mode)
+
+- [Bug] Symmetrize Widget will use the wrong name if it is using an 'override transform'
 
 
 ##v2.0 Release Notes:
 - changed the default name of the n panel to 'Rigging' rather than 'Rig Tools'
 - [fixed Bug] if the bone was using an override transform, it will use this bone mirror the widget to rather than just taking that bone's matrix
+- [Enhancement] Added setting in the user preferences so it can optionally use the Rigify naming convention for widget creation (collection and widget names).
 
 ## v1.9 Release Notes:
 - [Fix] widget collection no longer needs to be in the master scene for the addon to find it.

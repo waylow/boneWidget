@@ -219,16 +219,15 @@ class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
 
     def execute(self, context):
-        bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-        bw_collection = recurLayerCollection(bpy.context.view_layer.layer_collection, bw_collection_name)
+        if not context.preferences.addons[__package__].preferences.use_rigify_defaults:
+            bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+        else:
+            bw_collection_name = 'WGTS_' + context.active_object.name
 
-        #bw_collection = context.scene.collection.children.get(bw_collection_name)
+        bw_collection = recurLayerCollection(bpy.context.view_layer.layer_collection, bw_collection_name)
         bw_collection.hide_viewport = not bw_collection.hide_viewport
         #need to recursivly search for the view_layer
         bw_collection.exclude = False
-        # collection = getViewLayerCollection(context)
-        # collection.hide_viewport = not collection.hide_viewport
-        # collection.exclude = False
         return {'FINISHED'}
 
 
@@ -273,62 +272,6 @@ class BONEWIDGET_OT_resyncWidgetNames(bpy.types.Operator):
         resyncWidgetNames()
         return {'FINISHED'}
 
-'''
-class BONEWIDGET_OT_selectObject(bpy.types.Operator):
-    """Select object as widget for selected bone"""
-    bl_idname = "bonewidget.select_object"
-    bl_label = "Select Object as Widget"
-
-    @classmethod
-    def poll(cls, context):
-        return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
-
-    def active_armature(self, context):
-        ob = context.object
-        ob = str(ob).split('"')
-        ob = ob[1]
-        return ob
-
-    def active_bone(self, context):
-        ob = context.active_bone
-        ob = str(ob).split('"')
-        ob = ob[1]
-        return ob
-
-    def execute(self, context):
-        active_armature = self.active_armature(context)
-        active_bone = self.active_bone(context)
-        writeTemp(active_armature, active_bone)
-        logOperation("info", 'Write armature name: "{}" and bone name: "{}" to file temp.txt'.format(active_armature, active_bone))
-        selectObject()
-        return {'FINISHED'}
-
-
-class BONEWIDGET_OT_confirmWidget(bpy.types.Operator):
-    """Set selected object as widget for selected bone"""
-    bl_idname = "bonewidget.confirm_widget"
-    bl_label = "Confirm selected Object as widget shape"
-
-    @classmethod
-    def poll(cls, context):
-        return (context.object and context.object.type == 'MESH' and context.object.mode == 'OBJECT')
-
-    def execute(self, context):
-        arm_bone = readTemp().split(",")
-        active_armature = arm_bone[0]
-        active_bone = arm_bone[1]
-
-        active_bone = bpy.data.objects[active_armature].pose.bones[active_bone]
-        active_armature = bpy.data.objects[active_armature]
-
-        print(active_armature, active_bone)
-
-        cW = confirmWidget(context, active_bone, active_armature)
-
-        logOperation("info", 'Duplicate Object "{}" and set duplicate as custom shape for Bone "{}" in Armature "{}".'.format(cW, active_bone, active_armature))
-
-        return {'FINISHED'}
-'''
 
 class BONEWIDGET_OT_addObjectAsWidget(bpy.types.Operator):
     """Add selected object as widget for active bone."""

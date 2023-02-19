@@ -154,7 +154,13 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
 def symmetrizeWidget(bone, collection):
     C = bpy.context
     D = bpy.data
-    bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+
+    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
+        bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+        rigify_object_name = ''
+    else:
+        bw_widget_prefix = "WGT-"
+        rigify_object_name = C.active_object.name + "_"
 
     widget = bone.custom_shape
     if findMirrorObject(bone) is not None:
@@ -179,7 +185,7 @@ def symmetrizeWidget(bone, collection):
         newObject = widget.copy()
         newObject.data = newData
         newData.update()
-        newObject.name = bw_widget_prefix + mirrorBone.name
+        newObject.name = bw_widget_prefix + rigify_object_name + findMirrorObject(bone).name
         D.collections[collection.name].objects.link(newObject)
         newObject.matrix_local = mirrorBone.bone.matrix_local
         newObject.scale = [mirrorBone.bone.length, mirrorBone.bone.length, mirrorBone.bone.length]
@@ -215,7 +221,11 @@ def deleteUnusedWidgets():
     C = bpy.context
     D = bpy.data
 
-    bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
+    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
+        bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
+    else:
+        bw_collection_name = 'WGTS_' + C.active_object.name
+
     collection = recurLayerCollection(C.scene.collection, bw_collection_name)
     widgetList = []
 
@@ -362,8 +372,12 @@ def resyncWidgetNames():
     C = bpy.context
     D = bpy.data
 
-    bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
-    bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
+        bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
+        bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    else:
+        bw_collection_name = 'WGTS_' + C.active_object.name
+        bw_widget_prefix = 'WGT-' + C.active_object.name + '_'
 
     widgetsAndBones = {}
 
@@ -390,7 +404,6 @@ def clearBoneWidgets():
 
 def addObjectAsWidget(context, collection):
     sel = bpy.context.selected_objects
-    #bw_collection = context.preferences.addons[__package__].preferences.bonewidget_collection_name
 
     if sel[0].type == 'MESH':
         active_bone = context.active_pose_bone

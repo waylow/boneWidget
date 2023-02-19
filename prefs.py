@@ -3,7 +3,7 @@ from bpy.types import AddonPreferences
 from bpy.props import StringProperty, BoolProperty
 
 from .bl_class_registry import BlClassRegistry
-from .panels import VIEW3D_PT_bw_panel_main
+from .panels import BONEWIDGET_PT_bw_panel_main
 
 
 @BlClassRegistry()
@@ -45,7 +45,7 @@ class BoneWidgetPreferences(AddonPreferences):
                 bpy.utils.unregister_class(BONEWIDGET_PT_bw_panel_main)
             except:
                 pass
-        VIEW3D_PT_bw_panel_main.bl_category = self.panel_category
+        BONEWIDGET_PT_bw_panel_main.bl_category = self.panel_category
         bpy.utils.register_class(BONEWIDGET_PT_bw_panel_main)
 
     panel_category: bpy.props.StringProperty(
