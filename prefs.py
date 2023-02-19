@@ -39,14 +39,14 @@ class BoneWidgetPreferences(AddonPreferences):
     )
 
     def panel_category_update_fn(self, context):
-        has_panel = hasattr(bpy.types, VIEW3D_PT_bw_panel_main.bl_idname)
+        has_panel = hasattr(bpy.types, BONEWIDGET_PT_bw_panel_main.bl_idname)
         if has_panel:
             try:
-                bpy.utils.unregister_class(VIEW3D_PT_bw_panel_main)
+                bpy.utils.unregister_class(BONEWIDGET_PT_bw_panel_main)
             except:
                 pass
         VIEW3D_PT_bw_panel_main.bl_category = self.panel_category
-        bpy.utils.register_class(VIEW3D_PT_bw_panel_main)
+        bpy.utils.register_class(BONEWIDGET_PT_bw_panel_main)
 
     panel_category: bpy.props.StringProperty(
         name="Panel Category",

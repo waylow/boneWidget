@@ -4,20 +4,20 @@ from .functions import (
     getViewLayerCollection,
     recurLayerCollection,
 )
-from .bl_class_registry import BlClassRegistry
+
 from .menus import BONEWIDGET_MT_bw_specials
 
 
 
-class VIEW3D_PT_bonewidget_panel:
+class BONEWIDGET_PT_bw_panel:
     """BoneWidget Addon UI"""
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = "Rigging"
     bl_label = "Bone Widget"
 
-class VIEW3D_PT_bw_panel_main(VIEW3D_PT_bonewidget_panel, bpy.types.Panel):
-    bl_idname = 'VIEW3D_PT_bw_panel_main'
+class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
+    bl_idname = 'BONEWIDGET_PT_bw_panel_main'
     bl_label = "Bone Widget"
 
 
@@ -81,45 +81,8 @@ class VIEW3D_PT_bw_panel_main(VIEW3D_PT_bonewidget_panel, bpy.types.Panel):
             row.operator("bonewidget.toggle_collection_visibilty",
                          icon=icon, text=text)
 
-class VIEW3D_PT_bw_panel_settings(VIEW3D_PT_bonewidget_panel, bpy.types.Panel):
-    bl_parent_id = "VIEW3D_PT_bw_panel_main"
-    bl_label = "Settings"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
-        scene = context.scene
-
-        layout = self.layout
-        col = layout.column()
-        ### START TOOL SETTINGS UI BOX ###
-        box_settings = col.row()
-        col_box_settings = box_settings.column(align = True)
-
-        row = col_box_settings.row(align = True)
-        #row.prop(scene, "space_switcher_use_scene_frame_range", text = "Use Scene Frames Range", icon = "SCENE_DATA")
-
-        row = col_box_settings.row(align = True)
-        split_frames = col_box_settings.split()
-
-        col_fr_start = split_frames.column()
-        row = col_fr_start.row()
-        row.label(text="Frame Start")
-        row = col_fr_start.row()
-        #row.prop(scene, "space_switcher_frame_start", text = "")
-
-        col_fr_end = split_frames.column()
-        row = col_fr_end.row()
-        row.label(text="Frame End")
-        row = col_fr_end.row()
-        #row.prop(scene, "space_switcher_frame_end", text = "")
-
-        if scene.space_switcher_use_scene_frame_range:
-            col_fr_start.enabled = False
-            col_fr_end.enabled = False
-
 classes = (
-    VIEW3D_PT_bw_panel_main,
-    VIEW3D_PT_bw_panel_settings,
+    BONEWIDGET_PT_bw_panel_main,
 )
 
 
