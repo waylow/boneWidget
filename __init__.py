@@ -73,6 +73,7 @@ def check_version(major, minor, _):
 def register():
     operators.register()
     menus.register()
+
     bl_class_registry.BlClassRegistry.register()
 
     # Apply preferences of the panel location.
@@ -82,13 +83,16 @@ def register():
     if check_version(2, 80, 0) < 0:
         pref.panel_category = "Rigging"
     prefs.BoneWidgetPreferences.panel_category_update_fn(pref, context)
-
+    panels.register()
 
 def unregister():
     operators.unregister()
     menus.unregister()
+
     # TODO: Unregister by BlClassRegistry
     bl_class_registry.BlClassRegistry.unregister()
+
+    panels.unregister()
 
 
 if __name__ == "__main__":

@@ -7,8 +7,12 @@ from .. import __package__
 
 
 def getCollection(context):
-    bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-    #collection = context.scene.collection.children.get(bw_collection_name)
+    #check user preferences for the name of the collection
+    if not context.preferences.addons[__package__].preferences.use_rigify_defaults:
+        bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+    else:
+        bw_collection_name = "WGTS_" + context.active_object.name
+
     collection = recurLayerCollection(context.scene.collection, bw_collection_name)
     if collection:  # if it already exists
         return collection
@@ -92,11 +96,12 @@ def fromWidgetFindBone(widget):
 def createWidget(bone, widget, relative, size, scale, slide, rotation, collection):
     C = bpy.context
     D = bpy.data
-    bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
 
-#     if bone.custom_shape_transform:
-#    matrixBone = bone.custom_shape_transform
-#     else:
+    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
+        bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    else:
+        bw_widget_prefix = "WGT-" + C.active_object.name + "_"
+
     matrixBone = bone
 
     if bone.custom_shape:
