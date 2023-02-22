@@ -163,14 +163,14 @@ def symmetrizeWidget(bone, collection):
         rigify_object_name = C.active_object.name + "_"
 
     widget = bone.custom_shape
-    if findMirrorObject(bone) is not None:
-        if findMirrorObject(bone).custom_shape_transform:
-            mirrorBone = findMirrorObject(bone).custom_shape_transform
-        else:
-            mirrorBone = findMirrorObject(bone)
+
+    if findMirrorObject(bone):
+        mirrorBone = findMirrorObject(bone)
 
         mirrorWidget = mirrorBone.custom_shape
-        if mirrorWidget:
+        print(mirrorBone)
+        print(mirrorWidget)
+        if mirrorWidget is not None:
             if mirrorWidget != widget:
                 mirrorWidget.name = mirrorWidget.name + "_old"
                 mirrorWidget.data.name = mirrorWidget.data.name + "_old"
@@ -187,6 +187,11 @@ def symmetrizeWidget(bone, collection):
         newData.update()
         newObject.name = bw_widget_prefix + rigify_object_name + findMirrorObject(bone).name
         D.collections[collection.name].objects.link(newObject)
+
+        #if there is a override transform, use that bone matrix in the next step
+        if findMirrorObject(bone).custom_shape_transform:
+             mirrorBone = findMirrorObject(bone).custom_shape_transform
+
         newObject.matrix_local = mirrorBone.bone.matrix_local
         newObject.scale = [mirrorBone.bone.length, mirrorBone.bone.length, mirrorBone.bone.length]
 

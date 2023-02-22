@@ -99,15 +99,10 @@ As the name would suggest this will toggle the visibility of the widget collecti
 This will only toggle the visibility of the designated widget collection (set in the preferences).
 
 
-
 ### To Do:
-- [Feature] Let the user change the widget suffix to a prefix for a different naming convention
-- [Feature] Extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
-Maybe there can be a way of extracting them and making them real objects.
 - [Bug] The match Bone Transforms does not work well when the bone scale is not at 1.0
-
-
-- [Bug] Symmetrize Widget will use the wrong name if it is using an 'override transform'
+-import/export library of shapes.
+-redesign to include image of the shapes
 
 
 ##v2.0 Release Notes:
