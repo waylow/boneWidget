@@ -408,11 +408,22 @@ def clearBoneWidgets():
 
 
 def addObjectAsWidget(context, collection):
-    sel = bpy.context.selected_objects
+    selected_objects = bpy.context.selected_objects
 
-    if sel[1].type == 'MESH':
+    if len(selected_objects) != 2:
+        print('Only a widget object and the pose bone(s)')
+        return{'FINISHED'}
+
+    allowed_object_types = ['MESH','CURVE']
+
+    widget_object = None
+
+    for ob in selected_objects:
+        if ob.type in allowed_object_types:
+            widget_object = ob
+
+    if widget_object:
         active_bone = context.active_pose_bone
-        widget_object = sel[1]
 
         # deal with any existing shape
         if active_bone.custom_shape:

@@ -83,7 +83,7 @@ def register():
     if check_version(2, 80, 0) < 0:
         pref.panel_category = "Rigging"
     prefs.BoneWidgetPreferences.panel_category_update_fn(pref, context)
-    panels.register()
+    #panels.register()
 
 def unregister():
     operators.unregister()
@@ -92,7 +92,7 @@ def unregister():
     # TODO: Unregister by BlClassRegistry
     bl_class_registry.BlClassRegistry.unregister()
 
-    panels.unregister()
+    #panels.unregister()
 
 
 if __name__ == "__main__":
