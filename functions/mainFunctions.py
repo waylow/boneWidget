@@ -247,7 +247,8 @@ def deleteUnusedWidgets():
     # jump into object mode
     bpy.ops.object.mode_set(mode='OBJECT')
     # delete unwanted widgets
-    bpy.ops.object.delete({"selected_objects": unwantedList})
+    for ob in unwantedList:
+        bpy.data.objects.remove(bpy.data.objects[ob.name], do_unlink=True)
     # jump back to current mode
     bpy.ops.object.mode_set(mode=mode)
 
