@@ -4,17 +4,21 @@ from .functions import (
     getViewLayerCollection,
     recurLayerCollection,
 )
-from .bl_class_registry import BlClassRegistry
+
 from .menus import BONEWIDGET_MT_bw_specials
 
 
-@BlClassRegistry()
-class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
-    bl_label = "Bone Widget"
-    bl_category = "Rig Tools"
+
+class BONEWIDGET_PT_bw_panel:
+    """BoneWidget Addon UI"""
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_idname = 'VIEW3D_PT_bw_posemode_panel'
+    bl_category = "Rigging"
+    bl_label = "Bone Widget"
+
+class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
+    bl_idname = 'BONEWIDGET_PT_bw_panel_main'
+    bl_label = "Bone Widget"
 
 
     items = []
@@ -61,7 +65,10 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
                             icon='RESTRICT_SELECT_OFF')
 
         # if the bw collection exists, show the visibility toggle
-        bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+        if not context.preferences.addons[__package__].preferences.use_rigify_defaults:
+            bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+        else:
+            bw_collection_name = 'WGTS_' + context.active_object.name
         bw_collection = recurLayerCollection(bpy.context.view_layer.layer_collection, bw_collection_name)
 
         if bw_collection is not None:
@@ -76,3 +83,19 @@ class BONEWIDGET_PT_posemode_panel(bpy.types.Panel):
             row = layout.row()
             row.operator("bonewidget.toggle_collection_visibilty",
                          icon=icon, text=text)
+
+classes = (
+    BONEWIDGET_PT_bw_panel_main,
+)
+
+
+def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
+
+
+def unregister():
+    from bpy.utils import unregister_class
+    for cls in classes:
+        unregister_class(cls)

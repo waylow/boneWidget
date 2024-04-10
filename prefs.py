@@ -1,14 +1,21 @@
 import bpy
 from bpy.types import AddonPreferences
-from bpy.props import StringProperty
+from bpy.props import StringProperty, BoolProperty
 
 from .bl_class_registry import BlClassRegistry
-from .panels import BONEWIDGET_PT_posemode_panel
+from .panels import BONEWIDGET_PT_bw_panel_main
 
 
 @BlClassRegistry()
 class BoneWidgetPreferences(AddonPreferences):
     bl_idname = __package__
+
+    #Use Rigify Defaults
+    use_rigify_defaults: BoolProperty(
+        name="Use Rigify Defaults",
+        description="Use the same naming convention for widget creation (disable if you prefer your naming convention)",
+        default=False,
+    )
 
     # widget prefix
     widget_prefix: StringProperty(
@@ -32,19 +39,19 @@ class BoneWidgetPreferences(AddonPreferences):
     )
 
     def panel_category_update_fn(self, context):
-        has_panel = hasattr(bpy.types, BONEWIDGET_PT_posemode_panel.bl_idname)
+        has_panel = hasattr(bpy.types, BONEWIDGET_PT_bw_panel_main.bl_idname)
         if has_panel:
             try:
-                bpy.utils.unregister_class(BONEWIDGET_PT_posemode_panel)
+                bpy.utils.unregister_class(BONEWIDGET_PT_bw_panel_main)
             except:
                 pass
-        BONEWIDGET_PT_posemode_panel.bl_category = self.panel_category
-        bpy.utils.register_class(BONEWIDGET_PT_posemode_panel)
+        BONEWIDGET_PT_bw_panel_main.bl_category = self.panel_category
+        bpy.utils.register_class(BONEWIDGET_PT_bw_panel_main)
 
     panel_category: bpy.props.StringProperty(
         name="Panel Category",
         description="Category to show Bone-Widgets panel",
-        default="Rig Tools",
+        default="Rigging",
         update=panel_category_update_fn,
     )
 
@@ -52,9 +59,13 @@ class BoneWidgetPreferences(AddonPreferences):
         layout = self.layout
 
         row = layout.row()
+        row.prop(self, "use_rigify_defaults", text="Use Rigify Defaults")
+
+        row = layout.row()
         col = row.column()
         col.prop(self, "widget_prefix", text="Widget Prefix")
         col.prop(self, "bonewidget_collection_name", text="Collection name")
+        row.enabled = not self.use_rigify_defaults
 
         row = layout.row()
         row = layout.row()

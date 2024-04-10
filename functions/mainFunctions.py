@@ -7,8 +7,12 @@ from .. import __package__
 
 
 def getCollection(context):
-    bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-    #collection = context.scene.collection.children.get(bw_collection_name)
+    #check user preferences for the name of the collection
+    if not context.preferences.addons[__package__].preferences.use_rigify_defaults:
+        bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+    else:
+        bw_collection_name = "WGTS_" + context.active_object.name
+
     collection = recurLayerCollection(context.scene.collection, bw_collection_name)
     if collection:  # if it already exists
         return collection
@@ -92,11 +96,12 @@ def fromWidgetFindBone(widget):
 def createWidget(bone, widget, relative, size, scale, slide, rotation, collection):
     C = bpy.context
     D = bpy.data
-    bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
 
-#     if bone.custom_shape_transform:
-#    matrixBone = bone.custom_shape_transform
-#     else:
+    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
+        bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    else:
+        bw_widget_prefix = "WGT-" + C.active_object.name + "_"
+
     matrixBone = bone
 
     if bone.custom_shape:
@@ -149,17 +154,23 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
 def symmetrizeWidget(bone, collection):
     C = bpy.context
     D = bpy.data
-    bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+
+    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
+        bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+        rigify_object_name = ''
+    else:
+        bw_widget_prefix = "WGT-"
+        rigify_object_name = C.active_object.name + "_"
 
     widget = bone.custom_shape
-    if findMirrorObject(bone) is not None:
-        if findMirrorObject(bone).custom_shape_transform:
-            mirrorBone = findMirrorObject(bone).custom_shape_transform
-        else:
-            mirrorBone = findMirrorObject(bone)
+
+    if findMirrorObject(bone):
+        mirrorBone = findMirrorObject(bone)
 
         mirrorWidget = mirrorBone.custom_shape
-        if mirrorWidget:
+        print(mirrorBone)
+        print(mirrorWidget)
+        if mirrorWidget is not None:
             if mirrorWidget != widget:
                 mirrorWidget.name = mirrorWidget.name + "_old"
                 mirrorWidget.data.name = mirrorWidget.data.name + "_old"
@@ -174,15 +185,20 @@ def symmetrizeWidget(bone, collection):
         newObject = widget.copy()
         newObject.data = newData
         newData.update()
-        newObject.name = bw_widget_prefix + mirrorBone.name
+        newObject.name = bw_widget_prefix + rigify_object_name + findMirrorObject(bone).name
         D.collections[collection.name].objects.link(newObject)
+
+        #if there is a override transform, use that bone matrix in the next step
+        if findMirrorObject(bone).custom_shape_transform:
+             mirrorBone = findMirrorObject(bone).custom_shape_transform
+
         newObject.matrix_local = mirrorBone.bone.matrix_local
         newObject.scale = [mirrorBone.bone.length, mirrorBone.bone.length, mirrorBone.bone.length]
 
         layer = bpy.context.view_layer
         layer.update()
 
-        mirrorBone.custom_shape = newObject
+        findMirrorObject(bone).custom_shape = newObject
         mirrorBone.bone.show_wire = True
 
     else:
@@ -210,7 +226,11 @@ def deleteUnusedWidgets():
     C = bpy.context
     D = bpy.data
 
-    bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
+    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
+        bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
+    else:
+        bw_collection_name = 'WGTS_' + C.active_object.name
+
     collection = recurLayerCollection(C.scene.collection, bw_collection_name)
     widgetList = []
 
@@ -227,7 +247,8 @@ def deleteUnusedWidgets():
     # jump into object mode
     bpy.ops.object.mode_set(mode='OBJECT')
     # delete unwanted widgets
-    bpy.ops.object.delete({"selected_objects": unwantedList})
+    for ob in unwantedList:
+        bpy.data.objects.remove(bpy.data.objects[ob.name], do_unlink=True)
     # jump back to current mode
     bpy.ops.object.mode_set(mode=mode)
 
@@ -357,8 +378,12 @@ def resyncWidgetNames():
     C = bpy.context
     D = bpy.data
 
-    bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
-    bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
+        bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
+        bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    else:
+        bw_collection_name = 'WGTS_' + C.active_object.name
+        bw_widget_prefix = 'WGT-' + C.active_object.name + '_'
 
     widgetsAndBones = {}
 
@@ -384,12 +409,22 @@ def clearBoneWidgets():
 
 
 def addObjectAsWidget(context, collection):
-    sel = bpy.context.selected_objects
-    #bw_collection = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+    selected_objects = bpy.context.selected_objects
 
-    if sel[1].type == 'MESH':
+    if len(selected_objects) != 2:
+        print('Only a widget object and the pose bone(s)')
+        return{'FINISHED'}
+
+    allowed_object_types = ['MESH','CURVE']
+
+    widget_object = None
+
+    for ob in selected_objects:
+        if ob.type in allowed_object_types:
+            widget_object = ob
+
+    if widget_object:
         active_bone = context.active_pose_bone
-        widget_object = sel[1]
 
         # deal with any existing shape
         if active_bone.custom_shape:

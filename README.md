@@ -96,19 +96,19 @@ First select the mesh shape you want to use (object mode), then shift select the
 #### Hide/Show Collection:
 As the name would suggest this will toggle the visibility of the widget collection.  
 <b>Note:</b>
-This will only toggle the visibility of the designated widget collection (set in the preferences).  If the rig uses a
-
+This will only toggle the visibility of the designated widget collection (set in the preferences).
 
 
 ### To Do:
-- complete the documentation with images to this readme file
-- [Enhancement] Doesn't work well with Rigify naming scheme (solve this)
-- [Feature] Let the user change the widget suffix to a prefix for a different naming convention
-- [Feature] Extract and edit a widget?  Say you're editing a rig that doesn't have mesh objects for the widgets in the file (only mesh data).
-Maybe there can be a way of extracting them and making them real objects.
 - [Bug] The match Bone Transforms does not work well when the bone scale is not at 1.0
-- [Enchantment] Rewrite the mirrorShape function so it will work when you have the mesh shape selected (not just the bone in pose mode)
+-import/export library of shapes.
+-redesign to include image of the shapes
 
+
+##v2.0 Release Notes:
+- changed the default name of the n panel to 'Rigging' rather than 'Rig Tools'
+- [fixed Bug] if the bone was using an override transform, it will use this bone mirror the widget to rather than just taking that bone's matrix
+- [Enhancement] Added setting in the user preferences so it can optionally use the Rigify naming convention for widget creation (collection and widget names).
 
 ## v1.9 Release Notes:
 - [Fix] widget collection no longer needs to be in the master scene for the addon to find it.
@@ -123,6 +123,20 @@ Maybe there can be a way of extracting them and making them real objects.
 * Removed Logger
 * Functionality change: I rewrote the way to add the selected object as a widget without having to read and write to a text file
 * Fix: If collection is 'excluded' in the outliner it now re-enables it.
+
+## v1.7 Release Notes
+* Fix: Allow rename of Addons-Folder
+* Fix: Fixed the symmetrize error if the .L or the .R didn't have a widget
+* Fix: Symmetrize Operator caused Error when clicking in Object mode
+* Fix: Return to Armature: Didn't unselect widget-object before returning to armature
+* Fix: Edit Widget: Show only if active bone has a widget
+* Feature: Widgets renamed: Gear --> Gear_complex, Root --> Root_1
+* Feature: New Widgets: 3 Axes, 6 Axes, Arrow_double_sided, Arrow_head, Chest, Clavicle, Eyes_Target, FK_Limb, Gear_simple,
+Roll, Root_2, Torso
+* Feature: New Property: Panel Category
+* Feature: New Property: Bone Widget symmetry suffix
+* Feature: Add selected Mesh as widget-shape
+* Feature: Added Logger
 
 ### Widget Edits (from v1.7)
 * Resized '3 Axes' widget to better match a default size of 1 blender unit (and sits over the 6 axes nicely)
@@ -148,21 +162,6 @@ Maybe there can be a way of extracting them and making them real objects.
 * Added "Saddle" shape - useful for chests and head controls as a starting point
 * Added "Rhomboid" shape
 * Flipped "Arrow Head" and renamed to "Pyramid"
-
-
-## v1.7 Release Notes
-* Fix: Allow rename of Addons-Folder
-* Fix: Fixed the symmetrize error if the .L or the .R didn't have a widget
-* Fix: Symmetrize Operator caused Error when clicking in Object mode
-* Fix: Return to Armature: Didn't unselect widget-object before returning to armature
-* Fix: Edit Widget: Show only if active bone has a widget
-* Feature: Widgets renamed: Gear --> Gear_complex, Root --> Root_1
-* Feature: New Widgets: 3 Axes, 6 Axes, Arrow_double_sided, Arrow_head, Chest, Clavicle, Eyes_Target, FK_Limb, Gear_simple,
-Roll, Root_2, Torso
-* Feature: New Property: Panel Category
-* Feature: New Property: Bone Widget symmetry suffix
-* Feature: Add selected Mesh as widget-shape
-* Feature: Added Logger
 
 
 ## v1.6 Release Notes
