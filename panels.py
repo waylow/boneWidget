@@ -1,4 +1,6 @@
 import bpy
+import bpy.utils.previews
+import os
 from .functions import (
     readWidgets,
     getViewLayerCollection,
@@ -8,6 +10,45 @@ from .functions import (
 from .menus import BONEWIDGET_MT_bw_specials
 
 
+preview_collections = {}
+
+def generate_previews():
+    enum_items = []
+
+    pcoll = preview_collections["widgets"]
+    if pcoll.widget_list:
+        return pcoll.widget_list
+    
+    directory = os.path.join(os.path.dirname(__file__), "thumbnails")
+    if directory and os.path.exists(directory):
+        widget_names = sorted(readWidgets())
+
+        for i, name in enumerate(widget_names):
+            filepath = os.path.join(directory, name + ".png")
+            icon = pcoll.get(name)
+            if not icon:
+                thumb = pcoll.load(name, filepath, 'IMAGE')
+            else:
+                thumb = pcoll[name]
+            enum_items.append((name, name, "", thumb.icon_id, i))
+
+    pcoll.widget_list = enum_items
+    return enum_items
+
+def preview_update(self, context):
+    if len(bpy.types.Scene.widget_list.keywords["items"]) != len(bpy.types.WindowManager.widget_list.keywords["items"]):
+        del bpy.types.WindowManager.widget_list
+        for pcoll in preview_collections.values():
+            bpy.utils.previews.remove(pcoll)
+        preview_collections.clear()
+
+        pcoll = bpy.utils.previews.new()
+        pcoll.widget_list = ()
+        preview_collections["widgets"] = pcoll
+        
+        bpy.types.WindowManager.widget_list = bpy.props.EnumProperty(
+            items=generate_previews(), name="Shape", description="Shape", update=preview_update
+        )
 
 class BONEWIDGET_PT_bw_panel:
     """BoneWidget Addon UI"""
@@ -21,21 +62,31 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_label = "Bone Widget"
 
 
-    items = []
-    for key, value in readWidgets().items():
-        items.append(key)
-
     itemsSort = []
-    for key in sorted(items):
+    for key, value in sorted(readWidgets().items()):
         itemsSort.append((key, key, ""))
 
     bpy.types.Scene.widget_list = bpy.props.EnumProperty(
         items=itemsSort, name="Shape", description="Shape")
 
+    pcoll = bpy.utils.previews.new()
+    pcoll.widget_list = ()
+    preview_collections["widgets"] = pcoll
+
+    bpy.types.WindowManager.widget_list = bpy.props.EnumProperty(
+        items=generate_previews(), name="Shape", description="Shape", update=preview_update
+    )
+
     def draw(self, context):
         layout = self.layout
+        
+        # preview view
         row = layout.row(align=True)
-        row.prop(context.scene, "widget_list", expand=False, text="")
+        row.template_icon_view(context.window_manager, "widget_list", show_labels=True)
+
+        # dropdown list
+        row = layout.row(align=True)
+        row.prop(context.window_manager, "widget_list", expand=False, text="")
 
         row = layout.row(align=True)
         row.menu("BONEWIDGET_MT_bw_specials", icon='DOWNARROW_HLT', text="")
@@ -96,6 +147,12 @@ def register():
 
 
 def unregister():
+    del bpy.types.WindowManager.widget_list
+
+    for pcoll in preview_collections.values():
+        bpy.utils.previews.remove(pcoll)
+    preview_collections.clear()
+    
     from bpy.utils import unregister_class
     for cls in classes:
         unregister_class(cls)
