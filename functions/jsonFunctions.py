@@ -89,5 +89,9 @@ def addRemoveWidgets(context, addOrRemove, items, widgets):
             items=widget_itemsSorted, name="Shape", description="Shape")
         bpy.context.scene.widget_list = activeShape
         writeWidgets(wgts)
+
+        # trigger an update and display widget
+        bpy.context.window_manager.widget_list = bpy.context.window_manager.widget_list
+        bpy.context.window_manager.widget_list = activeShape
     elif ob_name is not None:
         return "Widget - " + ob_name + " already exists!"
