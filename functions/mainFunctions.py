@@ -67,7 +67,7 @@ def boneMatrix(widget, matchBone):
     widget.matrix_local = matchBone.bone.matrix_local
     widget.matrix_world = matchBone.id_data.matrix_world @ matchBone.bone.matrix_local
     if matchBone.custom_shape_transform:
-        #if it has a tranform override apply this to the widget loc and rot
+        #if it has a tranform override, apply this to the widget loc and rot
         org_scale = widget.matrix_world.to_scale()
         org_scale_mat = Matrix.Scale(1, 4, org_scale)
         target_matrix = matchBone.custom_shape_transform.id_data.matrix_world @ matchBone.custom_shape_transform.bone.matrix_local
@@ -79,7 +79,13 @@ def boneMatrix(widget, matchBone):
     if matchBone.use_custom_shape_bone_size:
         ob_scale = bpy.context.scene.objects[matchBone.id_data.name].scale
         widget.scale = [matchBone.bone.length * ob_scale[0], matchBone.bone.length * ob_scale[1], matchBone.bone.length * ob_scale[2]]
-        #widget.scale = [matchBone.bone.length, matchBone.bone.length, matchBone.bone.length]
+
+    #if the user has added any custom transforms to the bone widget display - calculate this too
+    loc = matchBone.custom_shape_translation
+    rot = matchBone.custom_shape_rotation_euler
+    scale =  matchBone.custom_shape_scale_xyz
+    widget.matrix_world = widget.matrix_world @ Matrix.LocRotScale(loc , rot, scale)
+
     widget.data.update()
 
 
