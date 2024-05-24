@@ -104,14 +104,13 @@ This will only toggle the visibility of the designated widget collection (set in
 </br></br></br>
 
 # To Do:
-<input type="checkbox"> The match Bone Transforms does not work well when the bone scale is not at 1.0 [BUG]</br> 
 <input type="checkbox"> import/export library of shapes.</br> 
 <input type="checkbox"> if use "rigify defaults" checked and the widget isn't in that collection, throws errors when you try to do some operators (like edit widget etc) [bug]</br> 
-<input type="checkbox" checked> redesign to include image of the shapes</br> 
 
 
 ## v2.1 Release Notes:
-- Markug Berg added functionality to display images of the widgets
+- Markus Berg added functionality to display images of the widgets
+- Matching the bone transforms now works correctly if the user has changed the transforms of the custom shape display on the bone settings
 
 ## v2.0 Release Notes:
 - changed the default name of the n panel to 'Rigging' rather than 'Rig Tools'
