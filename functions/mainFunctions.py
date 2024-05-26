@@ -257,8 +257,7 @@ def deleteUnusedWidgets():
         bpy.data.objects.remove(bpy.data.objects[ob.name], do_unlink=True)
     # jump back to current mode
     bpy.ops.object.mode_set(mode=mode)
-
-    return unwantedList
+    return
 
 
 def editWidget(active_bone):

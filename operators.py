@@ -241,7 +241,10 @@ class BONEWIDGET_OT_deleteUnusedWidgets(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
 
     def execute(self, context):
-        deleteUnusedWidgets()
+        try:
+            deleteUnusedWidgets()
+        except:
+            self.report({'INFO'}, "Can't find the Widget Collection. Does it exist?")
         return {'FINISHED'}
 
 

@@ -105,12 +105,12 @@ This will only toggle the visibility of the designated widget collection (set in
 
 # To Do:
 <input type="checkbox"> import/export library of shapes.</br> 
-<input type="checkbox"> if use "rigify defaults" checked and the widget isn't in that collection, throws errors when you try to do some operators (like edit widget etc) [bug]</br> 
 
 
 ## v2.1 Release Notes:
-- Markus Berg added functionality to display images of the widgets
+- Markus Berg added functionality to display images of the widgets. What a flippin' legend.
 - Matching the bone transforms now works correctly if the user has changed the transforms of the custom shape display on the bone settings
+- [fix] if the collection didn't exist when you tried to delete unused widgets it would throw an error.  You now get a message that hints at the problem.
 
 ## v2.0 Release Notes:
 - changed the default name of the n panel to 'Rigging' rather than 'Rig Tools'
