@@ -79,7 +79,7 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
     def execute(self, context):
         wgts = readWidgets()
         for bone in bpy.context.selected_pose_bones:
-            createWidget(bone, wgts[context.scene.widget_list], self.relative_size, self.global_size, [
+            createWidget(bone, wgts[context.window_manager.widget_list], self.relative_size, self.global_size, [
                          1, 1, 1], self.slide, self.rotation, getCollection(context))
         return {'FINISHED'}
 
@@ -204,7 +204,7 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
     bl_label = "Remove Widgets"
 
     def execute(self, context):
-        objects = bpy.context.scene.widget_list
+        objects = bpy.context.window_manager.widget_list
         unwantedList = addRemoveWidgets(context, "remove", bpy.types.Scene.widget_list.keywords['items'], objects)
         return {'FINISHED'}
 
@@ -241,7 +241,10 @@ class BONEWIDGET_OT_deleteUnusedWidgets(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
 
     def execute(self, context):
-        deleteUnusedWidgets()
+        try:
+            deleteUnusedWidgets()
+        except:
+            self.report({'INFO'}, "Can't find the Widget Collection. Does it exist?")
         return {'FINISHED'}
 
 

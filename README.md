@@ -10,8 +10,7 @@ It ships with many shapes pre-made but you can also add your own to the library 
 
 ## Installation:
 
-1. Download the zipped code here from Github.
-
+1. Download the zipped code here from Github. (Check in the release tab for the latest stable release)
 2. In Blender, open Preferences->Addons->Install. Navigate to where you saved the zip file and click install.
 3. Enable the Addon with the checkbox.
 4. The UI will appear in the properties panel (n panel) in the 3d viewport.
@@ -24,33 +23,35 @@ It ships with many shapes pre-made but you can also add your own to the library 
 This is the active shape from Bone Widget Library.
 Choose the shape you want to add from the list here.
 
-### BW Specials Menu:
+## BW Specials Menu:
+
+> <b>The image below is outdated but the concept is the same.</b>
 
 <img src="images/bone_widget_UI.png" alt="drawing" width="700"/>
 
-#### Add to Widget library
+### Add to Widget library
 
 To add a mesh object to the library, select a mesh object and click this button.
 Make sure you give that mesh object an appropriate name before adding.
 
-#### Remove from Widget Library
+### Remove from Widget Library
 
 This will remove the active shape from the library.
 Select the shape you want to remove from the list.  And click this. Boom, it is gone (forever!).
 
 
-### Creating a Widget:
+## Creating a Widget:
 
 
-#### Create:
+### Create:
 Select a bone (or bones), choose the shape from the drop down menu, then press create.
 This will create a widget object for each of the selected bones.  The widget objects will be placed in the collection that is specified in the user preferences.
 
 
-#### Redo panel
+### Redo panel
 <img src="images/bone_widget_redo_panel.png" alt="drawing" width="400">
 
-#### Scale to bone length:
+### Scale to bone length:
 When enabled the Global Size will be multiplied by the bone length.  (ie - the widget  will be relative size to the size of the bone)
 With this disabled, the Global Size will be in Blender units.
 
@@ -61,7 +62,7 @@ This will slide the position of the widget along the Y axis (or length) of the b
 You can rotate the widget by these values at the time of creation.  This can save you from having to jump into edit mode to rotate a widget to better align with your situation.
 
 
-#### Edit/To Bone:
+### Edit/To Bone:
 When in pose mode, this will jump into edit mode for the custom bone shape and allow you to edit it.
 When you have the shape selected (object or edit mode), this button will display as "To Bone".  That will take you back to pose mode, if that mesh object is in face a custom shape.
 
@@ -70,7 +71,7 @@ When you 'Create' a shape, it will always be placed in the collection set in the
 If you 'Edit' a shape, it will stay in whatever collection that widget was already located.
 
 
-#### Match bone Transforms:
+### Match bone Transforms:
 If the widgets get out of alignment with the location of the bone itself, this operator will snap the selected widget to the matrix of the bone.  It works if you have the bone(s) selected or if you have the widget object(s) selected.
 
 <b>Note:</b>
@@ -82,30 +83,36 @@ Sometimes you might rename a bone/or a widget.  This operator will loop through 
 <b>Note:</b>
 Currently the add-on is designed to have one widget per bone, if you have multiple users of the same widget, it will be renamed to the last user it finds.
 
-#### Clear Bone Widget:
+### Clear Bone Widget:
 This will clear the custom bone shapes from all the selected bones.
 
-#### Delete Unused Widgets:
+### Delete Unused Widgets:
 This operator will loop through the widget collection and delete anything that isn't being used.  This helps keep things tidy.
 
-#### Use Selected Object:
+### Use Selected Object:
 If you want to apply a mesh object that is already in your scene as a custom shape, you can use this option.
 First select the mesh shape you want to use (object mode), then shift select the armature, switch into pose mode and make sure you select any bone(s) you want this shape to be applied to.  Then press the button.
 
 
-#### Hide/Show Collection:
+### Hide/Show Collection:
 As the name would suggest this will toggle the visibility of the widget collection.  
+
+<blockquote>
 <b>Note:</b>
-This will only toggle the visibility of the designated widget collection (set in the preferences).
+This will only toggle the visibility of the designated widget collection (set in the preferences).  If your character has widgets outside of this collection, it will not toggle the visibilty of that.
+</blockquote>
+</br></br></br>
+
+# To Do:
+<input type="checkbox"> import/export library of shapes.</br> 
 
 
-### To Do:
-- [Bug] The match Bone Transforms does not work well when the bone scale is not at 1.0
--import/export library of shapes.
--redesign to include image of the shapes
+## v2.1 Release Notes:
+- Markus Berg added functionality to display images of the widgets. What a flippin' legend.
+- Matching the bone transforms now works correctly if the user has changed the transforms of the custom shape display on the bone settings
+- [fix] if the collection didn't exist when you tried to delete unused widgets it would throw an error.  You now get a message that hints at the problem.
 
-
-##v2.0 Release Notes:
+## v2.0 Release Notes:
 - changed the default name of the n panel to 'Rigging' rather than 'Rig Tools'
 - [fixed Bug] if the bone was using an override transform, it will use this bone mirror the widget to rather than just taking that bone's matrix
 - [Enhancement] Added setting in the user preferences so it can optionally use the Rigify naming convention for widget creation (collection and widget names).
