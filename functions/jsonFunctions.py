@@ -60,6 +60,7 @@ def addRemoveWidgets(context, addOrRemove, items, widgets):
 
     activeShape = None
     ob_name = None
+    return_message = ""
     if addOrRemove == 'add':
         bw_widget_prefix = bpy.context.preferences.addons[__package__].preferences.widget_prefix
         for ob in widgets:
@@ -72,11 +73,13 @@ def addRemoveWidgets(context, addOrRemove, items, widgets):
                 widget_items.append(ob_name)
                 wgts[ob_name] = objectDataToDico(ob)
                 activeShape = ob_name
+                return_message = "Widget - " + ob_name + " has been added!"
 
     elif addOrRemove == 'remove':
         del wgts[widgets]
         widget_items.remove(widgets)
         activeShape = widget_items[0]
+        return_message = "Widget - " + widgets + " has been removed!"
 
     if activeShape is not None:
         del bpy.types.Scene.widget_list
@@ -93,5 +96,7 @@ def addRemoveWidgets(context, addOrRemove, items, widgets):
         # trigger an update and display widget
         bpy.context.window_manager.widget_list = bpy.context.window_manager.widget_list
         bpy.context.window_manager.widget_list = activeShape
+
+        return 'INFO', return_message
     elif ob_name is not None:
-        return "Widget - " + ob_name + " already exists!"
+        return 'WARNING', "Widget - " + ob_name + " already exists!"
