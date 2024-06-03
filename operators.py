@@ -193,7 +193,11 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
 
         if not objects:
             self.report({'INFO'}, 'Select Meshes or Pose_bones')
-        addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects)
+        #addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects)
+        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects)
+
+        if return_message:
+            self.report({message_type}, return_message)
 
         return {'FINISHED'}
 
@@ -205,7 +209,12 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
 
     def execute(self, context):
         objects = bpy.context.window_manager.widget_list
-        unwantedList = addRemoveWidgets(context, "remove", bpy.types.Scene.widget_list.keywords['items'], objects)
+        #unwantedList = addRemoveWidgets(context, "remove", bpy.types.Scene.widget_list.keywords['items'], objects)
+        message_type, return_message = addRemoveWidgets(context, "remove", bpy.types.Scene.widget_list.keywords['items'], objects)
+
+        if return_message:
+            self.report({message_type}, return_message)
+            
         return {'FINISHED'}
 
 
