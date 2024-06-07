@@ -325,8 +325,3 @@ def unregister():
     for cls in classes:
         unregister_class(cls)
 
-    try:
-        import os
-        os.remove(os.path.join(os.path.expanduser("~"), "temp.txt"))
-    except:
-        pass
