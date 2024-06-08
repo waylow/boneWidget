@@ -47,9 +47,16 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         description="Show advanced options"
     )
 
-    global_size: FloatProperty(
+    global_size_simple: FloatProperty(
         name="Global Size",
         default=1.0,
+        description="Global Size"
+    )
+
+    global_size_advanced: FloatVectorProperty(
+        name="Global Size",
+        default=(1.0, 1.0, 1.0),
+        subtype='XYZ',
         description="Global Size"
     )
 
@@ -86,7 +93,7 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         row = col.row(align=True)
         row.prop(self, "relative_size")
         row = col.row(align=True)
-        row.prop(self, "global_size", expand=False)
+        row.prop(self, "global_size_advanced" if self.advanced_options else "global_size_simple", expand=False)
         row = col.row(align=True)
         row.prop(self, "slide_advanced" if self.advanced_options else "slide_simple", text="Slide")
         row = col.row(align=True)
@@ -97,8 +104,9 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
     def execute(self, context):
         wgts = readWidgets()
         slide = self.slide_advanced if self.advanced_options else (0.0, self.slide_simple, 0.0)
+        global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
         for bone in bpy.context.selected_pose_bones:
-            createWidget(bone, wgts[context.window_manager.widget_list], self.relative_size, self.global_size, [
+            createWidget(bone, wgts[context.window_manager.widget_list], self.relative_size, global_size, [
                          1, 1, 1], slide, self.rotation, getCollection(context))
         return {'FINISHED'}
 
