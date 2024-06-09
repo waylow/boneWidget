@@ -25,6 +25,15 @@ from bpy.types import Operator
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
 
 
+def advanced_options_toggled(self, context):
+    if self.advanced_options:
+        self.global_size_advanced = (self.global_size_simple,) * 3
+        self.slide_advanced[1] = self.slide_simple
+    else:
+        self.global_size_simple = self.global_size_advanced[1]
+        self.slide_simple = self.slide_advanced[1]
+
+
 class BONEWIDGET_OT_createWidget(bpy.types.Operator):
     """Creates a widget for selected bone"""
     bl_idname = "bonewidget.create_widget"
@@ -44,7 +53,8 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
     advanced_options: BoolProperty(
         name="Advanced options",
         default=False,
-        description="Show advanced options"
+        description="Show advanced options",
+        update=advanced_options_toggled
     )
 
     global_size_simple: FloatProperty(
@@ -73,7 +83,6 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         default=(0.0, 0.0, 0.0),
         subtype='XYZ',
         unit='NONE',
-        precision=1,
         description="Slide widget along bone xyz axes"
     )
     
