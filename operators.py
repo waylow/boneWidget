@@ -22,7 +22,7 @@ from .functions import (
     addObjectAsWidget,
 )
 from bpy.types import Operator
-from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
+from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
 
 
 def advanced_options_toggled(self, context):
@@ -211,10 +211,34 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
     bl_idname = "bonewidget.add_widgets"
     bl_label = "Add Widgets"
 
+
+    widget_name: StringProperty(
+        name="Widget Name",
+        default="",
+        description="The name of the new widget",
+        options={"TEXTEDIT_UPDATE"},
+    )
+
+
     @classmethod
     def poll(cls, context):
         return (context.object and context.object.type == 'MESH' and context.object.mode == 'OBJECT'
                 and context.active_object is not None)
+
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Widget Name:")
+        layout.prop(self, "widget_name", text="")
+
+
+    def invoke(self, context, event):
+        if bpy.context.selected_objects:
+            self.widget_name = context.active_object.name
+            return context.window_manager.invoke_props_dialog(self, title="Add New Widget to Library")
+            
+        self.report({'WARNING'}, 'Please select an object first!')
+        return {'CANCELLED'}
 
 
     def execute(self, context):
@@ -228,9 +252,10 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
                     objects.append(ob)
 
         if not objects:
-            self.report({'INFO'}, 'Select Meshes or Pose_bones')
+            self.report({'WARNING'}, 'Select Meshes or Pose bones')
+            return {'CANCELLED'}
         #addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects)
-        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects)
+        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects, self.widget_name)
 
         if return_message:
             self.report({message_type}, return_message)
