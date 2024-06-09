@@ -51,7 +51,7 @@ def writeWidgets(wgts):
         f.close()
 
 
-def addRemoveWidgets(context, addOrRemove, items, widgets):
+def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name=""):
     wgts = readWidgets()
 
     widget_items = []
@@ -64,10 +64,13 @@ def addRemoveWidgets(context, addOrRemove, items, widgets):
     if addOrRemove == 'add':
         bw_widget_prefix = bpy.context.preferences.addons[__package__].preferences.widget_prefix
         for ob in widgets:
-            if ob.name.startswith(bw_widget_prefix):
-                ob_name = ob.name[len(bw_widget_prefix):]
+            if not widget_name:
+                if ob.name.startswith(bw_widget_prefix):
+                    ob_name = ob.name[len(bw_widget_prefix):]
+                else:
+                    ob_name = ob.name
             else:
-                ob_name = ob.name
+                ob_name = widget_name
 
             if (ob_name) not in widget_items:
                 widget_items.append(ob_name)
