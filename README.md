@@ -112,6 +112,8 @@ add popup to be able to choose the name for the widget when you add it to the li
 - Markus Berg added functionality to display images of the widgets. What a flippin' legend.
 - Matching the bone transforms now works correctly if the user has changed the transforms of the custom shape display on the bone settings
 - Markus split the scale and slide into 3 axies and implemented toggle to show simple/advanced mode
+- [enhancemnt] Popup added for name input when adding a widget to the library
+- [fix] the match bone transforms now takes the custom shape transforms into account
 - [fix] if the collection didn't exist when you tried to delete unused widgets it would throw an error.  You now get a message that hints at the problem.
 
 ## v2.0 Release Notes:
