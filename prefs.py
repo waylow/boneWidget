@@ -14,7 +14,7 @@ class BoneWidgetPreferences(AddonPreferences):
     use_rigify_defaults: BoolProperty(
         name="Use Rigify Defaults",
         description="Use the same naming convention for widget creation (disable if you prefer your naming convention)",
-        default=False,
+        default=True,
     )
 
     # widget prefix
