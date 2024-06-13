@@ -55,8 +55,10 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         # preview view
         if context.window_manager.toggle_preview:
             row = layout.row(align=True)
-            row.template_icon_view(context.window_manager, "widget_list", show_labels=True)
-
+            preview_panel_size = context.preferences.addons[__package__].preferences.preview_panel_size
+            preview_popup_size = context.preferences.addons[__package__].preferences.preview_popup_size
+            row.template_icon_view(context.window_manager, "widget_list", show_labels=True,
+                                   scale=preview_panel_size, scale_popup=preview_popup_size)
 
         # dropdown list
         row = layout.row(align=True)

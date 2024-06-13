@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import AddonPreferences
-from bpy.props import StringProperty, BoolProperty
+from bpy.props import StringProperty, BoolProperty, FloatProperty
 
 from .bl_class_registry import BlClassRegistry
 from .panels import BONEWIDGET_PT_bw_panel_main
@@ -55,6 +55,24 @@ class BoneWidgetPreferences(AddonPreferences):
         update=panel_category_update_fn,
     )
 
+    preview_panel_size: FloatProperty(
+        name="Preview Panel Size",
+        description="Size of the Preview Panel",
+        default=6.0,
+        min=1.0,
+        max=10.0,
+        precision=1,
+    )
+
+    preview_popup_size: FloatProperty(
+        name="Preview Popup Size",
+        description="Size of the Preview Popup Thumbnails",
+        default=4.5,
+        min=1.0,
+        max=10.0,
+        precision=1,
+    )
+
     def draw(self, context):
         layout = self.layout
 
@@ -77,3 +95,20 @@ class BoneWidgetPreferences(AddonPreferences):
         col = row.column()
         col.label(text="Set the category to show Bone-Widgets panel:")
         col.prop(self, "panel_category")
+
+        # preview area
+        row = layout.row()
+        row = layout.row()
+        
+        row.label(text="Thumbnail Previews:")
+
+        row = layout.row()
+        col = row.column()
+        col.label(text="Preview Panel Size:")
+        row.prop(self, "preview_panel_size", text="")
+        
+        row = layout.row()
+        col = row.column()
+        col.label(text="Preview Popup Size:")
+        row.prop(self, "preview_popup_size", text="")
+        row = layout.row()
