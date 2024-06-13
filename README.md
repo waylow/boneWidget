@@ -1,7 +1,7 @@
 # Bone Widget
 
 Video explanation:
-https://vimeo.com/657697982
+https://www.youtube.com/watch?v=PDNVeDOzjzw
 
 ## Description:
 Bone Widget is a blender add-on to assist with making custom bone shapes. It has an editable library of shapes that make it easy to apply to any rig.
@@ -104,12 +104,16 @@ This will only toggle the visibility of the designated widget collection (set in
 </br></br></br>
 
 # To Do:
-<input type="checkbox"> import/export library of shapes.</br> 
+import/export library of shapes.
+add popup to be able to choose the name for the widget when you add it to the library
 
 
 ## v2.1 Release Notes:
 - Markus Berg added functionality to display images of the widgets. What a flippin' legend.
 - Matching the bone transforms now works correctly if the user has changed the transforms of the custom shape display on the bone settings
+- Markus split the scale and slide into 3 axies and implemented toggle to show simple/advanced mode
+- [enhancemnt] Popup added for name input when adding a widget to the library
+- [fix] the match bone transforms now takes the custom shape transforms into account
 - [fix] if the collection didn't exist when you tried to delete unused widgets it would throw an error.  You now get a message that hints at the problem.
 
 ## v2.0 Release Notes:

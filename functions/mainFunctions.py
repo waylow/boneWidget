@@ -125,12 +125,12 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
         boneLength = (1 / bone.bone.length)
 
     # add the verts
-    newData.from_pydata(numpy.array(widget['vertices']) * [size * scale[0] * boneLength, size * scale[2]
-                        * boneLength, size * scale[1] * boneLength], widget['edges'], widget['faces'])
+    newData.from_pydata(numpy.array(widget['vertices']) * [size[0] * scale[0] * boneLength, size[1] * scale[2]
+                        * boneLength, size[2] * scale[1] * boneLength], widget['edges'], widget['faces'])
 
     # Create tranform matrices (slide vector and rotation)
     widget_matrix = Matrix()
-    trans = Matrix.Translation((0, slide, 0))
+    trans = Matrix.Translation(slide)
     rot = rotation.to_matrix().to_4x4()
 
     # Translate then rotate the matrix

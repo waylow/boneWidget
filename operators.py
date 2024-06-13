@@ -22,7 +22,16 @@ from .functions import (
     addObjectAsWidget,
 )
 from bpy.types import Operator
-from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
+from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
+
+
+def advanced_options_toggled(self, context):
+    if self.advanced_options:
+        self.global_size_advanced = (self.global_size_simple,) * 3
+        self.slide_advanced[1] = self.slide_simple
+    else:
+        self.global_size_simple = self.global_size_advanced[1]
+        self.slide_simple = self.slide_advanced[1]
 
 
 class BONEWIDGET_OT_createWidget(bpy.types.Operator):
@@ -41,19 +50,42 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         description="Scale Widget to bone length"
     )
 
-    global_size: FloatProperty(
+    advanced_options: BoolProperty(
+        name="Advanced options",
+        default=False,
+        description="Show advanced options",
+        update=advanced_options_toggled
+    )
+
+    global_size_simple: FloatProperty(
         name="Global Size",
         default=1.0,
         description="Global Size"
     )
 
-    slide: FloatProperty(
+    global_size_advanced: FloatVectorProperty(
+        name="Global Size",
+        default=(1.0, 1.0, 1.0),
+        subtype='XYZ',
+        description="Global Size"
+    )
+
+    slide_simple: FloatProperty(
         name="Slide",
         default=0.0,
         subtype='NONE',
         unit='NONE',
-        description="Slide widget along y axis"
+        description="Slide widget along bone y axis"
     )
+
+    slide_advanced: FloatVectorProperty(
+        name="Slide",
+        default=(0.0, 0.0, 0.0),
+        subtype='XYZ',
+        unit='NONE',
+        description="Slide widget along bone xyz axes"
+    )
+    
     rotation: FloatVectorProperty(
         name="Rotation",
         description="Rotate the widget",
@@ -70,17 +102,21 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         row = col.row(align=True)
         row.prop(self, "relative_size")
         row = col.row(align=True)
-        row.prop(self, "global_size", expand=False)
+        row.prop(self, "global_size_advanced" if self.advanced_options else "global_size_simple", expand=False)
         row = col.row(align=True)
-        row.prop(self, "slide")
+        row.prop(self, "slide_advanced" if self.advanced_options else "slide_simple", text="Slide")
         row = col.row(align=True)
         row.prop(self, "rotation", text="Rotation")
+        row = col.row(align=True)
+        row.prop(self, "advanced_options")
 
     def execute(self, context):
         wgts = readWidgets()
+        slide = self.slide_advanced if self.advanced_options else (0.0, self.slide_simple, 0.0)
+        global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
         for bone in bpy.context.selected_pose_bones:
-            createWidget(bone, wgts[context.window_manager.widget_list], self.relative_size, self.global_size, [
-                         1, 1, 1], self.slide, self.rotation, getCollection(context))
+            createWidget(bone, wgts[context.window_manager.widget_list], self.relative_size, global_size, [
+                         1, 1, 1], slide, self.rotation, getCollection(context))
         return {'FINISHED'}
 
 
@@ -175,10 +211,34 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
     bl_idname = "bonewidget.add_widgets"
     bl_label = "Add Widgets"
 
+
+    widget_name: StringProperty(
+        name="Widget Name",
+        default="",
+        description="The name of the new widget",
+        options={"TEXTEDIT_UPDATE"},
+    )
+
+
     @classmethod
     def poll(cls, context):
         return (context.object and context.object.type == 'MESH' and context.object.mode == 'OBJECT'
                 and context.active_object is not None)
+
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Widget Name:")
+        layout.prop(self, "widget_name", text="")
+
+
+    def invoke(self, context, event):
+        if bpy.context.selected_objects:
+            self.widget_name = context.active_object.name
+            return context.window_manager.invoke_props_dialog(self, title="Add New Widget to Library")
+            
+        self.report({'WARNING'}, 'Please select an object first!')
+        return {'CANCELLED'}
 
 
     def execute(self, context):
@@ -192,9 +252,10 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
                     objects.append(ob)
 
         if not objects:
-            self.report({'INFO'}, 'Select Meshes or Pose_bones')
+            self.report({'WARNING'}, 'Select Meshes or Pose bones')
+            return {'CANCELLED'}
         #addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects)
-        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects)
+        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects, self.widget_name)
 
         if return_message:
             self.report({message_type}, return_message)
