@@ -24,6 +24,12 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_label = "Bone Widget"
 
 
+    bpy.types.WindowManager.toggle_preview = bpy.props.BoolProperty(
+        name="Preview Panel",
+        default=True,
+        description="Show thumbnail previews"
+    )
+
     itemsSort = []
     for key, value in sorted(readWidgets().items()):
         itemsSort.append((key, key, ""))
@@ -42,9 +48,15 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         
-        # preview view
+        # preview toggle checkbox
         row = layout.row(align=True)
-        row.template_icon_view(context.window_manager, "widget_list", show_labels=True)
+        row.prop(context.window_manager, "toggle_preview")
+        
+        # preview view
+        if context.window_manager.toggle_preview:
+            row = layout.row(align=True)
+            row.template_icon_view(context.window_manager, "widget_list", show_labels=True)
+
 
         # dropdown list
         row = layout.row(align=True)
