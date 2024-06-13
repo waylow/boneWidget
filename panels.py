@@ -25,7 +25,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 
 
     bpy.types.WindowManager.toggle_preview = bpy.props.BoolProperty(
-        name="Display Previews",
+        name="Preview Panel",
         default=True,
         description="Show thumbnail previews"
     )
