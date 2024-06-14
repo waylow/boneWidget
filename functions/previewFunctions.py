@@ -2,7 +2,7 @@ import bpy
 import bpy.utils.previews
 from .jsonFunctions import readWidgets
 import os
-
+from .. import __package__
 
 preview_collections = {}
 
@@ -47,3 +47,7 @@ def preview_update(self, context):
         bpy.types.WindowManager.widget_list = bpy.props.EnumProperty(
             items=generate_previews(), name="Shape", description="Shape", update=preview_update
         )
+
+
+def get_preview_default():
+    return bpy.context.preferences.addons[__package__].preferences.preview_default

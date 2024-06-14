@@ -48,7 +48,7 @@ class BoneWidgetPreferences(AddonPreferences):
         BONEWIDGET_PT_bw_panel_main.bl_category = self.panel_category
         bpy.utils.register_class(BONEWIDGET_PT_bw_panel_main)
 
-    panel_category: bpy.props.StringProperty(
+    panel_category: StringProperty(
         name="Panel Category",
         description="Category to show Bone-Widgets panel",
         default="Rigging",
@@ -71,6 +71,12 @@ class BoneWidgetPreferences(AddonPreferences):
         min=1.0,
         max=10.0,
         precision=1,
+    )
+
+    preview_default: BoolProperty(
+        name="Default Preview State",
+        description="Default state of preview panel",
+        default=True,
     )
 
     def draw(self, context):
@@ -101,6 +107,8 @@ class BoneWidgetPreferences(AddonPreferences):
         row = layout.row()
         
         row.label(text="Thumbnail Previews:")
+        row = layout.row()
+        row.prop(self, "preview_default", text="Display Previews by Default")
 
         row = layout.row()
         col = row.column()

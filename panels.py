@@ -7,6 +7,7 @@ from .functions import (
     preview_collections,
     generate_previews,
     preview_update,
+    get_preview_default,
 )
 
 from .menus import BONEWIDGET_MT_bw_specials
@@ -23,12 +24,6 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_idname = 'BONEWIDGET_PT_bw_panel_main'
     bl_label = "Bone Widget"
 
-
-    bpy.types.WindowManager.toggle_preview = bpy.props.BoolProperty(
-        name="Preview Panel",
-        default=True,
-        description="Show thumbnail previews"
-    )
 
     itemsSort = []
     for key, value in sorted(readWidgets().items()):
@@ -117,13 +112,23 @@ classes = (
 
 
 def register():
+    bpy.types.WindowManager.toggle_preview = bpy.props.BoolProperty(
+        name="Preview Panel",
+        default=get_preview_default(),
+        description="Show thumbnail previews"
+    )
+    
     from bpy.utils import register_class
     for cls in classes:
-        register_class(cls)
+        try:
+            register_class(cls)
+        except:
+            pass
 
 
 def unregister():
     del bpy.types.WindowManager.widget_list
+    del bpy.types.WindowManager.toggle_preview
 
     for pcoll in preview_collections.values():
         bpy.utils.previews.remove(pcoll)
@@ -131,4 +136,7 @@ def unregister():
     
     from bpy.utils import unregister_class
     for cls in classes:
-        unregister_class(cls)
+        try:
+            unregister_class(cls)
+        except:
+            pass
