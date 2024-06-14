@@ -67,7 +67,7 @@ class BoneWidgetPreferences(AddonPreferences):
     preview_popup_size: FloatProperty(
         name="Preview Popup Size",
         description="Size of the Preview Popup Thumbnails",
-        default=4.5,
+        default=3.5,
         min=1.0,
         max=10.0,
         precision=1,
