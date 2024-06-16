@@ -27,7 +27,7 @@ def objectDataToDico(object):
         else:
             edges.append(e.key)
 
-    wgts = {"vertices": verts, "edges": edges, "faces": polygons}
+    wgts = {"vertices": verts, "edges": edges, "faces": polygons, "image": "user_defined.png"}
     # print(wgts)
     return(wgts)
 
