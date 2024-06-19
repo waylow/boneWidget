@@ -17,12 +17,16 @@ def generate_previews():
     directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'thumbnails'))
 
     if directory and os.path.exists(directory):
-        widget_data = {item[0]: item[1].get("image", "") for item in readWidgets().items()}
+        widget_data = {item[0]: item[1].get("image", "missing_image.png") for item in readWidgets().items()}
         widget_names = sorted(widget_data.keys())
 
         for i, name in enumerate(widget_names):
             image = widget_data.get(name, "")
             filepath = os.path.join(directory, image)
+
+            # make sure the image exist
+            if not os.path.exists(filepath):
+                filepath = os.path.join(directory, "missing_image.png")
 
             icon = pcoll.get(name)
             if not icon:
