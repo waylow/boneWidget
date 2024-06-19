@@ -4,6 +4,9 @@ import json
 import numpy
 from .. import __package__
 
+JSON_DEFAULT_WIDGETS = "widgets.json"
+JSON_USER_WIDGETS = "user_widgets.json"
+
 
 def objectDataToDico(object):
     verts = []
@@ -32,27 +35,37 @@ def objectDataToDico(object):
     return(wgts)
 
 
-def readWidgets():
+def readWidgets(file = ""):
     wgts = {}
 
-    jsonFile = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'widgets.json')
-    if os.path.exists(jsonFile):
-        f = open(jsonFile, 'r')
-        wgts = json.load(f)
+    if not file:
+        files = [JSON_DEFAULT_WIDGETS, JSON_USER_WIDGETS]
+    else:
+        files = [file]
+
+    for file in files:
+        jsonFile = os.path.join(os.path.dirname(os.path.dirname(__file__)), file)
+        if os.path.exists(jsonFile):
+            f = open(jsonFile, 'r')
+            wgts.update(json.load(f))
+            f.close()
 
     return (wgts)
 
 
-def writeWidgets(wgts):
-    jsonFile = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'widgets.json')
-    if os.path.exists(jsonFile):
-        f = open(jsonFile, 'w')
-        f.write(json.dumps(wgts))
-        f.close()
+def writeWidgets(wgts, file):
+    jsonFile = os.path.join(os.path.dirname(os.path.dirname(__file__)), file)
+    #if os.path.exists(jsonFile):
+    f = open(jsonFile, 'w')
+    f.write(json.dumps(wgts))
+    f.close()
 
 
 def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name=""):
-    wgts = readWidgets()
+    wgts = {}
+
+    # file from where the widget should be read or written to
+    file = JSON_USER_WIDGETS
 
     widget_items = []
     for widget_item in items:
@@ -79,6 +92,13 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name=""):
                 return_message = "Widget - " + ob_name + " has been added!"
 
     elif addOrRemove == 'remove':
+        user_widgets = readWidgets(file)
+        if widgets in user_widgets:
+            wgts = user_widgets
+        else:
+            file = JSON_DEFAULT_WIDGETS
+            wgts = readWidgets(file)
+        
         del wgts[widgets]
         widget_items.remove(widgets)
         activeShape = widget_items[0]
@@ -94,7 +114,7 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name=""):
         bpy.types.Scene.widget_list = bpy.props.EnumProperty(
             items=widget_itemsSorted, name="Shape", description="Shape")
         bpy.context.scene.widget_list = activeShape
-        writeWidgets(wgts)
+        writeWidgets(wgts, file)
 
         # trigger an update and display widget
         bpy.context.window_manager.widget_list = bpy.context.window_manager.widget_list
