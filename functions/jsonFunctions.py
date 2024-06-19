@@ -75,6 +75,7 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name=""):
     ob_name = None
     return_message = ""
     if addOrRemove == 'add':
+        wgts = readWidgets(file)
         bw_widget_prefix = bpy.context.preferences.addons[__package__].preferences.widget_prefix
         for ob in widgets:
             if not widget_name:
