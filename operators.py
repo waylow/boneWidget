@@ -209,7 +209,7 @@ class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
 class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
     """Add selected mesh object to Bone Widget Library"""
     bl_idname = "bonewidget.add_widgets"
-    bl_label = "Add Widgets"
+    bl_label = "Add New Widget to Library"
 
 
     widget_name: StringProperty(
@@ -235,7 +235,7 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
     def invoke(self, context, event):
         if bpy.context.selected_objects:
             self.widget_name = context.active_object.name
-            return context.window_manager.invoke_props_dialog(self, title="Add New Widget to Library")
+            return context.window_manager.invoke_props_dialog(self) #title="Add New Widget to Library")
             
         self.report({'WARNING'}, 'Please select an object first!')
         return {'CANCELLED'}
