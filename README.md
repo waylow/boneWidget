@@ -17,27 +17,34 @@ It ships with many shapes pre-made but you can also add your own to the library 
 
 ## UI Panel
 
+<img src="images/bone_widget_UI.png" alt="drawing" width="700"/>
 
+### Preview Panel Checkbox:
+This will show/hide the large widget preview panel. It's also possible to set your preferred option for this in the preferences. (The default is enabled)
 
-### Shape:
+### Preview Panel:
+This is the large preview panel that displays the currently selected widget.  Click on this panel to open the selection menu.
+
+### Shape Drop Down:
 This is the active shape from Bone Widget Library.
-Choose the shape you want to add from the list here.
+Choose the shape you want to add from the list here or from the large preview (if you have that enabled).
 
 ## BW Specials Menu:
 
-> <b>The image below is outdated but the concept is the same.</b>
 
-<img src="images/bone_widget_UI.png" alt="drawing" width="700"/>
+
 
 ### Add to Widget library
 
 To add a mesh object to the library, select a mesh object and click this button.
-Make sure you give that mesh object an appropriate name before adding.
+Give the mesh object an appropriate name and then confirm.  Your widget will be added to the library.
+(User widgets are stored in a separate json file to the shapes that come with the addon.)
 
 ### Remove from Widget Library
 
 This will remove the active shape from the library.
 Select the shape you want to remove from the list.  And click this. Boom, it is gone (forever!).
+This will work on any widget in the list.
 
 
 ## Creating a Widget:
@@ -58,8 +65,15 @@ With this disabled, the Global Size will be in Blender units.
 #### Slide:
 This will slide the position of the widget along the Y axis (or length) of the bone.  0.0 is at the head of the bone and 1.0 is the tail.  (negative values are possible too)
 
+
+#### Slide X/Y/Z (Advanced Option Only)
+When advanced mode is enabled, the slide property is split into 3 axies rather than just the defalt y axis.
+
 #### Rotation X/Y/Z
 You can rotate the widget by these values at the time of creation.  This can save you from having to jump into edit mode to rotate a widget to better align with your situation.
+
+#### Advanced Options:
+This checkbox will switch the slide value into 3 axes rather than just the default Y axis.  This will enable the user to position the widget in some situations without having to jump into edit mode.
 
 
 ### Edit/To Bone:
