@@ -46,7 +46,6 @@ else:
     from . import menus
 
 import bpy
-import os
 
 
 def get_user_preferences(context):

@@ -1,4 +1,3 @@
-import bpy
 from bpy.types import Menu
 
 class BONEWIDGET_MT_bw_specials(Menu):

@@ -3,8 +3,6 @@ import bpy
 from .functions import (
     findMatchBones,
     fromWidgetFindBone,
-    findMirrorObject,
-    symmetrizeWidget,
     symmetrizeWidget_helper,
     boneMatrix,
     createWidget,
@@ -12,7 +10,6 @@ from .functions import (
     returnToArmature,
     addRemoveWidgets,
     readWidgets,
-    objectDataToDico,
     getCollection,
     getViewLayerCollection,
     recurLayerCollection,
@@ -21,7 +18,7 @@ from .functions import (
     resyncWidgetNames,
     addObjectAsWidget,
 )
-from bpy.types import Operator
+
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
 
 

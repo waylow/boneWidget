@@ -2,7 +2,6 @@ import bpy
 import bpy.utils.previews
 from .functions import (
     readWidgets,
-    getViewLayerCollection,
     recurLayerCollection,
     preview_collections,
     generate_previews,
