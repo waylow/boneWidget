@@ -102,8 +102,9 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name=""):
         
         del wgts[widgets]
         if widgets in widget_items:
+            widget_index = widget_items.index(widgets)
+            activeShape = widget_items[widget_index + 1] if widget_index == 0 else widget_items[widget_index - 1]
             widget_items.remove(widgets)
-        activeShape = widget_items[0]
         return_message = "Widget - " + widgets + " has been removed!"
 
     if activeShape is not None:
