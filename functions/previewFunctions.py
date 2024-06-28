@@ -57,8 +57,7 @@ def generate_previews():
 
 
 def preview_update(self, context):
-    if len(bpy.types.Scene.widget_list.keywords["items"]) != len(bpy.types.WindowManager.widget_list.keywords["items"]):
-        createPreviewCollection()
+    createPreviewCollection()
 
 
 def get_preview_default():
