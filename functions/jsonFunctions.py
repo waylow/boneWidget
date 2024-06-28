@@ -107,19 +107,15 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name=""):
         return_message = "Widget - " + widgets + " has been removed!"
 
     if activeShape is not None:
-        del bpy.types.Scene.widget_list
 
-        widget_itemsSorted = []
-        for w in sorted(widget_items):
-            widget_itemsSorted.append((w, w, ""))
-
-        bpy.types.Scene.widget_list = bpy.props.EnumProperty(
-            items=widget_itemsSorted, name="Shape", description="Shape")
-        bpy.context.scene.widget_list = activeShape
         writeWidgets(wgts, file)
 
+        # to handle circular import error
+        from .functions import createPreviewCollection
+
+        createPreviewCollection()
+    
         # trigger an update and display widget
-        bpy.context.window_manager.widget_list = bpy.context.window_manager.widget_list
         bpy.context.window_manager.widget_list = activeShape
 
         return 'INFO', return_message

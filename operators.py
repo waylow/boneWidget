@@ -254,8 +254,7 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         if not objects:
             self.report({'WARNING'}, 'Select Meshes or Pose bones')
             return {'CANCELLED'}
-        #addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects)
-        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects, self.widget_name)
+        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.WindowManager.widget_list.keywords['items'], objects, self.widget_name)
 
         if return_message:
             self.report({message_type}, return_message)
@@ -270,8 +269,7 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
 
     def execute(self, context):
         objects = bpy.context.window_manager.widget_list
-        #unwantedList = addRemoveWidgets(context, "remove", bpy.types.Scene.widget_list.keywords['items'], objects)
-        message_type, return_message = addRemoveWidgets(context, "remove", bpy.types.Scene.widget_list.keywords['items'], objects)
+        message_type, return_message = addRemoveWidgets(context, "remove", bpy.types.WindowManager.widget_list.keywords['items'], objects)
 
         if return_message:
             self.report({message_type}, return_message)

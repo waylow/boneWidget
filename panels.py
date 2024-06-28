@@ -1,10 +1,8 @@
 import bpy
 import bpy.utils.previews
 from .functions import (
-    readWidgets,
     recurLayerCollection,
     preview_collections,
-    generate_previews,
     createPreviewCollection,
     get_preview_default,
 )
@@ -23,13 +21,6 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_idname = 'BONEWIDGET_PT_bw_panel_main'
     bl_label = "Bone Widget"
 
-
-    itemsSort = []
-    for key, value in sorted(readWidgets().items()):
-        itemsSort.append((key, key, ""))
-
-    bpy.types.Scene.widget_list = bpy.props.EnumProperty(
-        items=itemsSort, name="Shape", description="Shape")
 
     createPreviewCollection()
 
