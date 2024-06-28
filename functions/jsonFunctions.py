@@ -95,7 +95,8 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name=""):
             wgts = readWidgets(file)
         
         del wgts[widgets]
-        widget_items.remove(widgets)
+        if widgets in widget_items:
+            widget_items.remove(widgets)
         activeShape = widget_items[0]
         return_message = "Widget - " + widgets + " has been removed!"
 
@@ -118,3 +119,46 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name=""):
         return 'INFO', return_message
     elif ob_name is not None:
         return 'WARNING', "Widget - " + ob_name + " already exists!"
+
+
+def exportWidgetLibrary(filepath):
+    wgts = readWidgets(JSON_USER_WIDGETS)
+
+    if wgts:
+        if not filepath.endswith(".bwl"):
+            filename += ".bwl"
+        f = open(os.path.join(filepath), 'w')
+        f.write(json.dumps(wgts))
+        f.close()
+
+    return len(wgts)
+
+
+def importWidgetLibrary(filepath):
+    wgts = {}
+    num_new_widgets = 0
+    failed_imports = []
+
+    if os.path.exists(filepath):
+        try:
+            f = open(filepath, 'r')
+            wgts = json.load(f)
+            f.close()
+
+            current_wgts = readWidgets(JSON_USER_WIDGETS)
+
+            # check for duplicate names
+            for name, data in wgts.items():
+                if name not in current_wgts:
+                    current_wgts.update({name : data})
+                    num_new_widgets += 1
+                else:
+                    failed_imports.append(name)
+
+            # if there are new widgets
+            if num_new_widgets:
+                writeWidgets(current_wgts, JSON_USER_WIDGETS)
+        except:
+            pass
+
+    return num_new_widgets, failed_imports
