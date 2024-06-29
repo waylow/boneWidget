@@ -21,17 +21,11 @@ def objectDataToDico(object):
         polygons.append(tuple(p.vertices))
 
     edges = []
-
     for e in mesh.edges:
-        if len(polygons) != 0:
-            for vert_indices in polygons:
-                if e.key[0] and e.key[1] not in vert_indices:
-                    edges.append(e.key)
-        else:
-            edges.append(e.key)
+        edges.append(e.key)
 
     wgts = {"vertices": verts, "edges": edges, "faces": polygons, "image": "user_defined.png"}
-    # print(wgts)
+
     return(wgts)
 
 
