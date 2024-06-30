@@ -191,6 +191,9 @@ class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
 
     def execute(self, context):
         widget = bpy.context.active_pose_bone.custom_shape
+        if widget is None:
+            self.report({"INFO"}, "There is no widget on this bone.")
+            return {'FINISHED'}
         collection = getViewLayerCollection(context, widget)
         widgetsAndBones = findMatchBones()[0]
         activeObject = findMatchBones()[1]
