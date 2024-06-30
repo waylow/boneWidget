@@ -27,7 +27,6 @@ This is the large preview panel that displays the currently selected widget.  Cl
 
 ### Shape Drop Down:
 This is the active shape from Bone Widget Library.
-Choose the shape you want to add from the list here or from the large preview (if you have that enabled).
 
 ## BW Specials Menu:
 
@@ -117,18 +116,24 @@ This will only toggle the visibility of the designated widget collection (set in
 </blockquote>
 </br></br></br>
 
-# To Do:
-import/export library of shapes.
-add popup to be able to choose the name for the widget when you add it to the library
+## TO DO:
+ - 
+ - [bug] If you press Symmetrize Shape in pose mode with no widget added, it will throw an error.
+ - [bug] If you add an object as a new widget, and then delete the object afterwards, it will throw errors every time you
+    move the mouse over the preview panel. 
+ - [change] add the ability to keep and use the face data for the widgets (in the redo panel).  This will make it possible to create solid shapes when needed rather than just wire shapes.
 
 
 ## v2.1 Release Notes:
-- Markus Berg added functionality to display images of the widgets. What a flippin' legend.
-- Matching the bone transforms now works correctly if the user has changed the transforms of the custom shape display on the bone settings
-- Markus split the scale and slide into 3 axies and implemented toggle to show simple/advanced mode
-- [enhancemnt] Popup added for name input when adding a widget to the library
+- [Added] Markus Berg added functionality to display images of the widgets. What a flippin' legend.
+- [Added] Markus split the scale and slide into 3 axies and implemented toggle to show simple/advanced mode
+- [Added] Popup added for name input when adding a widget to the library
+- [Added] import/export user library of shapes
+- [Added] popup to name the widget when adding to library
+- [change] remove the "_old" functionality of the code (just delete the old widget)
 - [fix] the match bone transforms now takes the custom shape transforms into account
 - [fix] if the collection didn't exist when you tried to delete unused widgets it would throw an error.  You now get a message that hints at the problem.
+- [fix] Matching the bone transforms now works correctly if the user has changed the transforms of the custom shape display on the bone settings
 
 ## v2.0 Release Notes:
 - changed the default name of the n panel to 'Rigging' rather than 'Rig Tools'

@@ -110,11 +110,9 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
 
     matrixBone = bone
 
+    # delete the existing shape
     if bone.custom_shape:
-        bone.custom_shape.name = bone.custom_shape.name + "_old"
-        bone.custom_shape.data.name = bone.custom_shape.data.name + "_old"
-        if C.scene.collection.objects.get(bone.custom_shape.name):
-            C.scene.collection.objects.unlink(bone.custom_shape)
+        bpy.data.objects.remove(bpy.data.objects[bone.custom_shape.name], do_unlink=True)
 
     # make the data name include the prefix
     newData = D.meshes.new(bw_widget_prefix + bone.name)
@@ -178,9 +176,6 @@ def symmetrizeWidget(bone, collection):
         print(mirrorWidget)
         if mirrorWidget is not None:
             if mirrorWidget != widget:
-                mirrorWidget.name = mirrorWidget.name + "_old"
-                mirrorWidget.data.name = mirrorWidget.data.name + "_old"
-                # unlink/delete old widget
                 if C.scene.objects.get(mirrorWidget.name):
                     D.objects.remove(mirrorWidget)
 
@@ -433,10 +428,7 @@ def addObjectAsWidget(context, collection):
 
         # deal with any existing shape
         if active_bone.custom_shape:
-            active_bone.custom_shape.name = active_bone.custom_shape.name + "_old"
-            active_bone.custom_shape.data.name = active_bone.custom_shape.data.name + "_old"
-            if context.scene.collection.objects.get(active_bone.custom_shape.name):
-                context.scene.collection.objects.unlink(active_bone.custom_shape)
+            bpy.data.objects.remove(bpy.data.objects[bone.custom_shape.name], do_unlink=True)
 
         #duplicate shape
         widget = widget_object.copy()
