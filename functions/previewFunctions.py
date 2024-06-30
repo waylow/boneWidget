@@ -57,7 +57,7 @@ def generate_previews():
 
 
 def preview_update(self, context):
-    createPreviewCollection()
+    generate_previews()
 
 
 def get_preview_default():
