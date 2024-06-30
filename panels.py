@@ -71,10 +71,15 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                             icon='RESTRICT_SELECT_OFF')
 
         # if the bw collection exists, show the visibility toggle
-        if not context.preferences.addons[__package__].preferences.use_rigify_defaults:
+        if not context.preferences.addons[__package__].preferences.use_rigify_defaults: #rigify
             bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-        else:
+        
+        elif context.active_object: # active  object
             bw_collection_name = 'WGTS_' + context.active_object.name
+        
+        else: # this is needed because sometimes there is no active object
+            bw_collection_name = None 
+        
         bw_collection = recurLayerCollection(bpy.context.view_layer.layer_collection, bw_collection_name)
 
         if bw_collection is not None:
