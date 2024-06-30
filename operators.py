@@ -3,8 +3,6 @@ import bpy
 from .functions import (
     findMatchBones,
     fromWidgetFindBone,
-    findMirrorObject,
-    symmetrizeWidget,
     symmetrizeWidget_helper,
     boneMatrix,
     createWidget,
@@ -12,7 +10,6 @@ from .functions import (
     returnToArmature,
     addRemoveWidgets,
     readWidgets,
-    objectDataToDico,
     getCollection,
     getViewLayerCollection,
     recurLayerCollection,
@@ -20,8 +17,11 @@ from .functions import (
     clearBoneWidgets,
     resyncWidgetNames,
     addObjectAsWidget,
+    importWidgetLibrary,
+    exportWidgetLibrary,
+    createPreviewCollection,
 )
-from bpy.types import Operator
+
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
 
 
@@ -254,8 +254,7 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         if not objects:
             self.report({'WARNING'}, 'Select Meshes or Pose bones')
             return {'CANCELLED'}
-        #addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects)
-        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.Scene.widget_list.keywords['items'], objects, self.widget_name)
+        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.WindowManager.widget_list.keywords['items'], objects, self.widget_name)
 
         if return_message:
             self.report({message_type}, return_message)
@@ -270,13 +269,88 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
 
     def execute(self, context):
         objects = bpy.context.window_manager.widget_list
-        #unwantedList = addRemoveWidgets(context, "remove", bpy.types.Scene.widget_list.keywords['items'], objects)
-        message_type, return_message = addRemoveWidgets(context, "remove", bpy.types.Scene.widget_list.keywords['items'], objects)
+        message_type, return_message = addRemoveWidgets(context, "remove", bpy.types.WindowManager.widget_list.keywords['items'], objects)
 
         if return_message:
             self.report({message_type}, return_message)
             
         return {'FINISHED'}
+
+
+class BONEWIDGET_OT_importLibrary(bpy.types.Operator):
+    """Import User Defined Widgets"""
+    bl_idname = "bonewidget.import_library"
+    bl_label = "Import Library"
+
+
+    filter_glob: StringProperty(
+        default='*.bwl',
+        options={'HIDDEN'}
+    )
+
+    filename: StringProperty(
+        name='Filename',
+        description='Name of file to be imported',
+    )
+
+    filepath: StringProperty(
+        subtype="FILE_PATH"
+    )
+
+    def execute(self, context):
+        if self.filepath:
+            num_widgets, failed_imports = importWidgetLibrary(self.filepath)
+
+            if failed_imports:
+                failed = " | ".join(failed_imports)
+                message = f"{num_widgets} widgets imported. {len(failed_imports)} failed: {failed}"
+            else:
+                message = f"{num_widgets} widgets imported successfully!"
+                
+            self.report({'INFO'}, message)
+
+            # trigger an update and display the new widgets if any widgets were imported
+            if num_widgets:
+                createPreviewCollection()
+            
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        self.filename = ""
+        context.window_manager.fileselect_add(self)        
+        return {'RUNNING_MODAL'}
+
+
+class BONEWIDGET_OT_exportLibrary(bpy.types.Operator):
+    """Export User Defined Widgets"""
+    bl_idname = "bonewidget.export_library"
+    bl_label = "Export Library"
+
+
+    filter_glob: StringProperty(
+        default='*.bwl',
+        options={'HIDDEN'}
+    )
+    
+    filename: StringProperty(
+        name='Filename',
+        description='Name of file to be exported',
+    )
+
+    filepath: StringProperty(
+        subtype="FILE_PATH"
+    )
+
+    def execute(self, context):
+        if self.filepath:
+            num_widgets = exportWidgetLibrary(self.filepath)
+            self.report({'INFO'}, f"{num_widgets} widgets exported successfully!")
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        self.filename = "widgetLibrary.bwl"
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
 
 class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
@@ -362,6 +436,8 @@ class BONEWIDGET_OT_addObjectAsWidget(bpy.types.Operator):
 classes = (
     BONEWIDGET_OT_removeWidgets,
     BONEWIDGET_OT_addWidgets,
+    BONEWIDGET_OT_importLibrary,
+    BONEWIDGET_OT_exportLibrary,
     BONEWIDGET_OT_matchSymmetrizeShape,
     BONEWIDGET_OT_matchBoneTransforms,
     BONEWIDGET_OT_returnToArmature,

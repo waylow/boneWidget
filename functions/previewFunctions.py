@@ -6,6 +6,23 @@ from .. import __package__
 
 preview_collections = {}
 
+
+def createPreviewCollection():
+    if preview_collections:
+        del bpy.types.WindowManager.widget_list
+        for pcoll in preview_collections.values():
+            bpy.utils.previews.remove(pcoll)
+        preview_collections.clear()
+
+    pcoll = bpy.utils.previews.new()
+    pcoll.widget_list = ()
+    preview_collections["widgets"] = pcoll
+
+    bpy.types.WindowManager.widget_list = bpy.props.EnumProperty(
+        items=generate_previews(), name="Shape", description="Shape", update=preview_update
+    )
+
+
 def generate_previews():
     enum_items = []
 
@@ -40,19 +57,7 @@ def generate_previews():
 
 
 def preview_update(self, context):
-    if len(bpy.types.Scene.widget_list.keywords["items"]) != len(bpy.types.WindowManager.widget_list.keywords["items"]):
-        del bpy.types.WindowManager.widget_list
-        for pcoll in preview_collections.values():
-            bpy.utils.previews.remove(pcoll)
-        preview_collections.clear()
-
-        pcoll = bpy.utils.previews.new()
-        pcoll.widget_list = ()
-        preview_collections["widgets"] = pcoll
-        
-        bpy.types.WindowManager.widget_list = bpy.props.EnumProperty(
-            items=generate_previews(), name="Shape", description="Shape", update=preview_update
-        )
+    generate_previews()
 
 
 def get_preview_default():

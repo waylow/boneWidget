@@ -2,7 +2,6 @@ import bpy
 import numpy
 from math import pi
 from mathutils import Matrix
-from .jsonFunctions import objectDataToDico
 from .. import __package__
 
 
