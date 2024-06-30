@@ -117,9 +117,7 @@ This will only toggle the visibility of the designated widget collection (set in
 </br></br></br>
 
 ## TO DO:
- - 
  - [bug] If you press Symmetrize Shape in pose mode with no widget added, it will throw an error.
- - [bug] If you add an object as a new widget, and then delete the object afterwards, it will throw errors every time you
     move the mouse over the preview panel. 
  - [change] add the ability to keep and use the face data for the widgets (in the redo panel).  This will make it possible to create solid shapes when needed rather than just wire shapes.
 
@@ -133,7 +131,7 @@ This will only toggle the visibility of the designated widget collection (set in
 - [change] remove the "_old" functionality of the code (just delete the old widget)
 - [fix] the match bone transforms now takes the custom shape transforms into account
 - [fix] if the collection didn't exist when you tried to delete unused widgets it would throw an error.  You now get a message that hints at the problem.
-- [fix] Matching the bone transforms now works correctly if the user has changed the transforms of the custom shape display on the bone settings
+ - [fixed] If there is no active object the panel.py would throw an error
 
 ## v2.0 Release Notes:
 - changed the default name of the n panel to 'Rigging' rather than 'Rig Tools'
