@@ -98,7 +98,7 @@ def fromWidgetFindBone(widget):
     return matchBone
 
 
-def createWidget(bone, widget, relative, size, scale, slide, rotation, collection):
+def createWidget(bone, widget, relative, size, scale, slide, rotation, collection, show_wireframe):
     C = bpy.context
     D = bpy.data
 
@@ -151,7 +151,7 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
     layer.update()
 
     bone.custom_shape = newObject
-    bone.bone.show_wire = True
+    bone.bone.show_wire = show_wireframe
 
 
 def symmetrizeWidget(bone, collection):
