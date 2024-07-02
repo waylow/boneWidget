@@ -1,6 +1,5 @@
 import bpy
 import numpy
-from math import pi
 from mathutils import Matrix
 from .. import __package__
 
