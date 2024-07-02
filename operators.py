@@ -9,7 +9,7 @@ from .functions import (
     editWidget,
     returnToArmature,
     addRemoveWidgets,
-    readWidgets,
+    getWidgetData,
     getCollection,
     getViewLayerCollection,
     recurLayerCollection,
@@ -119,11 +119,11 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         row.prop(self, "advanced_options")
 
     def execute(self, context):
-        wgts = readWidgets()
+        widget_data = getWidgetData(context.window_manager.widget_list)
         slide = self.slide_advanced if self.advanced_options else (0.0, self.slide_simple, 0.0)
         global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
         for bone in bpy.context.selected_pose_bones:
-            createWidget(bone, wgts[context.window_manager.widget_list], self.relative_size, global_size, [
+            createWidget(bone, widget_data, self.relative_size, global_size, [
                          1, 1, 1], slide, self.rotation, getCollection(context), self.show_wireframe)
         return {'FINISHED'}
 

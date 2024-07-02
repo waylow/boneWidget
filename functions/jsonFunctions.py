@@ -7,6 +7,8 @@ from .. import __package__
 JSON_DEFAULT_WIDGETS = "widgets.json"
 JSON_USER_WIDGETS = "user_widgets.json"
 
+widget_data = {}
+
 
 def objectDataToDico(object):
     verts = []
@@ -29,13 +31,14 @@ def objectDataToDico(object):
     return(wgts)
 
 
-def readWidgets(file = ""):
+def readWidgets(filename = ""):
+    global widget_data
     wgts = {}
 
-    if not file:
+    if not filename:
         files = [JSON_DEFAULT_WIDGETS, JSON_USER_WIDGETS]
     else:
-        files = [file]
+        files = [filename]
 
     for file in files:
         jsonFile = os.path.join(os.path.dirname(os.path.dirname(__file__)), file)
@@ -43,8 +46,15 @@ def readWidgets(file = ""):
             f = open(jsonFile, 'r')
             wgts.update(json.load(f))
             f.close()
+            
+    if not filename: # if both files have been read
+        widget_data = wgts.copy()
 
     return (wgts)
+
+
+def getWidgetData(widget):
+    return widget_data[widget]
 
 
 def writeWidgets(wgts, file):
