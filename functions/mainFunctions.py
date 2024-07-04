@@ -153,7 +153,7 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
     layer.update()
 
     bone.custom_shape = newObject
-    bone.bone.show_wire = True
+    bone.bone.show_wire = not use_face_data # show faces if use face data is enabled
 
 
 def symmetrizeWidget(bone, collection):
