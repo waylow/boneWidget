@@ -396,7 +396,7 @@ class BONEWIDGET_OT_deleteUnusedWidgets(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_clearBoneWidgets(bpy.types.Operator):
-    """Clear widgets from selected pose bones"""
+    """Clears widgets from selected pose bones but doesn't remove them from the scene."""
     bl_idname = "bonewidget.clear_widgets"
     bl_label = "Clear Widgets"
 
