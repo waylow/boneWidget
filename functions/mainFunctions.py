@@ -97,7 +97,7 @@ def fromWidgetFindBone(widget):
     return matchBone
 
 
-def createWidget(bone, widget, relative, size, scale, slide, rotation, collection, show_wireframe):
+def createWidget(bone, widget, relative, size, scale, slide, rotation, collection, use_face_data):
     C = bpy.context
     D = bpy.data
 
@@ -120,9 +120,12 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
     else:
         boneLength = (1 / bone.bone.length)
 
+    # deal with face data
+    faces = widget['faces'] if use_face_data else []
+
     # add the verts
     newData.from_pydata(numpy.array(widget['vertices']) * [size[0] * scale[0] * boneLength, size[1] * scale[2]
-                        * boneLength, size[2] * scale[1] * boneLength], widget['edges'], widget['faces'])
+                        * boneLength, size[2] * scale[1] * boneLength], widget['edges'], faces)
 
     # Create tranform matrices (slide vector and rotation)
     widget_matrix = Matrix()
@@ -150,7 +153,7 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
     layer.update()
 
     bone.custom_shape = newObject
-    bone.bone.show_wire = show_wireframe
+    bone.bone.show_wire = True
 
 
 def symmetrizeWidget(bone, collection):

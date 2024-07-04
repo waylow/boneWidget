@@ -50,10 +50,10 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         description="Scale Widget to bone length"
     )
 
-    show_wireframe: BoolProperty(
-        name="Wireframe",
-        default=True,
-        description="Display widget as wireframe"
+    use_face_data: BoolProperty(
+        name="Use Face Data",
+        default=False,
+        description="When enabled this option will include widget face data from library if available"
     )
 
     advanced_options: BoolProperty(
@@ -108,7 +108,8 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         row = col.row(align=True)
         row.prop(self, "relative_size")
         row = col.row(align=True)
-        row.prop(self, "show_wireframe")
+        if self.advanced_options:
+            row.prop(self, "use_face_data")
         row = col.row(align=True)
         row.prop(self, "global_size_advanced" if self.advanced_options else "global_size_simple", expand=False)
         row = col.row(align=True)
@@ -124,7 +125,7 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
         for bone in bpy.context.selected_pose_bones:
             createWidget(bone, widget_data, self.relative_size, global_size, [
-                         1, 1, 1], slide, self.rotation, getCollection(context), self.show_wireframe)
+                         1, 1, 1], slide, self.rotation, getCollection(context), self.use_face_data)
         return {'FINISHED'}
 
 
