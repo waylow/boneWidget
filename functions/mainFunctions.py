@@ -258,12 +258,19 @@ def editWidget(active_bone):
     D = bpy.data
     widget = active_bone.custom_shape
 
+    collection = getViewLayerCollection(C, widget)
+    collection.hide_viewport = False
+
+    # hide all other objects in collection
+    for obj in collection.collection.all_objects:
+        if obj.name != widget.name:
+            obj.hide_set(True)
+        else:
+            obj.hide_set(False) # in case user manually hid it
+
     armature = active_bone.id_data
     bpy.ops.object.mode_set(mode='OBJECT')
     C.active_object.select_set(False)
-
-    collection = getViewLayerCollection(C, widget)
-    collection.hide_viewport = False
 
     if C.space_data.local_view:
         bpy.ops.view3d.localview()
@@ -272,6 +279,7 @@ def editWidget(active_bone):
     widget.select_set(True)
     bpy.context.view_layer.objects.active = widget
     bpy.ops.object.mode_set(mode='EDIT')
+    bpy.context.tool_settings.mesh_select_mode = (True, False, False) # enter vertex mode
 
 
 def returnToArmature(widget):
@@ -288,8 +296,14 @@ def returnToArmature(widget):
 
     collection = getViewLayerCollection(C, widget)
     collection.hide_viewport = True
+
+    # unhide all objects in the collection
+    for obj in collection.collection.all_objects:
+        obj.hide_set(False)
+    
     if C.space_data.local_view:
         bpy.ops.view3d.localview()
+    
     bpy.context.view_layer.objects.active = armature
     armature.select_set(True)
     bpy.ops.object.mode_set(mode='POSE')
