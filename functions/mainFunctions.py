@@ -118,7 +118,7 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
     if relative is True:
         boneLength = 1
     else:
-        boneLength = (1 / bone.bone.length)
+        boneLength = (1.0 / bone.bone.length)
 
     # deal with face data
     faces = widget['faces'] if use_face_data else []
