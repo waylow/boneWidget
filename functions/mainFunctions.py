@@ -467,3 +467,12 @@ def addObjectAsWidget(context, collection):
 
         #deselect original object
         widget_object.select_set(False)
+
+
+def advanced_options_toggled(self, context):
+    if self.advanced_options:
+        self.global_size_advanced = (self.global_size_simple,) * 3
+        self.slide_advanced[1] = self.slide_simple
+    else:
+        self.global_size_simple = self.global_size_advanced[1]
+        self.slide_simple = self.slide_advanced[1]
