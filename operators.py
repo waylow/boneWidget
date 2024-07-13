@@ -20,18 +20,10 @@ from .functions import (
     importWidgetLibrary,
     exportWidgetLibrary,
     createPreviewCollection,
+    advanced_options_toggled,
 )
 
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
-
-
-def advanced_options_toggled(self, context):
-    if self.advanced_options:
-        self.global_size_advanced = (self.global_size_simple,) * 3
-        self.slide_advanced[1] = self.slide_simple
-    else:
-        self.global_size_simple = self.global_size_advanced[1]
-        self.slide_simple = self.slide_advanced[1]
 
 
 class BONEWIDGET_OT_createWidget(bpy.types.Operator):
