@@ -22,9 +22,16 @@ from .functions import (
     createPreviewCollection,
     advanced_options_toggled,
     removeCustomImage,
+    copyCustomImage,
+    getWidgetData,
 )
 
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
+
+
+class BONEWIDGET_OT_sharedPropertyGroup(bpy.types.PropertyGroup):
+    """Storage class for Shared Attribute Properties"""
+    pass
 
 
 class BONEWIDGET_OT_createWidget(bpy.types.Operator):
@@ -211,6 +218,39 @@ class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_fileSelect(bpy.types.Operator):
+    """Open a Fileselect browser and get the image location"""
+    bl_idname = "bonewidget.fileselect"
+    bl_label = "Select Image"
+
+
+    filter_glob: StringProperty(
+        default='*.jpg;*.jpeg;*.png;*.tif;',
+        options={'HIDDEN'}
+    )
+    
+    filename: StringProperty(
+        name='Filename',
+        description='Name of custom image',
+    )
+
+    filepath: StringProperty(
+        subtype="FILE_PATH"
+    )
+
+    def invoke(self, context, event):
+        self.filename = ""
+        context.window_manager.fileselect_add(self)
+        context.area.tag_redraw()
+        return {'RUNNING_MODAL'}
+
+    def execute(self, context):
+        bpy.context.window_manager.prop_grp.custom_image_name = self.filename
+        bpy.types.WindowManager.custom_image = (self.filepath, self.filename)
+        context.area.tag_redraw()
+        return {'FINISHED'}
+
+
 class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
     """Add selected mesh object to Bone Widget Library"""
     bl_idname = "bonewidget.add_widgets"
@@ -224,27 +264,41 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         options={"TEXTEDIT_UPDATE"},
     )
 
+    custom_image: BoolProperty(
+        name="Custom Image",
+        default=False,
+        description="Use a custom image for the new widget"
+    )
+
 
     @classmethod
     def poll(cls, context):
         return (context.object and context.object.type == 'MESH' and context.object.mode == 'OBJECT'
                 and context.active_object is not None)
 
-
     def draw(self, context):
         layout = self.layout
-        layout.label(text="Widget Name:")
-        layout.prop(self, "widget_name", text="")
+        row = layout.row()
+        row.label(text="Widget Name:")
+        row.prop(self, "widget_name", text="")
+        row = layout.row()
+        row.prop(self, "custom_image", text="Custom Image")
 
+        if self.custom_image:
+            row = layout.row()
+            row.prop(bpy.context.window_manager.prop_grp, "custom_image_name", text="", placeholder="Choose an image...", icon="FILE_IMAGE")
+            row.operator('bonewidget.fileselect', icon='FILEBROWSER', text="")
 
     def invoke(self, context, event):
         if bpy.context.selected_objects:
+            bpy.types.WindowManager.custom_image = ("", "")
             self.widget_name = context.active_object.name
+            bpy.types.WindowManager.prop_grp = bpy.props.PointerProperty(type=BONEWIDGET_OT_sharedPropertyGroup)
+            setattr(BONEWIDGET_OT_sharedPropertyGroup, "custom_image_name", bpy.props.StringProperty(name="Image Name"))
             return context.window_manager.invoke_props_dialog(self) #title="Add New Widget to Library")
             
         self.report({'WARNING'}, 'Please select an object first!')
         return {'CANCELLED'}
-
 
     def execute(self, context):
         objects = []
@@ -259,7 +313,15 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         if not objects:
             self.report({'WARNING'}, 'Select Meshes or Pose bones')
             return {'CANCELLED'}
-        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.WindowManager.widget_list.keywords['items'], objects, self.widget_name)
+        
+        # get filepath to custom image if specified and transfer to custom image folder
+        if self.custom_image:
+            custom_image_path, custom_image_name = context.window_manager.custom_image
+            copyCustomImage(custom_image_path, custom_image_name)
+            bpy.context.window_manager.prop_grp.custom_image_name = ""  # make sure the field is empty for next time
+        
+        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.WindowManager.widget_list.keywords['items'],
+                                                        objects, self.widget_name, custom_image_name)
 
         if return_message:
             self.report({message_type}, return_message)
@@ -457,6 +519,8 @@ classes = (
     BONEWIDGET_OT_clearBoneWidgets,
     BONEWIDGET_OT_resyncWidgetNames,
     BONEWIDGET_OT_addObjectAsWidget,
+    BONEWIDGET_OT_sharedPropertyGroup,
+    BONEWIDGET_OT_fileSelect,
 )
 
 

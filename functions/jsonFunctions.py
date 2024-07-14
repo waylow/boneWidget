@@ -10,7 +10,7 @@ JSON_USER_WIDGETS = "user_widgets.json"
 widget_data = {}
 
 
-def objectDataToDico(object):
+def objectDataToDico(object, custom_image):
     verts = []
     depsgraph = bpy.context.evaluated_depsgraph_get()
     mesh = object.evaluated_get(depsgraph).to_mesh()
@@ -26,7 +26,9 @@ def objectDataToDico(object):
     for e in mesh.edges:
         edges.append(e.key)
 
-    wgts = {"vertices": verts, "edges": edges, "faces": polygons, "image": "user_defined.png"}
+    custom_image = custom_image if custom_image != "" else "user_defined.png"
+
+    wgts = {"vertices": verts, "edges": edges, "faces": polygons, "image": custom_image}
 
     return(wgts)
 
@@ -65,7 +67,7 @@ def writeWidgets(wgts, file):
     f.close()
 
 
-def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name=""):
+def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name="", custom_image=""):
     wgts = {}
 
     # file from where the widget should be read or written to
@@ -92,7 +94,7 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name=""):
 
             if (ob_name) not in widget_items:
                 widget_items.append(ob_name)
-                wgts[ob_name] = objectDataToDico(ob)
+                wgts[ob_name] = objectDataToDico(ob, custom_image)
                 activeShape = ob_name
                 return_message = "Widget - " + ob_name + " has been added!"
 

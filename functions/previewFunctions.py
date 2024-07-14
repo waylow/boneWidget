@@ -32,6 +32,7 @@ def generate_previews():
     
     #directory = os.path.join(os.path.dirname(__file__), "thumbnails")
     directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'thumbnails'))
+    custom_directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'custom_thumbnails'))
 
     if directory and os.path.exists(directory):
         widget_data = {item[0]: item[1].get("image", "missing_image.png") for item in readWidgets().items()}
@@ -41,7 +42,11 @@ def generate_previews():
             image = widget_data.get(name, "")
             filepath = os.path.join(directory, image)
 
-            # make sure the image exist
+            # try in custom_thumbnails if above failed
+            if not os.path.exists(filepath):
+                filepath = os.path.join(custom_directory, image)
+
+            # if image still not found, let the user know
             if not os.path.exists(filepath):
                 filepath = os.path.join(directory, "missing_image.png")
 
@@ -51,7 +56,7 @@ def generate_previews():
             else:
                 thumb = pcoll[name]
             enum_items.append((name, name, "", thumb.icon_id, i))
-
+    
     pcoll.widget_list = enum_items
     return enum_items
 
@@ -62,6 +67,24 @@ def preview_update(self, context):
 
 def get_preview_default():
     return bpy.context.preferences.addons[__package__].preferences.preview_default
+
+
+def copyCustomImage(filepath, filename):
+    if os.path.exists(filepath):
+        image_directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'custom_thumbnails'))
+        destination_path = os.path.join(image_directory, filename)
+
+        try:
+            # create custom thumbnail folder if not existing
+            if not os.path.exists(image_directory):
+                os.makedirs(image_directory)
+
+            import shutil
+            shutil.copyfile(filepath, destination_path)
+            return True
+        except:
+            pass
+    return False
 
 
 def removeCustomImage(filename):
