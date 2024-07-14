@@ -332,7 +332,7 @@ class BONEWIDGET_OT_exportLibrary(bpy.types.Operator):
 
 
     filter_glob: StringProperty(
-        default='*.bwl',
+        default='*.zip',
         options={'HIDDEN'}
     )
     
@@ -352,7 +352,7 @@ class BONEWIDGET_OT_exportLibrary(bpy.types.Operator):
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        self.filename = "widgetLibrary.bwl"
+        self.filename = "widgetLibrary.zip"
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
