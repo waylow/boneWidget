@@ -62,3 +62,16 @@ def preview_update(self, context):
 
 def get_preview_default():
     return bpy.context.preferences.addons[__package__].preferences.preview_default
+
+
+def removeCustomImage(filename):
+    image_directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'custom_thumbnails'))
+    destination_path = os.path.join(image_directory, filename)
+    
+    if os.path.isfile(destination_path):
+        try:
+            os.remove(destination_path)
+            return True
+        except:
+            pass
+    return False
