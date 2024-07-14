@@ -132,11 +132,30 @@ def exportWidgetLibrary(filepath):
     wgts = readWidgets(JSON_USER_WIDGETS)
 
     if wgts:
-        if not filepath.endswith(".bwl"):
-            filename += ".bwl"
-        f = open(os.path.join(filepath), 'w')
-        f.write(json.dumps(wgts))
-        f.close()
+        # variables needed for exporting widgets
+        dest_dir = os.path.dirname(filepath)
+        json_dir = os.path.dirname(os.path.dirname(__file__))
+        image_folder = 'custom_thumbnails'
+        custom_image_dir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', image_folder))
+        
+        filename = os.path.basename(filepath)
+        if not filename: filename = "widgetLibrary.zip"
+        elif not filename.endswith('.zip'): filename += ".zip"
+
+        # start the zipping process
+        from zipfile import ZipFile
+        with ZipFile(os.path.join(dest_dir, filename), "w") as zip:
+            # write the json file
+            file = os.path.join(json_dir, JSON_USER_WIDGETS)
+            arcname = os.path.basename(file)
+            zip.write(file, arcname=arcname)
+
+            # write the custom images if present
+            if os.path.exists(custom_image_dir):
+                from pathlib import Path
+                for filepath in Path(custom_image_dir).iterdir():
+                    arcname = os.path.join(image_folder, os.path.basename(filepath))
+                    zip.write(filepath, arcname=arcname)
 
     return len(wgts)
 
