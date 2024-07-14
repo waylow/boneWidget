@@ -21,6 +21,7 @@ from .functions import (
     exportWidgetLibrary,
     createPreviewCollection,
     advanced_options_toggled,
+    removeCustomImage,
 )
 
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
@@ -273,6 +274,10 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
 
     def execute(self, context):
         objects = bpy.context.window_manager.widget_list
+
+        # try and remove the image - will abort if no custom image assigned or if missing
+        removeCustomImage(getWidgetData(objects).get("image"))
+        
         message_type, return_message = addRemoveWidgets(context, "remove", bpy.types.WindowManager.widget_list.keywords['items'], objects)
 
         if return_message:
