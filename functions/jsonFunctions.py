@@ -190,3 +190,28 @@ def importWidgetLibrary(filepath):
             pass
 
     return num_new_widgets, failed_imports
+
+
+def updateCustomImage(image_name):
+    current_widget = bpy.context.window_manager.widget_list
+    current_widget_data = getWidgetData(current_widget)
+
+    # swap out the image
+    current_widget_data['image'] = image_name
+
+     # update and write the new data
+    wgts = readWidgets(JSON_USER_WIDGETS)
+    if current_widget in wgts:
+        wgts[current_widget] = current_widget_data
+        writeWidgets(wgts, JSON_USER_WIDGETS)
+    else:
+        wgts = readWidgets(JSON_DEFAULT_WIDGETS)
+        wgts[current_widget] = current_widget_data
+        writeWidgets(wgts, JSON_DEFAULT_WIDGETS)
+
+    # update the preview panel
+    from .functions import createPreviewCollection
+    createPreviewCollection()
+    
+    # trigger an update and display original but updated widget
+    bpy.context.window_manager.widget_list = current_widget
