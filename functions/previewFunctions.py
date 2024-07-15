@@ -1,6 +1,6 @@
 import bpy
 import bpy.utils.previews
-from .jsonFunctions import readWidgets
+from .jsonFunctions import readWidgets, JSON_USER_WIDGETS
 import os
 from .. import __package__
 
@@ -92,6 +92,14 @@ def removeCustomImage(filename):
     destination_path = os.path.join(image_directory, filename)
     
     if os.path.isfile(destination_path):
+        # make sure the image is only used once - else stop
+        count = 0
+        for v in readWidgets(JSON_USER_WIDGETS).values():
+            if v.get("image") == filename:
+                count += 1
+            if count > 1:
+                return False
+            
         try:
             os.remove(destination_path)
             return True
