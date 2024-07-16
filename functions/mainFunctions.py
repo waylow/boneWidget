@@ -115,17 +115,14 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
     # make the data name include the prefix
     newData = D.meshes.new(bw_widget_prefix + bone.name)
 
-    if relative is True:
-        boneLength = 1
-    else:
-        boneLength = (1.0 / bone.bone.length)
+    bone.use_custom_shape_bone_size = relative
 
     # deal with face data
     faces = widget['faces'] if use_face_data else []
 
     # add the verts
-    newData.from_pydata(numpy.array(widget['vertices']) * [size[0] * scale[0] * boneLength, size[1] * scale[2]
-                        * boneLength, size[2] * scale[1] * boneLength], widget['edges'], faces)
+    newData.from_pydata(numpy.array(widget['vertices']) * [size[0] * scale[0], size[1] * scale[2],
+                        size[2] * scale[1]], widget['edges'], faces)
 
     # Create tranform matrices (slide vector and rotation)
     widget_matrix = Matrix()
