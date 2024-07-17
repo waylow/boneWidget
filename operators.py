@@ -102,6 +102,14 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         precision=1,
     )
 
+    wireframe_width: FloatProperty(
+        name="Wire Width",
+        default=1.0,
+        max=16,
+        soft_max = 10,
+        description="Set the thickness of a wireframe widget"
+    )
+
     def draw(self, context):
         layout = self.layout
         layout.use_property_split = True
@@ -118,6 +126,8 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         row = col.row(align=True)
         row.prop(self, "rotation", text="Rotation")
         row = col.row(align=True)
+        row.prop(self, "wireframe_width", text="Wire Width")
+        row = col.row(align=True)
         row.prop(self, "advanced_options")
 
     def execute(self, context):
@@ -126,7 +136,7 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
         for bone in bpy.context.selected_pose_bones:
             createWidget(bone, widget_data, self.relative_size, global_size, [
-                         1, 1, 1], slide, self.rotation, getCollection(context), self.use_face_data)
+                         1, 1, 1], slide, self.rotation, getCollection(context), self.use_face_data, self.wireframe_width)
         return {'FINISHED'}
 
 

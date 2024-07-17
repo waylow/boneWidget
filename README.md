@@ -116,9 +116,6 @@ This will only toggle the visibility of the designated widget collection (set in
 </blockquote>
 </br></br></br>
 
-## TO DO:
- - [enhancment] add wire width default to userprefs
-
 
 ## v2.1 Release Notes:
 - [Added] Markus Berg added functionality to display images of the widgets. What a flippin' legend.
@@ -127,6 +124,7 @@ This will only toggle the visibility of the designated widget collection (set in
 - [Added] import/export user library of shapes
 - [Added] popup to name the widget when adding to library
 - [Added] you can now add custom images to the widgets (or use the in-built image place holders)
+- [Added] added wire width option when the widgets are created
 - [change] remove the "_old" functionality of the code (just delete the old widget)
 - [fix] the match bone transforms now takes the custom shape transforms into account
 - [fix] if the collection didn't exist when you tried to delete unused widgets it would throw an error.  You now get a message that hints at the problem.
