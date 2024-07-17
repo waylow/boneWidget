@@ -99,7 +99,7 @@ class BoneWidgetPreferences(AddonPreferences):
 
         row = layout.row()
         col = row.column()
-        col.label(text="Set the category to show Bone-Widgets panel:")
+        col.label(text="Set the name of the tab where the Bone-Widget addon will show:")
         col.prop(self, "panel_category")
 
         # preview area
