@@ -54,7 +54,7 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
     use_face_data: BoolProperty(
         name="Use Face Data",
         default=False,
-        description="When enabled this option will include widget face data from library if available"
+        description="When enabled this option will include the widget's face data (if available)"
     )
 
     advanced_options: BoolProperty(
