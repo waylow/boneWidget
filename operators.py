@@ -126,8 +126,9 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         row = col.row(align=True)
         row.prop(self, "rotation", text="Rotation")
         row = col.row(align=True)
-        row.prop(self, "wireframe_width", text="Wire Width")
-        row = col.row(align=True)
+        if bpy.app.version >= (4,2,0):
+            row.prop(self, "wireframe_width", text="Wire Width")
+            row = col.row(align=True)
         row.prop(self, "advanced_options")
 
     def execute(self, context):

@@ -151,7 +151,9 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
 
     bone.custom_shape = newObject
     bone.bone.show_wire = not use_face_data # show faces if use face data is enabled
-    bone.custom_shape_wire_width = wireframe_width
+
+    if bpy.app.version >= (4,2,0):
+        bone.custom_shape_wire_width = wireframe_width
 
 
 def symmetrizeWidget(bone, collection):
