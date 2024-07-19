@@ -55,11 +55,22 @@ This will create a widget object for each of the selected bones.  The widget obj
 
 
 ### Redo panel
-<img src="images/bone_widget_redo_panel.png" alt="drawing" width="400">
 
-### Scale to bone length:
+<img src="images/bone_widget_redo_panel_advanced.png" alt="drawing" width="400">
+
+
+#### Scale to bone length:
 When enabled the Global Size will be multiplied by the bone length.  (ie - the widget  will be relative size to the size of the bone)
 With this disabled, the Global Size will be in Blender units.
+
+#### Use Face Data:
+If the widget that has been added has faces, you can choose to show them with this setting.  This will either include or exclude them when the widget is built.
+
+#### Global size:
+This will be the size of the widget, relative to the size of the bone if 'Scale to bone length' is enabled.  Or in Blender units if that setting is disabled.
+
+#### Global Size XYZ: (Advanced Option only)
+When the advanced options is enabled you can access the individual scale channels of the created widget, rather that 1 scale value for all 3 axes
 
 #### Slide:
 This will slide the position of the widget along the Y axis (or length) of the bone.  0.0 is at the head of the bone and 1.0 is the tail.  (negative values are possible too)
@@ -70,6 +81,9 @@ When advanced mode is enabled, the slide property is split into 3 axies rather t
 
 #### Rotation X/Y/Z
 You can rotate the widget by these values at the time of creation.  This can save you from having to jump into edit mode to rotate a widget to better align with your situation.
+
+#### Wire Width:
+This will let you set the wireframe thickness.  The default setting is 2.0 but Blender will allow any float between 1 and 16. 
 
 #### Advanced Options:
 This checkbox will switch the slide value into 3 axes rather than just the default Y axis.  This will enable the user to position the widget in some situations without having to jump into edit mode.
@@ -86,9 +100,6 @@ If you 'Edit' a shape, it will stay in whatever collection that widget was alrea
 
 ### Match bone Transforms:
 If the widgets get out of alignment with the location of the bone itself, this operator will snap the selected widget to the matrix of the bone.  It works if you have the bone(s) selected or if you have the widget object(s) selected.
-
-<b>Note:</b>
-Currently bone widget is designed to work with a “bone scale” setting of 1.0.  So this feature won't work correctly for the cases where the bone scale is not 1.
 
 #### Resync Widget Names:
 Sometimes you might rename a bone/or a widget.  This operator will loop through all the custom bone shapes and make sure they match the name of the bone they are assigned to.
@@ -114,9 +125,10 @@ As the name would suggest this will toggle the visibility of the widget collecti
 <b>Note:</b>
 This will only toggle the visibility of the designated widget collection (set in the preferences).  If your character has widgets outside of this collection, it will not toggle the visibilty of that.
 </blockquote>
-</br></br></br>
+</br></br>
 
-
+---
+---
 ## v2.1 Release Notes:
 - [Added] Markus Berg added functionality to display images of the widgets. What a flippin' legend.
 - [Added] Markus split the scale and slide into 3 axies and implemented toggle to show simple/advanced mode
