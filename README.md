@@ -127,6 +127,40 @@ This will only toggle the visibility of the designated widget collection (set in
 </blockquote>
 </br></br>
 
+## User Preferences:
+
+![alt text](images/bone_widget_user_prefs.png)
+
+### Use Rifigy Defaults
+
+With this enabled the addon will use the same naming convention for the widget prefix and collection name as Rifigy.  If this setting is disabled you can set them to your preference.
+
+
+### Widget Prefix
+If the "Use Rigify Deafaults" is disabled, the addon will append this text to the start of every new widget created.
+
+### Collection name:
+If the "Use Rigify Deafaults" is disabled, the addon will use this as the collection to place all the newly created widgets.  If a widget already exists when you edit it, it will stay in the collection it already belongs to.  The addon will not move existing widgets.
+
+### Symmetry Suffix:
+This will let you set the suffix that is appended to the end of the symetrical widgets.
+
+### Panel Category:
+This is the name of the panel the addon will be displayed in. 
+
+### Display previews by Default
+This boolean will let you set the default state of the Preview Panel.
+You will still be able to turn in on/off with the checkbox in the main ui, but advanced users probably don't need to see the large preview all the time.
+
+### Preview Panel Size:
+You can set the size of the Preview window with this setting.
+
+### Preview Popup Size:
+This will set the size of the images when you activate the popup widget panel.
+
+### Reset Default Widget Thumbnails:
+If you have accidentally (or purposefully) changed the images for any of the widgets that the addon ships with, this operator will reset them back to their original images.
+
 ---
 ---
 ## v2.1 Release Notes:

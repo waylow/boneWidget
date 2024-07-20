@@ -125,5 +125,5 @@ class BoneWidgetPreferences(AddonPreferences):
         layout.separator()
         row = layout.row()
         row = row.split(factor=.75)
-        row.label(text="Reset thumbnails for all default widgets")
+        row.label(text="Reset Default Widget Thumbnails")
         row.operator("bonewidget.reset_default_images", icon="ERROR")
