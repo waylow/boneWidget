@@ -104,7 +104,8 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
 
     wireframe_width: FloatProperty(
         name="Wire Width",
-        default=1.0,
+        default=2.0,
+        min=1.0,
         max=16,
         soft_max = 10,
         description="Set the thickness of a wireframe widget"
