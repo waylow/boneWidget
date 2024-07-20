@@ -215,3 +215,21 @@ def updateCustomImage(image_name):
     
     # trigger an update and display original but updated widget
     bpy.context.window_manager.widget_list = current_widget
+
+
+def resetDefaultImages():
+    current_widget = bpy.context.window_manager.widget_list
+    wgts = readWidgets(JSON_DEFAULT_WIDGETS)
+
+    for name, data in wgts.items():
+        image = f"{name}.png"
+        data["image"] = image
+    
+    writeWidgets(wgts, JSON_DEFAULT_WIDGETS)
+
+    # update the preview panel
+    from .functions import createPreviewCollection
+    createPreviewCollection()
+    
+    # trigger an update and display original but updated widget
+    bpy.context.window_manager.widget_list = current_widget

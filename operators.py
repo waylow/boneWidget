@@ -25,6 +25,7 @@ from .functions import (
     copyCustomImage,
     getWidgetData,
     updateCustomImage,
+    resetDefaultImages,
 )
 
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
@@ -551,6 +552,17 @@ class BONEWIDGET_OT_addObjectAsWidget(bpy.types.Operator):
         addObjectAsWidget(context, getCollection(context))
         return {'FINISHED'}
 
+
+class BONEWIDGET_OT_resetDefaultImages(bpy.types.Operator):
+    """Resets the thumbnails for all default widgets"""
+    bl_idname = "bonewidget.reset_default_images"
+    bl_label = "Reset"
+
+    def execute(self, context):
+        resetDefaultImages()
+        return {'FINISHED'}
+
+
 classes = (
     BONEWIDGET_OT_removeWidgets,
     BONEWIDGET_OT_addWidgets,
@@ -569,6 +581,7 @@ classes = (
     BONEWIDGET_OT_sharedPropertyGroup,
     BONEWIDGET_OT_fileSelect,
     BONEWIDGET_OT_addCustomImage,
+    BONEWIDGET_OT_resetDefaultImages,
 )
 
 

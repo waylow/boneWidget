@@ -4,6 +4,7 @@ from bpy.props import StringProperty, BoolProperty, FloatProperty
 
 from .bl_class_registry import BlClassRegistry
 from .panels import BONEWIDGET_PT_bw_panel_main
+from .operators import BONEWIDGET_OT_resetDefaultImages
 
 
 @BlClassRegistry()
@@ -120,3 +121,9 @@ class BoneWidgetPreferences(AddonPreferences):
         col.label(text="Preview Popup Size:")
         row.prop(self, "preview_popup_size", text="")
         row = layout.row()
+
+        layout.separator()
+        row = layout.row()
+        row = row.split(factor=.75)
+        row.label(text="Reset thumbnails for all default widgets")
+        row.operator("bonewidget.reset_default_images", icon="ERROR")
