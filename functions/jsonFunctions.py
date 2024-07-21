@@ -162,34 +162,90 @@ def exportWidgetLibrary(filepath):
     return len(wgts)
 
 
-def importWidgetLibrary(filepath):
-    wgts = {}
-    num_new_widgets = 0
-    failed_imports = []
+class WidgetImportStats:
+    def __init__(self):
+        self.new_widgets = 0
+        self.failed_widgets = {}
+        self.skipped_widgets = [] # to make sure the data won't change order
+        self.widgets = {}
+    
+    def skipped(self):
+        return len(self.skipped_widgets)
+    
+    def failed(self):
+        return len(self.failed_widgets)
 
-    if os.path.exists(filepath):
+
+def importWidgetLibrary(filepath, action=""):
+    wgts = {}
+
+    from zipfile import ZipFile
+    dest_dir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
+
+    if os.path.exists(filepath) and action:
         try:
-            f = open(filepath, 'r')
-            wgts = json.load(f)
-            f.close()
+            with ZipFile(filepath, 'r') as zip_file:
+                # extract images
+                for file in zip_file.namelist():
+                    if file.startswith('custom_thumbnails/'):
+                        zip_file.extract(file, dest_dir)
+                    elif file.endswith('.json'): # extract data from the .json file
+                        f = zip_file.read(file)
+                        json_data = f.decode('utf8').replace("'", '"')
+                        wgts = json.loads(json_data)
 
             current_wgts = readWidgets(JSON_USER_WIDGETS)
 
-            # check for duplicate names
-            for name, data in wgts.items():
-                if name not in current_wgts:
-                    current_wgts.update({name : data})
-                    num_new_widgets += 1
-                else:
-                    failed_imports.append(name)
+            widgetImport = WidgetImportStats()
 
-            # if there are new widgets
-            if num_new_widgets:
-                writeWidgets(current_wgts, JSON_USER_WIDGETS)
+            # check for duplicate names
+            for name, data in sorted(wgts.items()): # sorting by keys
+                if action == "ASK":
+                    widgetImport.skipped_widgets.append({name : data})
+                elif action == "OVERWRITE":
+                    widgetImport.widgets.update({name : data})
+                    widgetImport.new_widgets += 1
+                elif action == "SKIP":
+                    if not name in current_wgts:
+                        widgetImport.widgets.update({name : data})
+                        widgetImport.new_widgets += 1
+                    else:
+                        widgetImport.skipped_widgets.append({name : data})
+                else:
+                    widgetImport.failed_widgets.update({name : data})
+
         except:
             pass
+    return widgetImport
 
-    return num_new_widgets, failed_imports
+
+def updateWidgetLibrary(new_widgets, new_images, zip_filepath):
+    current_widget = bpy.context.window_manager.widget_list
+    wgts = readWidgets(JSON_USER_WIDGETS)
+
+    wgts.update(new_widgets)
+    
+    writeWidgets(wgts, JSON_USER_WIDGETS)
+
+    # extract any images needed from zip library
+    if new_images:
+        from zipfile import ZipFile
+        dest_dir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
+        if os.path.exists(zip_filepath):
+            try:
+                with ZipFile(zip_filepath, 'r') as zip_file:
+                    for file in zip_file.namelist():
+                        if file.startswith('custom_thumbnails/') and file.split("/")[1] in new_images:
+                            zip_file.extract(file, dest_dir)
+            except:
+                pass
+
+    # update the preview panel
+    from .functions import createPreviewCollection
+    createPreviewCollection()
+    
+    # trigger an update and display original but updated widget
+    bpy.context.window_manager.widget_list = current_widget
 
 
 def updateCustomImage(image_name):

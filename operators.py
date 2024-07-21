@@ -19,13 +19,13 @@ from .functions import (
     addObjectAsWidget,
     importWidgetLibrary,
     exportWidgetLibrary,
-    createPreviewCollection,
     advanced_options_toggled,
     removeCustomImage,
     copyCustomImage,
     getWidgetData,
     updateCustomImage,
     resetDefaultImages,
+    updateWidgetLibrary,
 )
 
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
@@ -33,7 +33,9 @@ from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringPr
 
 class BONEWIDGET_OT_sharedPropertyGroup(bpy.types.PropertyGroup):
     """Storage class for Shared Attribute Properties"""
-    pass
+    
+    custom_image_data = ("", "")
+    import_library_filepath = ""
 
 
 class BONEWIDGET_OT_createWidget(bpy.types.Operator):
@@ -232,9 +234,9 @@ class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_fileSelect(bpy.types.Operator):
+class BONEWIDGET_OT_imageSelect(bpy.types.Operator):
     """Open a Fileselect browser and get the image location"""
-    bl_idname = "bonewidget.fileselect"
+    bl_idname = "bonewidget.image_select"
     bl_label = "Select Image"
 
 
@@ -260,7 +262,7 @@ class BONEWIDGET_OT_fileSelect(bpy.types.Operator):
 
     def execute(self, context):
         bpy.context.window_manager.prop_grp.custom_image_name = self.filename
-        bpy.types.WindowManager.custom_image = (self.filepath, self.filename)
+        bpy.context.window_manager.prop_grp.custom_image_data = (self.filepath, self.filename)
         context.area.tag_redraw()
         return {'FINISHED'}
 
@@ -334,14 +336,13 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         if self.custom_image:
             row = layout.row()
             row.prop(bpy.context.window_manager.prop_grp, "custom_image_name", text="", placeholder="Choose an image...", icon="FILE_IMAGE")
-            row.operator('bonewidget.fileselect', icon='FILEBROWSER', text="")
+            row.operator('bonewidget.image_select', icon='FILEBROWSER', text="")
 
     def invoke(self, context, event):
         if bpy.context.selected_objects:
             self.widget_name = context.active_object.name
-            bpy.types.WindowManager.prop_grp = bpy.props.PointerProperty(type=BONEWIDGET_OT_sharedPropertyGroup)
-            setattr(BONEWIDGET_OT_sharedPropertyGroup, "custom_image_name", bpy.props.StringProperty(name="Image Name"))
-            return context.window_manager.invoke_props_dialog(self) #title="Add New Widget to Library")
+            setattr(BONEWIDGET_OT_sharedPropertyGroup, "custom_image_name", StringProperty(name="Image Name"))
+            return context.window_manager.invoke_props_dialog(self)
             
         self.report({'WARNING'}, 'Please select an object first!')
         return {'CANCELLED'}
@@ -362,7 +363,7 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         
         # get filepath to custom image if specified and transfer to custom image folder
         if self.custom_image:
-            custom_image_path, custom_image_name = context.window_manager.custom_image
+            custom_image_path, custom_image_name = bpy.context.window_manager.prop_grp.custom_image_data
             copyCustomImage(custom_image_path, custom_image_name)
             bpy.context.window_manager.prop_grp.custom_image_name = ""  # make sure the field is empty for next time
         else:
@@ -396,6 +397,130 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_importWidgetsSummaryPopup(bpy.types.Operator):
+    """Display summary of imported Widget Library"""
+    bl_idname = "bonewidget.widget_summary_popup"
+    bl_label = "Imported Widget Summary"
+
+ 
+    def draw(self, context):
+        layout = self.layout
+        layout.scale_x = 1.2
+
+        layout.separator()
+        row = layout.row()
+        row.label(text=f"Imported Widgets: {context.window_manager.custom_data.new_widgets}")
+
+        row = layout.row()
+        row.label(text=f"Skipped Widgets: {context.window_manager.custom_data.skipped()}")
+        
+        row = layout.row()
+        row.label(text=f"Failed Widgets: {context.window_manager.custom_data.failed()}")
+
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+    
+    def execute(self, context):
+        return {'FINISHED'}
+
+
+class BONEWIDGET_OT_importWidgetsAskPopup(bpy.types.Operator):
+    """Ask user how to handle name collisions from the imported Widget Library"""
+    bl_idname = "bonewidget.widget_ask_popup"
+    bl_label = "Imported Widget Choice Popup"
+
+    widgetImportData = None
+
+    import_options = [
+        ("OVERWRITE", "Overwrite", "Overwrite existing widget"),
+        ("SKIP", "Skip", "Skip widget"),
+        ("RENAME", "Rename", "Rename widget"),
+    ]
+
+    def draw(self, context):
+        layout = self.layout
+        layout.scale_x = 1.2
+
+        layout.separator()
+        row = layout.row()
+        row.label(text="Choose an action:")
+
+        row = layout.row()
+        for i, _ in enumerate(self.widgetImportData.skipped_widgets):
+            if getattr(context.window_manager.prop_grp, f"ImportOptions{i}") == self.import_options[2][0]: # Rename
+                row.prop(context.window_manager.prop_grp, f"EditName{i}", text="")
+            else:
+                row.label(text=str(getattr(context.window_manager.prop_grp, f"EditName{i}")))
+            row.prop(context.window_manager.prop_grp, f"ImportOptions{i}", text=" ")
+            row = layout.row()
+
+    def invoke(self, context, event):
+        self.widgetImportData = bpy.context.window_manager.custom_data
+        
+        # generate the x number of drop down lists and widget names needed
+        for n, widget in enumerate(self.widgetImportData.skipped_widgets):
+            widget_name = next(iter(widget.keys()))
+            setattr(BONEWIDGET_OT_sharedPropertyGroup, f"ImportOptions{n}", bpy.props.EnumProperty(
+                    name=f"ImportOptions{n}",
+                    description="Choose an option",
+                    items=self.import_options,
+                    default="SKIP"
+            ))
+            setattr(bpy.context.window_manager.prop_grp, f"ImportOptions{n}", "SKIP")
+            
+            setattr(BONEWIDGET_OT_sharedPropertyGroup, f"EditName{n}", StringProperty(
+                    name=f"EditName{n}",
+                    default=widget_name,
+                    description="The name of the widget",
+            ))
+            setattr(bpy.context.window_manager.prop_grp, f"EditName{n}", widget_name)
+        
+        return context.window_manager.invoke_props_dialog(self)
+    
+    def execute(self, context):
+        widget_results = {}
+        widget_images = set()
+
+        for i, widget in enumerate(self.widgetImportData.skipped_widgets):
+            widget_name, widget_data = next(iter(widget.items()))
+            widget_image = widget_data.get('image')
+            widget_image = widget_image if widget_image != "user_defined.png" else ""  # only append custom images
+            action = getattr(bpy.context.window_manager.prop_grp, f"ImportOptions{i}")
+            new_widget_name = getattr(bpy.context.window_manager.prop_grp, f"EditName{i}")
+
+            # error check before proceeding - widget renamed to empty string
+            if widget_name != new_widget_name and new_widget_name.strip() == "":
+                self.widgetImportData.failed_widgets.update(widget)
+                continue
+
+            if action == self.import_options[0][0]: # overwrite
+                widget_results.update(widget)
+                if widget_image: widget_images.add(widget_image)
+                self.widgetImportData.new_widgets += 1
+                self.widgetImportData.skipped_widgets.remove(widget)
+            elif action == self.import_options[2][0]: # Rename
+                widget_results.update({new_widget_name: widget_data})
+                if widget_image: widget_images.add(widget_image)
+                self.widgetImportData.new_widgets += 1
+                self.widgetImportData.skipped_widgets.remove(widget)
+                
+        updateWidgetLibrary(widget_results, widget_images, bpy.context.window_manager.prop_grp.import_library_filepath)
+
+        # clean up the data from the property group
+        for i in range(self.widgetImportData.skipped()):
+            delattr(BONEWIDGET_OT_sharedPropertyGroup, f"ImportOptions{i}")
+            delattr(BONEWIDGET_OT_sharedPropertyGroup, f"EditName{i}")
+
+        #del bpy.types.WindowManager.custom_data
+        self.widgetImportData = None
+
+        # display summary of imported widgets
+        bpy.ops.bonewidget.widget_summary_popup('INVOKE_DEFAULT')
+
+        return {'FINISHED'}
+
+
 class BONEWIDGET_OT_importLibrary(bpy.types.Operator):
     """Import User Defined Widgets"""
     bl_idname = "bonewidget.import_library"
@@ -403,7 +528,7 @@ class BONEWIDGET_OT_importLibrary(bpy.types.Operator):
 
 
     filter_glob: StringProperty(
-        default='*.bwl',
+        default='*.zip',
         options={'HIDDEN'}
     )
 
@@ -416,21 +541,45 @@ class BONEWIDGET_OT_importLibrary(bpy.types.Operator):
         subtype="FILE_PATH"
     )
 
+    import_option : bpy.props.EnumProperty(
+        name="Import Option",
+        items=[
+            ("OVERWRITE", "Overwrite", "Overwrite existing widget"),
+            ("SKIP", "Skip", "Skip widget"),
+            ("ASK", "Ask", "Ask user what to do")],
+        default="ASK",
+    )
+
+    def draw(self, context):
+        layout = self.layout
+        row = layout.row(align=True)
+        row.label(text="If duplicates are found:")
+        row = layout.row(align=True)
+        row.prop(self, "import_option", expand=True)
+
     def execute(self, context):
-        if self.filepath:
-            num_widgets, failed_imports = importWidgetLibrary(self.filepath)
+        if self.filepath and self.import_option:
+            importLibraryData = importWidgetLibrary(self.filepath, self.import_option)
+            bpy.context.window_manager.prop_grp.import_library_filepath = self.filepath
 
-            if failed_imports:
-                failed = " | ".join(failed_imports)
-                message = f"{num_widgets} widgets imported. {len(failed_imports)} failed: {failed}"
+            bpy.types.WindowManager.custom_data = importLibraryData
+
+            if self.import_option == "ASK":
+                bpy.types.WindowManager.custom_data = importLibraryData
+                bpy.ops.bonewidget.widget_ask_popup('INVOKE_DEFAULT')
+
+            elif self.import_option == "OVERWRITE" or self.import_option == "SKIP":
+                widget_images = set()
+
+                # extract image names if any
+                for _, value in importLibraryData.widgets.items():
+                    widget_images.add(value['image'])
+
+                updateWidgetLibrary(importLibraryData.widgets, widget_images, self.filepath)
+
+                bpy.ops.bonewidget.widget_summary_popup('INVOKE_DEFAULT')
             else:
-                message = f"{num_widgets} widgets imported successfully!"
-                
-            self.report({'INFO'}, message)
-
-            # trigger an update and display the new widgets if any widgets were imported
-            if num_widgets:
-                createPreviewCollection()
+                bpy.ops.bonewidget.widget_summary_popup('INVOKE_DEFAULT')
             
         return {'FINISHED'}
 
@@ -578,8 +727,10 @@ classes = (
     BONEWIDGET_OT_clearBoneWidgets,
     BONEWIDGET_OT_resyncWidgetNames,
     BONEWIDGET_OT_addObjectAsWidget,
+    BONEWIDGET_OT_importWidgetsSummaryPopup,
+    BONEWIDGET_OT_importWidgetsAskPopup,
     BONEWIDGET_OT_sharedPropertyGroup,
-    BONEWIDGET_OT_fileSelect,
+    BONEWIDGET_OT_imageSelect,
     BONEWIDGET_OT_addCustomImage,
     BONEWIDGET_OT_resetDefaultImages,
 )
@@ -590,8 +741,11 @@ def register():
     for cls in classes:
         register_class(cls)
 
+    bpy.types.WindowManager.prop_grp = bpy.props.PointerProperty(type=BONEWIDGET_OT_sharedPropertyGroup)
+
 
 def unregister():
+    del bpy.types.WindowManager.prop_grp
     from bpy.utils import unregister_class
     for cls in classes:
         unregister_class(cls)
