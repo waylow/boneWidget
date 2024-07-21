@@ -262,7 +262,7 @@ class BONEWIDGET_OT_imageSelect(bpy.types.Operator):
 
     def execute(self, context):
         bpy.context.window_manager.prop_grp.custom_image_name = self.filename
-        bpy.context.window_manager.prop_grp.custom_image_data = (self.filepath, self.filename)
+        setattr(BONEWIDGET_OT_sharedPropertyGroup, "custom_image_data", (self.filepath, self.filename))
         context.area.tag_redraw()
         return {'FINISHED'}
 
