@@ -335,7 +335,10 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
 
         if self.custom_image:
             row = layout.row()
-            row.prop(bpy.context.window_manager.prop_grp, "custom_image_name", text="", placeholder="Choose an image...", icon="FILE_IMAGE")
+            if bpy.app.version >= (4,1,0):
+                row.prop(bpy.context.window_manager.prop_grp, "custom_image_name", text="", placeholder="Choose an image...", icon="FILE_IMAGE")
+            else:
+                row.prop(bpy.context.window_manager.prop_grp, "custom_image_name", text="", icon="FILE_IMAGE")
             row.operator('bonewidget.image_select', icon='FILEBROWSER', text="")
 
     def invoke(self, context, event):
