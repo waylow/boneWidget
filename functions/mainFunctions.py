@@ -201,7 +201,7 @@ def symmetrizeWidget(bone, collection):
         layer.update()
 
         findMirrorObject(bone).custom_shape = newObject
-        mirrorBone.bone.show_wire = True
+        mirrorBone.bone.show_wire = bone.bone.show_wire
 
         if bpy.app.version >= (4,2,0):
             mirrorBone.custom_shape_wire_width = bone.custom_shape_wire_width
