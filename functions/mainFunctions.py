@@ -196,7 +196,8 @@ def symmetrizeWidget(bone, collection):
 
         newObject.matrix_local = mirrorBone.bone.matrix_local
         newObject.scale = [mirrorBone.bone.length, mirrorBone.bone.length, mirrorBone.bone.length]
-
+        newObject.data.flip_normals()
+        
         layer = bpy.context.view_layer
         layer.update()
 
