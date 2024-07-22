@@ -173,8 +173,7 @@ def symmetrizeWidget(bone, collection):
         mirrorBone = findMirrorObject(bone)
 
         mirrorWidget = mirrorBone.custom_shape
-        print(mirrorBone)
-        print(mirrorWidget)
+
         if mirrorWidget is not None:
             if mirrorWidget != widget:
                 if C.scene.objects.get(mirrorWidget.name):
