@@ -30,7 +30,7 @@ This is the active shape from Bone Widget Library.
 
 ## BW Specials Menu:
 
-
+![alt text](images/bone_widget_specials_menu.png)
 
 
 ### Add to Widget library
@@ -45,6 +45,20 @@ This will remove the active shape from the library.
 Select the shape you want to remove from the list.  And click this. Boom, it is gone (forever!).
 This will work on any widget in the list.
 
+### Import/Export Widget Libray
+
+It is possible to inport and  export all the custom widgets that you have added to/from a zipped json file.  This will let you more easily share them with another computer. 
+
+> [!CAUTION]
+>
+> A note on updating the addon:
+>Version 2.1 is the first version to support importing/exporting.  Versions prior to this have a slightly different structure that are not compatible with 2.1 onwards.  If you already have widgets that you'd like to reuse, the easist way would be to open the rig file that uses them and then 'add to library' in the newer version.
+>
+>Also before you update to a version after 2.1, make sure you export your custom widgets so it's possible to import them easily.  This is the easist way to keep your existing work for the moment. 
+
+### Add Custom Image to Widget
+
+This function will let you assign an image from you hard drive to use as the widget preview.
 
 ## Creating a Widget:
 
@@ -56,7 +70,7 @@ This will create a widget object for each of the selected bones.  The widget obj
 
 ### Redo panel
 
-<img src="images/bone_widget_redo_panel_advanced.png" alt="drawing" width="400">
+<img src="images/bone_widget_redo_panel.png" alt="drawing" width="400">
 
 
 #### Scale to bone length:
