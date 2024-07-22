@@ -203,6 +203,9 @@ def symmetrizeWidget(bone, collection):
         findMirrorObject(bone).custom_shape = newObject
         mirrorBone.bone.show_wire = True
 
+        if bpy.app.version >= (4,2,0):
+            mirrorBone.custom_shape_wire_width = bone.custom_shape_wire_width
+
     else:
         pass
 
