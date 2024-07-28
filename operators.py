@@ -331,15 +331,18 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         row.label(text="Widget Name:")
         row.prop(self, "widget_name", text="")
         row = layout.row()
-        row.prop(self, "custom_image", text="Custom Image")
 
-        if self.custom_image:
-            row = layout.row()
-            if bpy.app.version >= (4,1,0):
-                row.prop(bpy.context.window_manager.prop_grp, "custom_image_name", text="", placeholder="Choose an image...", icon="FILE_IMAGE")
-            else:
-                row.prop(bpy.context.window_manager.prop_grp, "custom_image_name", text="", icon="FILE_IMAGE")
-            row.operator('bonewidget.image_select', icon='FILEBROWSER', text="")
+        # adding custom image this way doesn't work in blender 3.6
+        if bpy.app.version > (3, 7, 0):
+            row.prop(self, "custom_image", text="Custom Image")
+
+            if self.custom_image:
+                row = layout.row()
+                if bpy.app.version >= (4,1,0):
+                    row.prop(bpy.context.window_manager.prop_grp, "custom_image_name", text="", placeholder="Choose an image...", icon="FILE_IMAGE")
+                else:
+                    row.prop(bpy.context.window_manager.prop_grp, "custom_image_name", text="", icon="FILE_IMAGE")
+                row.operator('bonewidget.image_select', icon='FILEBROWSER', text="")
 
     def invoke(self, context, event):
         if bpy.context.selected_objects:
