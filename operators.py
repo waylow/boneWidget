@@ -368,18 +368,33 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
             return {'CANCELLED'}
         
         # get filepath to custom image if specified and transfer to custom image folder
+        custom_image_name = ""
+        custom_image_path = ""
+        message_extra = ""
         if self.custom_image:
-            custom_image_path, custom_image_name = bpy.context.window_manager.prop_grp.custom_image_data
-            copyCustomImage(custom_image_path, custom_image_name)
+            custom_image_path, custom_image_name = bpy.context.window_manager.prop_grp.custom_image_data #context.window_manager.custom_image
+
+            # no image path found
+            if not custom_image_path:
+                # check if user pasted an image path into text field
+                text_field = bpy.context.window_manager.prop_grp.custom_image_name
+                import os
+                if os.path.isfile(text_field) and text_field.endswith((".jpg", ".jpeg" ".png", ".tif")):
+                    custom_image_name = os.path.basename(text_field)
+                    custom_image_path = text_field
+                else:
+                    message_extra = " - WARNING - No custom image specified!"
+            
+            if custom_image_name and custom_image_path:
+                copyCustomImage(custom_image_path, custom_image_name)
+
             bpy.context.window_manager.prop_grp.custom_image_name = ""  # make sure the field is empty for next time
-        else:
-            custom_image_name = ""
         
         message_type, return_message = addRemoveWidgets(context, "add", bpy.types.WindowManager.widget_list.keywords['items'],
                                                         objects, self.widget_name, custom_image_name)
 
         if return_message:
-            self.report({message_type}, return_message)
+            self.report({message_type}, return_message + message_extra)
 
         return {'FINISHED'}
 
