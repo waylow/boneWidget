@@ -366,6 +366,11 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         if not objects:
             self.report({'WARNING'}, 'Select Meshes or Pose bones')
             return {'CANCELLED'}
+
+        # make sure widget name isn't empty
+        if not self.widget_name:
+            self.report({'WARNING'}, "Widget name can't be empty!")
+            return {'CANCELLED'}
         
         # get filepath to custom image if specified and transfer to custom image folder
         custom_image_name = ""
