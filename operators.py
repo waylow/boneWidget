@@ -293,6 +293,9 @@ class BONEWIDGET_OT_addCustomImage(bpy.types.Operator):
     
     def execute(self, context):
         if self.filepath:
+            # first remove previous custom image if present
+            current_widget = context.window_manager.widget_list
+            removeCustomImage(getWidgetData(current_widget).get("image"))
             # copy over the image to custom folder
             copyCustomImage(self.filepath, self.filename)
             # update the json files with new image data
