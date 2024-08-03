@@ -297,6 +297,8 @@ class BONEWIDGET_OT_addCustomImage(bpy.types.Operator):
             copyCustomImage(self.filepath, self.filename)
             # update the json files with new image data
             updateCustomImage(self.filename)
+
+            self.report({'INFO'}, "Custom image has been added!")
         return {'FINISHED'}
 
 
