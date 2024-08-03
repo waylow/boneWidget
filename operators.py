@@ -257,7 +257,8 @@ class BONEWIDGET_OT_imageSelect(bpy.types.Operator):
     def invoke(self, context, event):
         self.filename = ""
         context.window_manager.fileselect_add(self)
-        context.area.tag_redraw()
+        if context.area:
+            context.area.tag_redraw()
         return {'RUNNING_MODAL'}
 
     def execute(self, context):
