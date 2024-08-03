@@ -446,7 +446,7 @@ def addObjectAsWidget(context, collection):
 
         # deal with any existing shape
         if active_bone.custom_shape:
-            bpy.data.objects.remove(bpy.data.objects[bone.custom_shape.name], do_unlink=True)
+            bpy.data.objects.remove(bpy.data.objects[active_bone.custom_shape.name], do_unlink=True)
 
         #duplicate shape
         widget = widget_object.copy()
