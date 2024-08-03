@@ -642,7 +642,7 @@ class BONEWIDGET_OT_exportLibrary(bpy.types.Operator):
     )
 
     def execute(self, context):
-        if self.filepath:
+        if self.filepath and self.filename:
             num_widgets = exportWidgetLibrary(self.filepath)
             self.report({'INFO'}, f"{num_widgets} user defined widgets exported successfully!")
         return {'FINISHED'}
