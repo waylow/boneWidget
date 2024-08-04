@@ -78,11 +78,12 @@ def boneMatrix(widget, matchBone):
         ob_scale = bpy.context.scene.objects[matchBone.id_data.name].scale
         widget.scale = [matchBone.bone.length * ob_scale[0], matchBone.bone.length * ob_scale[1], matchBone.bone.length * ob_scale[2]]
 
-    #if the user has added any custom transforms to the bone widget display - calculate this too
+    # if the user has added any custom transforms to the bone widget display - calculate this too
     loc = matchBone.custom_shape_translation
     rot = matchBone.custom_shape_rotation_euler
     scale =  matchBone.custom_shape_scale_xyz
-    widget.matrix_world = widget.matrix_world @ Matrix.LocRotScale(loc , rot, scale)
+    widget.scale *= scale
+    widget.matrix_world = widget.matrix_world @ Matrix.LocRotScale(loc , rot, widget.scale)
 
     widget.data.update()
 
