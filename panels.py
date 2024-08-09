@@ -1,54 +1,14 @@
 import bpy
 import bpy.utils.previews
-import os
 from .functions import (
-    readWidgets,
-    getViewLayerCollection,
     recurLayerCollection,
+    preview_collections,
+    createPreviewCollection,
+    get_preview_default,
 )
 
 from .menus import BONEWIDGET_MT_bw_specials
 
-
-preview_collections = {}
-
-def generate_previews():
-    enum_items = []
-
-    pcoll = preview_collections["widgets"]
-    if pcoll.widget_list:
-        return pcoll.widget_list
-    
-    directory = os.path.join(os.path.dirname(__file__), "thumbnails")
-    if directory and os.path.exists(directory):
-        widget_names = sorted(readWidgets())
-
-        for i, name in enumerate(widget_names):
-            filepath = os.path.join(directory, name + ".png")
-            icon = pcoll.get(name)
-            if not icon:
-                thumb = pcoll.load(name, filepath, 'IMAGE')
-            else:
-                thumb = pcoll[name]
-            enum_items.append((name, name, "", thumb.icon_id, i))
-
-    pcoll.widget_list = enum_items
-    return enum_items
-
-def preview_update(self, context):
-    if len(bpy.types.Scene.widget_list.keywords["items"]) != len(bpy.types.WindowManager.widget_list.keywords["items"]):
-        del bpy.types.WindowManager.widget_list
-        for pcoll in preview_collections.values():
-            bpy.utils.previews.remove(pcoll)
-        preview_collections.clear()
-
-        pcoll = bpy.utils.previews.new()
-        pcoll.widget_list = ()
-        preview_collections["widgets"] = pcoll
-        
-        bpy.types.WindowManager.widget_list = bpy.props.EnumProperty(
-            items=generate_previews(), name="Shape", description="Shape", update=preview_update
-        )
 
 class BONEWIDGET_PT_bw_panel:
     """BoneWidget Addon UI"""
@@ -62,27 +22,22 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_label = "Bone Widget"
 
 
-    itemsSort = []
-    for key, value in sorted(readWidgets().items()):
-        itemsSort.append((key, key, ""))
-
-    bpy.types.Scene.widget_list = bpy.props.EnumProperty(
-        items=itemsSort, name="Shape", description="Shape")
-
-    pcoll = bpy.utils.previews.new()
-    pcoll.widget_list = ()
-    preview_collections["widgets"] = pcoll
-
-    bpy.types.WindowManager.widget_list = bpy.props.EnumProperty(
-        items=generate_previews(), name="Shape", description="Shape", update=preview_update
-    )
+    createPreviewCollection()
 
     def draw(self, context):
         layout = self.layout
         
-        # preview view
+        # preview toggle checkbox
         row = layout.row(align=True)
-        row.template_icon_view(context.window_manager, "widget_list", show_labels=True)
+        row.prop(context.window_manager, "toggle_preview")
+        
+        # preview view
+        if context.window_manager.toggle_preview:
+            row = layout.row(align=True)
+            preview_panel_size = context.preferences.addons[__package__].preferences.preview_panel_size
+            preview_popup_size = context.preferences.addons[__package__].preferences.preview_popup_size
+            row.template_icon_view(context.window_manager, "widget_list", show_labels=True,
+                                   scale=preview_panel_size, scale_popup=preview_popup_size)
 
         # dropdown list
         row = layout.row(align=True)
@@ -116,10 +71,15 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                             icon='RESTRICT_SELECT_OFF')
 
         # if the bw collection exists, show the visibility toggle
-        if not context.preferences.addons[__package__].preferences.use_rigify_defaults:
+        if not context.preferences.addons[__package__].preferences.use_rigify_defaults: #rigify
             bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
-        else:
+        
+        elif context.active_object: # active  object
             bw_collection_name = 'WGTS_' + context.active_object.name
+        
+        else: # this is needed because sometimes there is no active object
+            bw_collection_name = None 
+        
         bw_collection = recurLayerCollection(bpy.context.view_layer.layer_collection, bw_collection_name)
 
         if bw_collection is not None:
@@ -141,13 +101,23 @@ classes = (
 
 
 def register():
+    bpy.types.WindowManager.toggle_preview = bpy.props.BoolProperty(
+        name="Preview Panel",
+        default=get_preview_default(),
+        description="Show thumbnail previews"
+    )
+    
     from bpy.utils import register_class
     for cls in classes:
-        register_class(cls)
+        try:
+            register_class(cls)
+        except:
+            pass
 
 
 def unregister():
     del bpy.types.WindowManager.widget_list
+    del bpy.types.WindowManager.toggle_preview
 
     for pcoll in preview_collections.values():
         bpy.utils.previews.remove(pcoll)
@@ -155,4 +125,7 @@ def unregister():
     
     from bpy.utils import unregister_class
     for cls in classes:
-        unregister_class(cls)
+        try:
+            unregister_class(cls)
+        except:
+            pass

@@ -1,8 +1,6 @@
 import bpy
 import numpy
-from math import pi
 from mathutils import Matrix
-from .jsonFunctions import objectDataToDico
 from .. import __package__
 
 
@@ -80,11 +78,12 @@ def boneMatrix(widget, matchBone):
         ob_scale = bpy.context.scene.objects[matchBone.id_data.name].scale
         widget.scale = [matchBone.bone.length * ob_scale[0], matchBone.bone.length * ob_scale[1], matchBone.bone.length * ob_scale[2]]
 
-    #if the user has added any custom transforms to the bone widget display - calculate this too
+    # if the user has added any custom transforms to the bone widget display - calculate this too
     loc = matchBone.custom_shape_translation
     rot = matchBone.custom_shape_rotation_euler
     scale =  matchBone.custom_shape_scale_xyz
-    widget.matrix_world = widget.matrix_world @ Matrix.LocRotScale(loc , rot, scale)
+    widget.scale *= scale
+    widget.matrix_world = widget.matrix_world @ Matrix.LocRotScale(loc , rot, widget.scale)
 
     widget.data.update()
 
@@ -99,7 +98,7 @@ def fromWidgetFindBone(widget):
     return matchBone
 
 
-def createWidget(bone, widget, relative, size, scale, slide, rotation, collection):
+def createWidget(bone, widget, relative, size, scale, slide, rotation, collection, use_face_data, wireframe_width):
     C = bpy.context
     D = bpy.data
 
@@ -110,27 +109,25 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
 
     matrixBone = bone
 
+    # delete the existing shape
     if bone.custom_shape:
-        bone.custom_shape.name = bone.custom_shape.name + "_old"
-        bone.custom_shape.data.name = bone.custom_shape.data.name + "_old"
-        if C.scene.collection.objects.get(bone.custom_shape.name):
-            C.scene.collection.objects.unlink(bone.custom_shape)
+        bpy.data.objects.remove(bpy.data.objects[bone.custom_shape.name], do_unlink=True)
 
     # make the data name include the prefix
     newData = D.meshes.new(bw_widget_prefix + bone.name)
 
-    if relative is True:
-        boneLength = 1
-    else:
-        boneLength = (1 / bone.bone.length)
+    bone.use_custom_shape_bone_size = relative
+
+    # deal with face data
+    faces = widget['faces'] if use_face_data else []
 
     # add the verts
-    newData.from_pydata(numpy.array(widget['vertices']) * [size * scale[0] * boneLength, size * scale[2]
-                        * boneLength, size * scale[1] * boneLength], widget['edges'], widget['faces'])
+    newData.from_pydata(numpy.array(widget['vertices']) * [size[0] * scale[0], size[1] * scale[2],
+                        size[2] * scale[1]], widget['edges'], faces)
 
     # Create tranform matrices (slide vector and rotation)
     widget_matrix = Matrix()
-    trans = Matrix.Translation((0, slide, 0))
+    trans = Matrix.Translation(slide)
     rot = rotation.to_matrix().to_4x4()
 
     # Translate then rotate the matrix
@@ -154,7 +151,10 @@ def createWidget(bone, widget, relative, size, scale, slide, rotation, collectio
     layer.update()
 
     bone.custom_shape = newObject
-    bone.bone.show_wire = True
+    bone.bone.show_wire = not use_face_data # show faces if use face data is enabled
+
+    if bpy.app.version >= (4,2,0):
+        bone.custom_shape_wire_width = wireframe_width
 
 
 def symmetrizeWidget(bone, collection):
@@ -174,13 +174,9 @@ def symmetrizeWidget(bone, collection):
         mirrorBone = findMirrorObject(bone)
 
         mirrorWidget = mirrorBone.custom_shape
-        print(mirrorBone)
-        print(mirrorWidget)
+
         if mirrorWidget is not None:
             if mirrorWidget != widget:
-                mirrorWidget.name = mirrorWidget.name + "_old"
-                mirrorWidget.data.name = mirrorWidget.data.name + "_old"
-                # unlink/delete old widget
                 if C.scene.objects.get(mirrorWidget.name):
                     D.objects.remove(mirrorWidget)
 
@@ -200,12 +196,16 @@ def symmetrizeWidget(bone, collection):
 
         newObject.matrix_local = mirrorBone.bone.matrix_local
         newObject.scale = [mirrorBone.bone.length, mirrorBone.bone.length, mirrorBone.bone.length]
-
+        newObject.data.flip_normals()
+        
         layer = bpy.context.view_layer
         layer.update()
 
         findMirrorObject(bone).custom_shape = newObject
-        mirrorBone.bone.show_wire = True
+        mirrorBone.bone.show_wire = bone.bone.show_wire
+
+        if bpy.app.version >= (4,2,0):
+            mirrorBone.custom_shape_wire_width = bone.custom_shape_wire_width
 
     else:
         pass
@@ -265,12 +265,19 @@ def editWidget(active_bone):
     D = bpy.data
     widget = active_bone.custom_shape
 
+    collection = getViewLayerCollection(C, widget)
+    collection.hide_viewport = False
+
+    # hide all other objects in collection
+    for obj in collection.collection.all_objects:
+        if obj.name != widget.name:
+            obj.hide_set(True)
+        else:
+            obj.hide_set(False) # in case user manually hid it
+
     armature = active_bone.id_data
     bpy.ops.object.mode_set(mode='OBJECT')
     C.active_object.select_set(False)
-
-    collection = getViewLayerCollection(C, widget)
-    collection.hide_viewport = False
 
     if C.space_data.local_view:
         bpy.ops.view3d.localview()
@@ -279,6 +286,7 @@ def editWidget(active_bone):
     widget.select_set(True)
     bpy.context.view_layer.objects.active = widget
     bpy.ops.object.mode_set(mode='EDIT')
+    bpy.context.tool_settings.mesh_select_mode = (True, False, False) # enter vertex mode
 
 
 def returnToArmature(widget):
@@ -295,8 +303,14 @@ def returnToArmature(widget):
 
     collection = getViewLayerCollection(C, widget)
     collection.hide_viewport = True
+
+    # unhide all objects in the collection
+    for obj in collection.collection.all_objects:
+        obj.hide_set(False)
+    
     if C.space_data.local_view:
         bpy.ops.view3d.localview()
+    
     bpy.context.view_layer.objects.active = armature
     armature.select_set(True)
     bpy.ops.object.mode_set(mode='POSE')
@@ -433,10 +447,7 @@ def addObjectAsWidget(context, collection):
 
         # deal with any existing shape
         if active_bone.custom_shape:
-            active_bone.custom_shape.name = active_bone.custom_shape.name + "_old"
-            active_bone.custom_shape.data.name = active_bone.custom_shape.data.name + "_old"
-            if context.scene.collection.objects.get(active_bone.custom_shape.name):
-                context.scene.collection.objects.unlink(active_bone.custom_shape)
+            bpy.data.objects.remove(bpy.data.objects[active_bone.custom_shape.name], do_unlink=True)
 
         #duplicate shape
         widget = widget_object.copy()
@@ -460,3 +471,12 @@ def addObjectAsWidget(context, collection):
 
         #deselect original object
         widget_object.select_set(False)
+
+
+def advanced_options_toggled(self, context):
+    if self.advanced_options:
+        self.global_size_advanced = (self.global_size_simple,) * 3
+        self.slide_advanced[1] = self.slide_simple
+    else:
+        self.global_size_simple = self.global_size_advanced[1]
+        self.slide_simple = self.slide_advanced[1]

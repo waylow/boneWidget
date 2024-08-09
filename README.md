@@ -1,7 +1,7 @@
 # Bone Widget
 
 Video explanation:
-https://vimeo.com/657697982
+https://www.youtube.com/watch?v=PDNVeDOzjzw
 
 ## Description:
 Bone Widget is a blender add-on to assist with making custom bone shapes. It has an editable library of shapes that make it easy to apply to any rig.
@@ -17,28 +17,48 @@ It ships with many shapes pre-made but you can also add your own to the library 
 
 ## UI Panel
 
+<img src="images/bone_widget_UI.png" alt="drawing" width="700"/>
 
+### Preview Panel Checkbox:
+This will show/hide the large widget preview panel. It's also possible to set your preferred option for this in the preferences. (The default is enabled)
 
-### Shape:
+### Preview Panel:
+This is the large preview panel that displays the currently selected widget.  Click on this panel to open the selection menu.
+
+### Shape Drop Down:
 This is the active shape from Bone Widget Library.
-Choose the shape you want to add from the list here.
 
 ## BW Specials Menu:
 
-> <b>The image below is outdated but the concept is the same.</b>
+![alt text](images/bone_widget_specials_menu.png)
 
-<img src="images/bone_widget_UI.png" alt="drawing" width="700"/>
 
 ### Add to Widget library
 
 To add a mesh object to the library, select a mesh object and click this button.
-Make sure you give that mesh object an appropriate name before adding.
+Give the mesh object an appropriate name and then confirm.  Your widget will be added to the library.
+(User widgets are stored in a separate json file to the shapes that come with the addon.)
 
 ### Remove from Widget Library
 
 This will remove the active shape from the library.
 Select the shape you want to remove from the list.  And click this. Boom, it is gone (forever!).
+This will work on any widget in the list.
 
+### Import/Export Widget Libray
+
+It is possible to inport and  export all the custom widgets that you have added to/from a zipped json file.  This will let you more easily share them with another computer. 
+
+> [!CAUTION]
+>
+> A note on updating the addon:
+>Version 2.1 is the first version to support importing/exporting.  Versions prior to this have a slightly different structure that are not compatible with 2.1 onwards.  If you already have widgets that you'd like to reuse, the easist way would be to open the rig file that uses them and then 'add to library' in the newer version.
+>
+>Also before you update to a version after 2.1, make sure you export your custom widgets so it's possible to import them easily.  This is the easist way to keep your existing work for the moment. 
+
+### Add Custom Image to Widget
+
+This function will let you assign an image from you hard drive to use as the widget preview.
 
 ## Creating a Widget:
 
@@ -49,17 +69,38 @@ This will create a widget object for each of the selected bones.  The widget obj
 
 
 ### Redo panel
+
 <img src="images/bone_widget_redo_panel.png" alt="drawing" width="400">
 
-### Scale to bone length:
+
+#### Scale to bone length:
 When enabled the Global Size will be multiplied by the bone length.  (ie - the widget  will be relative size to the size of the bone)
 With this disabled, the Global Size will be in Blender units.
+
+#### Use Face Data:
+If the widget that has been added has faces, you can choose to show them with this setting.  This will either include or exclude them when the widget is built.
+
+#### Global size:
+This will be the size of the widget, relative to the size of the bone if 'Scale to bone length' is enabled.  Or in Blender units if that setting is disabled.
+
+#### Global Size XYZ: (Advanced Option only)
+When the advanced options is enabled you can access the individual scale channels of the created widget, rather that 1 scale value for all 3 axes
 
 #### Slide:
 This will slide the position of the widget along the Y axis (or length) of the bone.  0.0 is at the head of the bone and 1.0 is the tail.  (negative values are possible too)
 
+
+#### Slide X/Y/Z (Advanced Option Only)
+When advanced mode is enabled, the slide property is split into 3 axies rather than just the defalt y axis.
+
 #### Rotation X/Y/Z
 You can rotate the widget by these values at the time of creation.  This can save you from having to jump into edit mode to rotate a widget to better align with your situation.
+
+#### Wire Width:
+This will let you set the wireframe thickness.  The default setting is 2.0 but Blender will allow any float between 1 and 16. 
+
+#### Advanced Options:
+This checkbox will switch the slide value into 3 axes rather than just the default Y axis.  This will enable the user to position the widget in some situations without having to jump into edit mode.
 
 
 ### Edit/To Bone:
@@ -73,9 +114,6 @@ If you 'Edit' a shape, it will stay in whatever collection that widget was alrea
 
 ### Match bone Transforms:
 If the widgets get out of alignment with the location of the bone itself, this operator will snap the selected widget to the matrix of the bone.  It works if you have the bone(s) selected or if you have the widget object(s) selected.
-
-<b>Note:</b>
-Currently bone widget is designed to work with a “bone scale” setting of 1.0.  So this feature won't work correctly for the cases where the bone scale is not 1.
 
 #### Resync Widget Names:
 Sometimes you might rename a bone/or a widget.  This operator will loop through all the custom bone shapes and make sure they match the name of the bone they are assigned to.
@@ -101,16 +139,56 @@ As the name would suggest this will toggle the visibility of the widget collecti
 <b>Note:</b>
 This will only toggle the visibility of the designated widget collection (set in the preferences).  If your character has widgets outside of this collection, it will not toggle the visibilty of that.
 </blockquote>
-</br></br></br>
+</br></br>
 
-# To Do:
-<input type="checkbox"> import/export library of shapes.</br> 
+## User Preferences:
+
+![alt text](images/bone_widget_user_prefs.png)
+
+### Use Rifigy Defaults
+
+With this enabled the addon will use the same naming convention for the widget prefix and collection name as Rifigy.  If this setting is disabled you can set them to your preference.
 
 
+### Widget Prefix
+If the "Use Rigify Deafaults" is disabled, the addon will append this text to the start of every new widget created.
+
+### Collection name:
+If the "Use Rigify Deafaults" is disabled, the addon will use this as the collection to place all the newly created widgets.  If a widget already exists when you edit it, it will stay in the collection it already belongs to.  The addon will not move existing widgets.
+
+### Symmetry Suffix:
+This will let you set the suffix that is appended to the end of the symetrical widgets.
+
+### Panel Category:
+This is the name of the panel the addon will be displayed in. 
+
+### Display previews by Default
+This boolean will let you set the default state of the Preview Panel.
+You will still be able to turn in on/off with the checkbox in the main ui, but advanced users probably don't need to see the large preview all the time.
+
+### Preview Panel Size:
+You can set the size of the Preview window with this setting.
+
+### Preview Popup Size:
+This will set the size of the images when you activate the popup widget panel.
+
+### Reset Default Widget Thumbnails:
+If you have accidentally (or purposefully) changed the images for any of the widgets that the addon ships with, this operator will reset them back to their original images.
+
+---
+---
 ## v2.1 Release Notes:
-- Markus Berg added functionality to display images of the widgets. What a flippin' legend.
-- Matching the bone transforms now works correctly if the user has changed the transforms of the custom shape display on the bone settings
+- [Added] Markus Berg added functionality to display images of the widgets. What a flippin' legend.
+- [Added] Markus split the scale and slide into 3 axies and implemented toggle to show simple/advanced mode
+- [Added] Popup added for name input when adding a widget to the library
+- [Added] import/export user library of shapes
+- [Added] you can now add custom images to the widgets (or use the in-built image place holders)
+- [Added] added wire width option when the widgets are created
+- [change] remove the "_old" functionality of the code (just delete the old widget)
+- [fix] the match bone transforms now takes the custom shape transforms into account
 - [fix] if the collection didn't exist when you tried to delete unused widgets it would throw an error.  You now get a message that hints at the problem.
+ - [fixed] If there is no active object the panel.py would throw an error
+- [fixed] If you Symmetrized the Shape in pose mode with no widget added, it will throw an error.
 
 ## v2.0 Release Notes:
 - changed the default name of the n panel to 'Rigging' rather than 'Rig Tools'
