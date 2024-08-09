@@ -182,7 +182,6 @@ If you have accidentally (or purposefully) changed the images for any of the wid
 - [Added] Markus split the scale and slide into 3 axies and implemented toggle to show simple/advanced mode
 - [Added] Popup added for name input when adding a widget to the library
 - [Added] import/export user library of shapes
-- [Added] popup to name the widget when adding to library
 - [Added] you can now add custom images to the widgets (or use the in-built image place holders)
 - [Added] added wire width option when the widgets are created
 - [change] remove the "_old" functionality of the code (just delete the old widget)
