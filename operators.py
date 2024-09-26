@@ -140,8 +140,8 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         slide = self.slide_advanced if self.advanced_options else (0.0, self.slide_simple, 0.0)
         global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
         for bone in bpy.context.selected_pose_bones:
-            createWidget(bone, widget_data, self.relative_size, global_size, [
-                         1, 1, 1], slide, self.rotation, getCollection(context), self.use_face_data, self.wireframe_width)
+            createWidget(bone, widget_data, self.relative_size, global_size,
+                         slide, self.rotation, getCollection(context), self.use_face_data, self.wireframe_width)
         return {'FINISHED'}
 
 
