@@ -78,6 +78,11 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
             row.operator("bonewidget.set_bone_color", text="Set Bone Color", icon="BRUSHES_ALL")
             row.scale_x = 3.0
             row.template_icon_view(context.window_manager, "bone_widget_colors", show_labels=False, scale=1, scale_popup=1.8)
+            if context.window_manager.bone_widget_colors == "CUSTOM":
+                row = layout.row(align=True)
+                row.prop(context.scene, "colorset_normal", text="")
+                row.prop(context.scene, "colorset_select", text="")
+                row.prop(context.scene, "colorset_active", text="")
             row = layout.row(align=True)
             row.operator("bonewidget.clear_bone_color", text="Clear Bone Color", icon="PANEL_CLOSE")
 
@@ -124,6 +129,30 @@ def register():
         items=bone_color_items_short,
         default=1, # THEME01
     )
+
+    bpy.types.Scene.colorset_normal = bpy.props.FloatVectorProperty(
+        name="Color Picker",
+        subtype='COLOR',
+        default=(0.0, 0.0, 0.0),
+        min=0.0, max=1.0,
+        description="Choose a color"
+    )
+
+    bpy.types.Scene.colorset_select = bpy.props.FloatVectorProperty(
+        name="Color Picker",
+        subtype='COLOR',
+        default=(0.0, 0.0, 0.0),
+        min=0.0, max=1.0,
+        description="Choose a color"
+    )
+
+    bpy.types.Scene.colorset_active = bpy.props.FloatVectorProperty(
+        name="Color Picker",
+        subtype='COLOR',
+        default=(0.0, 0.0, 0.0),
+        min=0.0, max=1.0,
+        description="Choose a color"
+    )
     
     from bpy.utils import register_class
     for cls in classes:
@@ -137,6 +166,9 @@ def unregister():
     del bpy.types.WindowManager.widget_list
     del bpy.types.WindowManager.toggle_preview
     del bpy.types.WindowManager.bone_widget_colors
+    del bpy.types.Scene.colorset_normal
+    del bpy.types.Scene.colorset_select
+    del bpy.types.Scene.colorset_active
 
     for pcoll in preview_collections.values():
         bpy.utils.previews.remove(pcoll)
