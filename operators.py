@@ -26,6 +26,8 @@ from .functions import (
     updateCustomImage,
     resetDefaultImages,
     updateWidgetLibrary,
+    setBoneColor,
+    bone_color_items,
 )
 
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
@@ -114,6 +116,13 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         description="Set the thickness of a wireframe widget"
     )
 
+    bone_color: bpy.props.EnumProperty(
+        name="Bone Color",
+        description="Color of bone widget",
+        items=bone_color_items,
+        default=0,
+    )
+
     def draw(self, context):
         layout = self.layout
         layout.use_property_split = True
@@ -133,15 +142,19 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         if bpy.app.version >= (4,2,0):
             row.prop(self, "wireframe_width", text="Wire Width")
             row = col.row(align=True)
+            if self.advanced_options:
+                row.prop(self, "bone_color")
+                row = col.row(align=True)
         row.prop(self, "advanced_options")
 
     def execute(self, context):
         widget_data = getWidgetData(context.window_manager.widget_list)
         slide = self.slide_advanced if self.advanced_options else (0.0, self.slide_simple, 0.0)
         global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
+        bone_color = self.bone_color if self.advanced_options else "DEFAULT"
         for bone in bpy.context.selected_pose_bones:
-            createWidget(bone, widget_data, self.relative_size, global_size,
-                         slide, self.rotation, getCollection(context), self.use_face_data, self.wireframe_width)
+            createWidget(bone, widget_data, self.relative_size, global_size, slide, self.rotation,
+                         getCollection(context), self.use_face_data, self.wireframe_width, bone_color)
         return {'FINISHED'}
 
 
@@ -744,6 +757,34 @@ class BONEWIDGET_OT_resetDefaultImages(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_setBoneColor(bpy.types.Operator):
+    """Add bone color to selected widgets."""
+    bl_idname = "bonewidget.set_bone_color"
+    bl_label = "Set Bone Color to Widget"
+
+    @classmethod
+    def poll(cls, context):
+        return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
+
+    def execute(self, context):
+        setBoneColor(context, context.window_manager.bone_widget_colors)
+        return {'FINISHED'}
+
+
+class BONEWIDGET_OT_clearBoneColor(bpy.types.Operator):
+    """Add bone color to selected widgets."""
+    bl_idname = "bonewidget.clear_bone_color"
+    bl_label = "Clear Bone Color"
+
+    @classmethod
+    def poll(cls, context):
+        return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
+
+    def execute(self, context):
+        setBoneColor(context, "DEFAULT")
+        return {'FINISHED'}
+
+
 classes = (
     BONEWIDGET_OT_removeWidgets,
     BONEWIDGET_OT_addWidgets,
@@ -765,6 +806,8 @@ classes = (
     BONEWIDGET_OT_imageSelect,
     BONEWIDGET_OT_addCustomImage,
     BONEWIDGET_OT_resetDefaultImages,
+    BONEWIDGET_OT_setBoneColor,
+    BONEWIDGET_OT_clearBoneColor,
 )
 
 
