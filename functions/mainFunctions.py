@@ -98,7 +98,7 @@ def fromWidgetFindBone(widget):
     return matchBone
 
 
-def createWidget(bone, widget, relative, size, slide, rotation, collection, use_face_data, wireframe_width):
+def createWidget(bone, widget, relative, size, slide, rotation, collection, use_face_data, wireframe_width, bone_color):
     C = bpy.context
     D = bpy.data
 
@@ -154,6 +154,7 @@ def createWidget(bone, widget, relative, size, slide, rotation, collection, use_
 
     if bpy.app.version >= (4,2,0):
         bone.custom_shape_wire_width = wireframe_width
+        bone.bone.color.palette = bone_color
 
 
 def symmetrizeWidget(bone, collection):
@@ -205,6 +206,7 @@ def symmetrizeWidget(bone, collection):
 
         if bpy.app.version >= (4,2,0):
             mirrorBone.custom_shape_wire_width = bone.custom_shape_wire_width
+            mirrorBone.bone.color.palette = bone.bone.color.palette
 
     else:
         pass
@@ -472,6 +474,11 @@ def addObjectAsWidget(context, collection):
         widget_object.select_set(False)
 
 
+def setBoneColor(context, color):
+    for bone in context.selected_pose_bones:
+        bone.bone.color.palette = color
+
+
 def advanced_options_toggled(self, context):
     if self.advanced_options:
         self.global_size_advanced = (self.global_size_simple,) * 3
@@ -479,3 +486,17 @@ def advanced_options_toggled(self, context):
     else:
         self.global_size_simple = self.global_size_advanced[1]
         self.slide_simple = self.slide_advanced[1]
+
+
+def bone_color_items(self, context):
+    items = [("DEFAULT", "Default Colors", "", "", 0)]
+    for i in range(1, 16):
+        items.append((f"THEME{i:02}", f"Theme {i:02}", "", f"COLORSET_{i:02}_VEC", i))
+    return items
+
+
+def bone_color_items_short(self, context):
+    items = []
+    for i in range(1, 16):
+        items.append((f"THEME{i:02}", f"Theme {i:02}", "", f"COLORSET_{i:02}_VEC", i))
+    return items

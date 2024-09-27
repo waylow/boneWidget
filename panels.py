@@ -5,6 +5,7 @@ from .functions import (
     preview_collections,
     createPreviewCollection,
     get_preview_default,
+    bone_color_items_short,
 )
 
 from .menus import BONEWIDGET_MT_bw_specials
@@ -70,6 +71,16 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                             text="Use Selected Object",
                             icon='RESTRICT_SELECT_OFF')
 
+        # BONE COLORS
+        if bpy.app.version >= (4,2,0):
+            layout.separator()
+            row = layout.row(align=True)
+            row.operator("bonewidget.set_bone_color", text="Set Bone Color", icon="BRUSHES_ALL")
+            row.scale_x = 3.0
+            row.template_icon_view(context.window_manager, "bone_widget_colors", show_labels=False, scale=1, scale_popup=1.8)
+            row = layout.row(align=True)
+            row.operator("bonewidget.clear_bone_color", text="Clear Bone Color", icon="PANEL_CLOSE")
+
         # if the bw collection exists, show the visibility toggle
         if not context.preferences.addons[__package__].preferences.use_rigify_defaults: #rigify
             bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
@@ -106,6 +117,13 @@ def register():
         default=get_preview_default(),
         description="Show thumbnail previews"
     )
+
+    bpy.types.WindowManager.bone_widget_colors = bpy.props.EnumProperty(
+        name="Colors",
+        description="Select a Bone Color",
+        items=bone_color_items_short,
+        default=1, # THEME01
+    )
     
     from bpy.utils import register_class
     for cls in classes:
@@ -118,6 +136,7 @@ def register():
 def unregister():
     del bpy.types.WindowManager.widget_list
     del bpy.types.WindowManager.toggle_preview
+    del bpy.types.WindowManager.bone_widget_colors
 
     for pcoll in preview_collections.values():
         bpy.utils.previews.remove(pcoll)
