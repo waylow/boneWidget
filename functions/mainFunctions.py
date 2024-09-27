@@ -478,6 +478,11 @@ def setBoneColor(context, color):
     for bone in context.selected_pose_bones:
         bone.bone.color.palette = color
 
+        if color == "CUSTOM":
+            bone.bone.color.custom.normal = context.scene.colorset_normal
+            bone.bone.color.custom.select = context.scene.colorset_select
+            bone.bone.color.custom.active = context.scene.colorset_active
+
 
 def advanced_options_toggled(self, context):
     if self.advanced_options:
@@ -499,4 +504,5 @@ def bone_color_items_short(self, context):
     items = []
     for i in range(1, 16):
         items.append((f"THEME{i:02}", f"Theme {i:02}", "", f"COLORSET_{i:02}_VEC", i))
+    items.append(("CUSTOM", "Custom", "", "QUESTION", 16))
     return items
