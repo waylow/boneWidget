@@ -6,6 +6,7 @@ from .functions import (
     createPreviewCollection,
     get_preview_default,
     bone_color_items_short,
+    updateBoneColor,
 )
 
 from .menus import BONEWIDGET_MT_bw_specials
@@ -136,7 +137,8 @@ def register():
         default=(0.0, 0.0, 0.0),
         size=3,
         min=0.0, max=1.0,
-        description="Color used for the surface of bones."
+        description="Color used for the surface of bones.",
+        update=updateBoneColor,
     )
 
     bpy.types.Scene.colorset_select = bpy.props.FloatVectorProperty(
@@ -145,7 +147,8 @@ def register():
         default=(0.0, 0.0, 0.0),
         size=3,
         min=0.0, max=1.0,
-        description="Color used for selected bones."
+        description="Color used for selected bones.",
+        update=updateBoneColor,
     )
 
     bpy.types.Scene.colorset_active = bpy.props.FloatVectorProperty(
@@ -154,7 +157,8 @@ def register():
         default=(0.0, 0.0, 0.0),
         size=3,
         min=0.0, max=1.0,
-        description="Color used for active bones."
+        description="Color used for active bones.",
+        update=updateBoneColor,
     )
     
     from bpy.utils import register_class
