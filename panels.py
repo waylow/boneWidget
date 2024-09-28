@@ -131,27 +131,30 @@ def register():
     )
 
     bpy.types.Scene.colorset_normal = bpy.props.FloatVectorProperty(
-        name="Color Picker",
-        subtype='COLOR',
+        name="Normal",
+        subtype='COLOR_GAMMA',
         default=(0.0, 0.0, 0.0),
+        size=3,
         min=0.0, max=1.0,
-        description="Choose a color"
+        description="Color used for the surface of bones."
     )
 
     bpy.types.Scene.colorset_select = bpy.props.FloatVectorProperty(
-        name="Color Picker",
-        subtype='COLOR',
+        name="Select",
+        subtype='COLOR_GAMMA',
         default=(0.0, 0.0, 0.0),
+        size=3,
         min=0.0, max=1.0,
-        description="Choose a color"
+        description="Color used for selected bones."
     )
 
     bpy.types.Scene.colorset_active = bpy.props.FloatVectorProperty(
-        name="Color Picker",
-        subtype='COLOR',
+        name="Active",
+        subtype='COLOR_GAMMA',
         default=(0.0, 0.0, 0.0),
+        size=3,
         min=0.0, max=1.0,
-        description="Choose a color"
+        description="Color used for active bones."
     )
     
     from bpy.utils import register_class
