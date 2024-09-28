@@ -484,6 +484,10 @@ def setBoneColor(context, color):
             bone.bone.color.custom.active = context.scene.colorset_active
 
 
+def updateBoneColor(self, context):
+    setBoneColor(context, "CUSTOM")
+
+
 def advanced_options_toggled(self, context):
     if self.advanced_options:
         self.global_size_advanced = (self.global_size_simple,) * 3
