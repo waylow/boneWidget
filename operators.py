@@ -27,6 +27,7 @@ from .functions import (
     resetDefaultImages,
     updateWidgetLibrary,
     setBoneColor,
+    copyBoneColor,
     bone_color_items,
 )
 
@@ -785,6 +786,21 @@ class BONEWIDGET_OT_clearBoneColor(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_copyBoneColor(bpy.types.Operator):
+    """Copy bone color from selected bone if available"""
+    bl_idname = "bonewidget.copy_bone_color"
+    bl_label = "Copy Bone Color"
+
+    @classmethod
+    def poll(cls, context):
+        return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE'
+                and len(context.selected_pose_bones) == 1)
+
+    def execute(self, context):
+        copyBoneColor(context, context.selected_pose_bones[0].bone)
+        return {'FINISHED'}
+
+
 classes = (
     BONEWIDGET_OT_removeWidgets,
     BONEWIDGET_OT_addWidgets,
@@ -808,6 +824,7 @@ classes = (
     BONEWIDGET_OT_resetDefaultImages,
     BONEWIDGET_OT_setBoneColor,
     BONEWIDGET_OT_clearBoneColor,
+    BONEWIDGET_OT_copyBoneColor,
 )
 
 

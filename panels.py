@@ -84,6 +84,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                 row.prop(context.scene, "colorset_normal", text="")
                 row.prop(context.scene, "colorset_select", text="")
                 row.prop(context.scene, "colorset_active", text="")
+                row = layout.row(align=True)
+                row.operator("bonewidget.copy_bone_color", text="Copy Bone Color", icon="COPYDOWN")
             row = layout.row(align=True)
             row.operator("bonewidget.clear_bone_color", text="Clear Bone Color", icon="PANEL_CLOSE")
 
@@ -137,7 +139,7 @@ def register():
         default=(0.0, 0.0, 0.0),
         size=3,
         min=0.0, max=1.0,
-        description="Color used for the surface of bones.",
+        description="Color used for the surface of bones",
         update=updateBoneColor,
     )
 
@@ -147,7 +149,7 @@ def register():
         default=(0.0, 0.0, 0.0),
         size=3,
         min=0.0, max=1.0,
-        description="Color used for selected bones.",
+        description="Color used for selected bones",
         update=updateBoneColor,
     )
 
@@ -157,8 +159,14 @@ def register():
         default=(0.0, 0.0, 0.0),
         size=3,
         min=0.0, max=1.0,
-        description="Color used for active bones.",
+        description="Color used for active bones",
         update=updateBoneColor,
+    )
+
+    bpy.types.Scene.live_update_on = bpy.props.BoolProperty(
+        name="Live Update",
+        description="Live Update on or off",
+        default=True,
     )
     
     from bpy.utils import register_class
@@ -176,6 +184,7 @@ def unregister():
     del bpy.types.Scene.colorset_normal
     del bpy.types.Scene.colorset_select
     del bpy.types.Scene.colorset_active
+    del bpy.types.Scene.live_update_on
 
     for pcoll in preview_collections.values():
         bpy.utils.previews.remove(pcoll)
