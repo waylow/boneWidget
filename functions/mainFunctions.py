@@ -476,12 +476,12 @@ def addObjectAsWidget(context, collection):
 
 def setBoneColor(context, color):
     for bone in context.selected_pose_bones:
-        bone.bone.color.palette = color
+        bone.color.palette = color
 
         if color == "CUSTOM":
-            bone.bone.color.custom.normal = context.scene.colorset_normal
-            bone.bone.color.custom.select = context.scene.colorset_select
-            bone.bone.color.custom.active = context.scene.colorset_active
+            bone.color.custom.normal = context.scene.colorset_normal
+            bone.color.custom.select = context.scene.colorset_select
+            bone.color.custom.active = context.scene.colorset_active
 
 
 def copyBoneColor(context, bone):
