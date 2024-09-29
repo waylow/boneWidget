@@ -787,7 +787,7 @@ class BONEWIDGET_OT_clearBoneColor(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_copyBoneColor(bpy.types.Operator):
-    """Copy bone color from selected bone if available"""
+    """Copy the colors of the active bone to the custom colors above (ignores default colors)"""
     bl_idname = "bonewidget.copy_bone_color"
     bl_label = "Copy Bone Color"
 
