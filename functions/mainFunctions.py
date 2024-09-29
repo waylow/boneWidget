@@ -484,8 +484,28 @@ def setBoneColor(context, color):
             bone.bone.color.custom.active = context.scene.colorset_active
 
 
+def copyBoneColor(context, bone):
+    context.scene.live_update_on = False
+    
+    if bone.color.is_custom:
+        context.scene.colorset_normal = bone.color.custom.normal
+        context.scene.colorset_select = bone.color.custom.select
+        context.scene.colorset_active = bone.color.custom.active
+    elif bone.color.palette != "DEFAULT": # bone has a theme assigned
+        theme = bone.color.palette
+        theme_id = int(theme[-2:]) - 1
+        theme_color_set = bpy.context.preferences.themes[0].bone_color_sets[theme_id]
+
+        context.scene.colorset_normal = theme_color_set.normal
+        context.scene.colorset_select = theme_color_set.select
+        context.scene.colorset_active = theme_color_set.active
+        
+    context.scene.live_update_on = True
+
+
 def updateBoneColor(self, context):
-    setBoneColor(context, "CUSTOM")
+    if context.scene.live_update_on:
+        setBoneColor(context, "CUSTOM")
 
 
 def advanced_options_toggled(self, context):
@@ -508,5 +528,5 @@ def bone_color_items_short(self, context):
     items = []
     for i in range(1, 16):
         items.append((f"THEME{i:02}", f"Theme {i:02}", "", f"COLORSET_{i:02}_VEC", i))
-    items.append(("CUSTOM", "Custom", "", "QUESTION", 16))
+    items.append(("CUSTOM", "Custom", "", "COLOR", 16))
     return items
