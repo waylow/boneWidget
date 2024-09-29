@@ -707,7 +707,7 @@ class BONEWIDGET_OT_deleteUnusedWidgets(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_clearBoneWidgets(bpy.types.Operator):
-    """Clears widgets from selected pose bones but doesn't remove them from the scene."""
+    """Clears widgets from selected pose bones but doesn't remove them from the scene"""
     bl_idname = "bonewidget.clear_widgets"
     bl_label = "Clear Widgets"
 
@@ -735,7 +735,7 @@ class BONEWIDGET_OT_resyncWidgetNames(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_addObjectAsWidget(bpy.types.Operator):
-    """Add selected object as widget for active bone."""
+    """Add selected object as widget for active bone"""
     bl_idname = "bonewidget.add_as_widget"
     bl_label = "Confirm selected Object as widget shape"
 
@@ -759,7 +759,7 @@ class BONEWIDGET_OT_resetDefaultImages(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_setBoneColor(bpy.types.Operator):
-    """Add bone color to selected widgets."""
+    """Add bone color to selected widgets"""
     bl_idname = "bonewidget.set_bone_color"
     bl_label = "Set Bone Color to Widget"
 
@@ -773,7 +773,7 @@ class BONEWIDGET_OT_setBoneColor(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_clearBoneColor(bpy.types.Operator):
-    """Add bone color to selected widgets."""
+    """Add bone color to selected widgets"""
     bl_idname = "bonewidget.clear_bone_color"
     bl_label = "Clear Bone Color"
 
