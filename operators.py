@@ -797,7 +797,7 @@ class BONEWIDGET_OT_copyBoneColor(bpy.types.Operator):
                 and len(context.selected_pose_bones) == 1)
 
     def execute(self, context):
-        copyBoneColor(context, context.selected_pose_bones[0].bone)
+        copyBoneColor(context, context.selected_pose_bones[0])
         return {'FINISHED'}
 
 
