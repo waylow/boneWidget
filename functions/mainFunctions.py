@@ -530,3 +530,7 @@ def bone_color_items_short(self, context):
         items.append((f"THEME{i:02}", f"Theme {i:02}", "", f"COLORSET_{i:02}_VEC", i))
     items.append(("CUSTOM", "Custom", "", "COLOR", 16))
     return items
+
+
+def live_update_toggle(self, context):
+    context.scene.live_update_on = self.live_update_toggle

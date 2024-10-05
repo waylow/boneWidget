@@ -7,6 +7,7 @@ from .functions import (
     get_preview_default,
     bone_color_items_short,
     updateBoneColor,
+    live_update_toggle,
 )
 
 from .menus import BONEWIDGET_MT_bw_specials
@@ -84,6 +85,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                 row.prop(context.scene, "colorset_normal", text="")
                 row.prop(context.scene, "colorset_select", text="")
                 row.prop(context.scene, "colorset_active", text="")
+                row.separator(factor=0.5)
+                row.prop(context.scene, "live_update_toggle", text="", icon="UV_SYNC_SELECT")
                 row = layout.row(align=True)
                 row.operator("bonewidget.copy_bone_color", text="Copy Bone Color", icon="COPYDOWN")
             row = layout.row(align=True)
@@ -166,7 +169,14 @@ def register():
     bpy.types.Scene.live_update_on = bpy.props.BoolProperty(
         name="Live Update",
         description="Live Update on or off",
-        default=True,
+        default=False,
+    )
+
+    bpy.types.Scene.live_update_toggle = bpy.props.BoolProperty(
+        name="Live Update Toggle",
+        description="Toggles Live Update on/off for custom colors",
+        default=bpy.types.Scene.live_update_on.keywords['default'],
+        update=live_update_toggle,
     )
     
     from bpy.utils import register_class
@@ -185,6 +195,7 @@ def unregister():
     del bpy.types.Scene.colorset_select
     del bpy.types.Scene.colorset_active
     del bpy.types.Scene.live_update_on
+    del bpy.types.Scene.live_update_toggle
 
     for pcoll in preview_collections.values():
         bpy.utils.previews.remove(pcoll)
