@@ -80,47 +80,59 @@ class BoneWidgetPreferences(AddonPreferences):
         default=True,
     )
 
+    edit_bone_colors: BoolProperty(
+        name="Edit Mode Bone Colors",
+        description="Enable Edit Mode Bone Colors",
+        default=False,
+    )
+
     def draw(self, context):
         layout = self.layout
 
-        row = layout.row()
-        row.prop(self, "use_rigify_defaults", text="Use Rigify Defaults")
+        box = layout.box()
+        box.prop(self, "use_rigify_defaults", text="Use Rigify Defaults")
+
+        box_row = box.row()
+        box_col = box_row.column()
+        box_col.prop(self, "widget_prefix", text="Widget Prefix")
+        box_col.prop(self, "bonewidget_collection_name", text="Collection name")
+        box_row.enabled = not self.use_rigify_defaults
+
+        box_row = box.row()
+        box_row = box.row()
+        box_row.prop(self, "symmetry_suffix", text="Symmetry suffix")
 
         row = layout.row()
-        col = row.column()
-        col.prop(self, "widget_prefix", text="Widget Prefix")
-        col.prop(self, "bonewidget_collection_name", text="Collection name")
-        row.enabled = not self.use_rigify_defaults
 
-        row = layout.row()
-        row = layout.row()
-        row.prop(self, "symmetry_suffix", text="Symmetry suffix")
+        box = layout.box()
+        box_col = box.column()
+        box_col.label(text="Set the category to show Bone-Widgets panel:")
+        box_col.prop(self, "panel_category")
 
+        # edit bone colors
         row = layout.row()
-
-        row = layout.row()
-        col = row.column()
-        col.label(text="Set the name of the tab where the Bone-Widget addon will show:")
-        col.prop(self, "panel_category")
+        box = layout.box()
+        box.label(text="Bone Colors:")
+        row = box.row()
+        row.prop(self, "edit_bone_colors")
 
         # preview area
         row = layout.row()
-        row = layout.row()
+        box = layout.box()
         
-        row.label(text="Thumbnail Previews:")
-        row = layout.row()
-        row.prop(self, "preview_default", text="Display Previews by Default")
+        box.label(text="Thumbnail Previews:")
+        box_row = box.row()
+        box_row.prop(self, "preview_default", text="Display Previews by Default")
 
-        row = layout.row()
-        col = row.column()
-        col.label(text="Preview Panel Size:")
-        row.prop(self, "preview_panel_size", text="")
+        box_row = box.row()
+        box_col = box_row.column()
+        box_col.label(text="Preview Panel Size:")
+        box_row.prop(self, "preview_panel_size", text="")
         
-        row = layout.row()
-        col = row.column()
-        col.label(text="Preview Popup Size:")
-        row.prop(self, "preview_popup_size", text="")
-        row = layout.row()
+        box_row = box.row()
+        box_col = box_row.column()
+        box_col.label(text="Preview Popup Size:")
+        box_row.prop(self, "preview_popup_size", text="")
 
         layout.separator()
         row = layout.row()
