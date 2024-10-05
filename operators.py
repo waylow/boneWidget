@@ -28,6 +28,7 @@ from .functions import (
     updateWidgetLibrary,
     setBoneColor,
     copyBoneColor,
+    copyEditBoneColor,
     bone_color_items,
 )
 
@@ -765,7 +766,7 @@ class BONEWIDGET_OT_setBoneColor(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
+        return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'])
 
     def execute(self, context):
         setBoneColor(context, context.window_manager.bone_widget_colors)
@@ -779,7 +780,7 @@ class BONEWIDGET_OT_clearBoneColor(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
+        return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'])
 
     def execute(self, context):
         setBoneColor(context, "DEFAULT")
@@ -793,11 +794,15 @@ class BONEWIDGET_OT_copyBoneColor(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE'
-                and len(context.selected_pose_bones) == 1)
+        bones = context.selected_pose_bones if context.object.mode == 'POSE' else context.selected_bones
+        return (context.object and context.object.type == 'ARMATURE'
+                and context.object.mode in ['POSE', 'EDIT'] and len(bones) == 1)
 
     def execute(self, context):
-        copyBoneColor(context, context.selected_pose_bones[0])
+        if context.object.mode == 'POSE':
+            copyBoneColor(context, context.selected_pose_bones[0]) #changed
+        elif context.object.mode == 'EDIT':
+            copyEditBoneColor(context, context.selected_bones[0])
         return {'FINISHED'}
 
 

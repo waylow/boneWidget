@@ -7,6 +7,7 @@ from .functions import (
     get_preview_default,
     bone_color_items_short,
     updateBoneColor,
+    updateEditBoneColor,
     live_update_toggle,
 )
 
@@ -74,20 +75,30 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                             icon='RESTRICT_SELECT_OFF')
 
         # BONE COLORS
-        if bpy.app.version >= (4,2,0):
+        if bpy.app.version >= (4,2,0) and not (context.object.mode == "EDIT"
+                                    and context.preferences.addons[__package__].preferences.edit_bone_colors == False):
             layout.separator()
             row = layout.row(align=True)
             row.operator("bonewidget.set_bone_color", text="Set Bone Color", icon="BRUSHES_ALL")
             row.scale_x = 3.0
             row.template_icon_view(context.window_manager, "bone_widget_colors", show_labels=False, scale=1, scale_popup=1.8)
             if context.window_manager.bone_widget_colors == "CUSTOM":
+                
                 row = layout.row(align=True)
-                row.prop(context.scene, "colorset_normal", text="")
-                row.prop(context.scene, "colorset_select", text="")
-                row.prop(context.scene, "colorset_active", text="")
-                row.separator(factor=0.5)
-                row.prop(context.scene, "live_update_toggle", text="", icon="UV_SYNC_SELECT")
-                row = layout.row(align=True)
+                if context.object.mode == 'POSE': # display pose bone colors
+                    row.prop(context.scene, "colorset_normal", text="")
+                    row.prop(context.scene, "colorset_select", text="")
+                    row.prop(context.scene, "colorset_active", text="")
+                elif context.object.mode == "EDIT": #edit bone colors
+                    row.prop(context.scene, "edit_colorset_normal", text="")
+                    row.prop(context.scene, "edit_colorset_select", text="")
+                    row.prop(context.scene, "edit_colorset_active", text="")
+                
+                if context.object.mode in ['POSE', 'EDIT']:
+                    row.separator(factor=0.5)
+                    row.prop(context.scene, "live_update_toggle", text="", icon="UV_SYNC_SELECT")
+                    row = layout.row(align=True)
+
                 row.operator("bonewidget.copy_bone_color", text="Copy Bone Color", icon="COPYDOWN")
             row = layout.row(align=True)
             row.operator("bonewidget.clear_bone_color", text="Clear Bone Color", icon="PANEL_CLOSE")
@@ -166,6 +177,36 @@ def register():
         update=updateBoneColor,
     )
 
+    bpy.types.Scene.edit_colorset_normal = bpy.props.FloatVectorProperty(
+        name="Normal",
+        subtype='COLOR_GAMMA',
+        default=(0.0, 0.0, 0.0),
+        size=3,
+        min=0.0, max=1.0,
+        description="Color used for the surface of edit bones",
+        update=updateEditBoneColor,
+    )
+
+    bpy.types.Scene.edit_colorset_select = bpy.props.FloatVectorProperty(
+        name="Select",
+        subtype='COLOR_GAMMA',
+        default=(0.0, 0.0, 0.0),
+        size=3,
+        min=0.0, max=1.0,
+        description="Color used for selected edit bones",
+        update=updateEditBoneColor,
+    )
+
+    bpy.types.Scene.edit_colorset_active = bpy.props.FloatVectorProperty(
+        name="Active",
+        subtype='COLOR_GAMMA',
+        default=(0.0, 0.0, 0.0),
+        size=3,
+        min=0.0, max=1.0,
+        description="Color used for active edit bones",
+        update=updateEditBoneColor,
+    )
+
     bpy.types.Scene.live_update_on = bpy.props.BoolProperty(
         name="Live Update",
         description="Live Update on or off",
@@ -194,6 +235,9 @@ def unregister():
     del bpy.types.Scene.colorset_normal
     del bpy.types.Scene.colorset_select
     del bpy.types.Scene.colorset_active
+    del bpy.types.Scene.edit_colorset_normal
+    del bpy.types.Scene.edit_colorset_select
+    del bpy.types.Scene.edit_colorset_active
     del bpy.types.Scene.live_update_on
     del bpy.types.Scene.live_update_toggle
 
