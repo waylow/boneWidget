@@ -475,13 +475,22 @@ def addObjectAsWidget(context, collection):
 
 
 def setBoneColor(context, color):
-    for bone in context.selected_pose_bones:
-        bone.color.palette = color
+    if context.object.mode == "POSE":
+        for bone in context.selected_pose_bones:
+            bone.color.palette = color #this will get the selected bone color
 
-        if color == "CUSTOM":
-            bone.color.custom.normal = context.scene.colorset_normal
-            bone.color.custom.select = context.scene.colorset_select
-            bone.color.custom.active = context.scene.colorset_active
+            if color == "CUSTOM":
+                bone.color.custom.normal = context.scene.colorset_normal
+                bone.color.custom.select = context.scene.colorset_select
+                bone.color.custom.active = context.scene.colorset_active
+    elif context.object.mode == "EDIT":
+        for bone in context.selected_bones:
+            bone.color.palette = color #this will get the selected bone color
+
+            if color == "CUSTOM":
+                bone.color.custom.normal = context.scene.edit_colorset_normal
+                bone.color.custom.select = context.scene.edit_colorset_select
+                bone.color.custom.active = context.scene.edit_colorset_active
 
 
 def copyBoneColor(context, bone):
@@ -503,7 +512,32 @@ def copyBoneColor(context, bone):
     context.scene.live_update_on = True
 
 
+def copyEditBoneColor(context, bone):
+    live_update_current_state = context.scene.live_update_on
+    context.scene.live_update_on = False
+    
+    if bone.color.is_custom:
+        context.scene.edit_colorset_normal = bone.color.custom.normal
+        context.scene.edit_colorset_select = bone.color.custom.select
+        context.scene.edit_colorset_active = bone.color.custom.active
+    elif bone.color.palette != "DEFAULT": # bone has a theme assigned
+        theme = bone.color.palette
+        theme_id = int(theme[-2:]) - 1
+        theme_color_set = bpy.context.preferences.themes[0].bone_color_sets[theme_id]
+
+        context.scene.edit_colorset_normal = theme_color_set.normal
+        context.scene.edit_colorset_select = theme_color_set.select
+        context.scene.edit_colorset_active = theme_color_set.active
+        
+    context.scene.live_update_on = live_update_current_state
+
+
 def updateBoneColor(self, context):
+    if context.scene.live_update_on:
+        setBoneColor(context, "CUSTOM")
+
+
+def updateEditBoneColor(self, context):
     if context.scene.live_update_on:
         setBoneColor(context, "CUSTOM")
 
