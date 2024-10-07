@@ -494,6 +494,7 @@ def setBoneColor(context, color):
 
 
 def copyBoneColor(context, bone):
+    live_update_current_state = context.scene.live_update_on
     context.scene.live_update_on = False
     
     if bone.color.is_custom:
@@ -509,7 +510,7 @@ def copyBoneColor(context, bone):
         context.scene.colorset_select = theme_color_set.select
         context.scene.colorset_active = theme_color_set.active
         
-    context.scene.live_update_on = True
+    context.scene.live_update_on = live_update_current_state
 
 
 def copyEditBoneColor(context, bone):
