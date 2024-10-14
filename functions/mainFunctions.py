@@ -6,8 +6,8 @@ from .. import __package__
 
 def getCollection(context):
     #check user preferences for the name of the collection
-    if not context.preferences.addons[__package__].preferences.use_rigify_defaults:
-        bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+    if not getPreferences(context).use_rigify_defaults:
+        bw_collection_name = getPreferences(context).bonewidget_collection_name
     else:
         bw_collection_name = "WGTS_" + context.active_object.name
 
@@ -102,8 +102,8 @@ def createWidget(bone, widget, relative, size, slide, rotation, collection, use_
     C = bpy.context
     D = bpy.data
 
-    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
-        bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    if not getPreferences(C).use_rigify_defaults:
+        bw_widget_prefix = getPreferences(C).widget_prefix
     else:
         bw_widget_prefix = "WGT-" + C.active_object.name + "_"
 
@@ -161,8 +161,8 @@ def symmetrizeWidget(bone, collection):
     C = bpy.context
     D = bpy.data
 
-    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
-        bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    if not getPreferences(C).use_rigify_defaults:
+        bw_widget_prefix = getPreferences(C).widget_prefix
         rigify_object_name = ''
     else:
         bw_widget_prefix = "WGT-"
@@ -215,7 +215,7 @@ def symmetrizeWidget(bone, collection):
 def symmetrizeWidget_helper(bone, collection, activeObject, widgetsAndBones):
     C = bpy.context
 
-    bw_symmetry_suffix = C.preferences.addons[__package__].preferences.symmetry_suffix
+    bw_symmetry_suffix = getPreferences(C).symmetry_suffix
     bw_symmetry_suffix = bw_symmetry_suffix.split(";")
 
     suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
@@ -233,8 +233,8 @@ def deleteUnusedWidgets():
     C = bpy.context
     D = bpy.data
 
-    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
-        bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
+    if not getPreferences(C).use_rigify_defaults:
+        bw_collection_name = getPreferences(C).bonewidget_collection_name
     else:
         bw_collection_name = 'WGTS_' + C.active_object.name
 
@@ -323,7 +323,7 @@ def findMirrorObject(object):
     C = bpy.context
     D = bpy.data
 
-    bw_symmetry_suffix = C.preferences.addons[__package__].preferences.symmetry_suffix
+    bw_symmetry_suffix = getPreferences(C).symmetry_suffix
     bw_symmetry_suffix = bw_symmetry_suffix.split(";")
 
     suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
@@ -361,7 +361,7 @@ def findMatchBones():
     C = bpy.context
     D = bpy.data
 
-    bw_symmetry_suffix = C.preferences.addons[__package__].preferences.symmetry_suffix
+    bw_symmetry_suffix = getPreferences(C).symmetry_suffix
     bw_symmetry_suffix = bw_symmetry_suffix.split(";")
 
     suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
@@ -398,9 +398,9 @@ def resyncWidgetNames():
     C = bpy.context
     D = bpy.data
 
-    if not C.preferences.addons[__package__].preferences.use_rigify_defaults:
-        bw_collection_name = C.preferences.addons[__package__].preferences.bonewidget_collection_name
-        bw_widget_prefix = C.preferences.addons[__package__].preferences.widget_prefix
+    if not getPreferences(C).use_rigify_defaults:
+        bw_collection_name = getPreferences(C).bonewidget_collection_name
+        bw_widget_prefix = getPreferences(C).widget_prefix
     else:
         bw_collection_name = 'WGTS_' + C.active_object.name
         bw_widget_prefix = 'WGT-' + C.active_object.name + '_'
@@ -454,7 +454,7 @@ def addObjectAsWidget(context, collection):
         widget = widget_object.copy()
         widget.data = widget.data.copy()
         # reamame it
-        bw_widget_prefix = context.preferences.addons[__package__].preferences.widget_prefix
+        bw_widget_prefix = getPreferences(context).widget_prefix
         widget_name = bw_widget_prefix + active_bone.name
         widget.name = widget_name
         widget.data.name = widget_name
@@ -569,3 +569,7 @@ def bone_color_items_short(self, context):
 
 def live_update_toggle(self, context):
     context.scene.live_update_on = self.live_update_toggle
+
+
+def getPreferences(context):
+    return context.preferences.addons[__package__].preferences
