@@ -9,6 +9,7 @@ from .functions import (
     updateBoneColor,
     updateEditBoneColor,
     live_update_toggle,
+    getPreferences,
 )
 
 from .menus import BONEWIDGET_MT_bw_specials
@@ -38,8 +39,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         # preview view
         if context.window_manager.toggle_preview:
             row = layout.row(align=True)
-            preview_panel_size = context.preferences.addons[__package__].preferences.preview_panel_size
-            preview_popup_size = context.preferences.addons[__package__].preferences.preview_popup_size
+            preview_panel_size = getPreferences(context).preview_panel_size
+            preview_popup_size = getPreferences(context).preview_popup_size
             row.template_icon_view(context.window_manager, "widget_list", show_labels=True,
                                    scale=preview_panel_size, scale_popup=preview_popup_size)
 
@@ -76,7 +77,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 
         # BONE COLORS
         if bpy.app.version >= (4,2,0) and not (context.object.mode == "EDIT"
-                                    and context.preferences.addons[__package__].preferences.edit_bone_colors == False):
+                                    and getPreferences(context).edit_bone_colors == False):
             layout.separator()
             row = layout.row(align=True)
             row.operator("bonewidget.set_bone_color", text="Set Bone Color", icon="BRUSHES_ALL")
@@ -104,8 +105,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
             row.operator("bonewidget.clear_bone_color", text="Clear Bone Color", icon="PANEL_CLOSE")
 
         # if the bw collection exists, show the visibility toggle
-        if not context.preferences.addons[__package__].preferences.use_rigify_defaults: #rigify
-            bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+        if not getPreferences(context).use_rigify_defaults: #rigify
+            bw_collection_name = getPreferences(context).bonewidget_collection_name
         
         elif context.active_object: # active  object
             bw_collection_name = 'WGTS_' + context.active_object.name

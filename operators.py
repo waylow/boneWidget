@@ -30,6 +30,7 @@ from .functions import (
     copyBoneColor,
     copyEditBoneColor,
     bone_color_items,
+    getPreferences,
 )
 
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
@@ -678,8 +679,8 @@ class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
 
     def execute(self, context):
-        if not context.preferences.addons[__package__].preferences.use_rigify_defaults:
-            bw_collection_name = context.preferences.addons[__package__].preferences.bonewidget_collection_name
+        if not getPreferences(context).use_rigify_defaults:
+            bw_collection_name = getPreferences(context).bonewidget_collection_name
         else:
             bw_collection_name = 'WGTS_' + context.active_object.name
 

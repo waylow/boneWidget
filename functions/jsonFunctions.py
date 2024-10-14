@@ -2,6 +2,7 @@ import bpy
 import os
 import json
 import numpy
+from .mainFunctions import getPreferences
 from .. import __package__
 
 JSON_DEFAULT_WIDGETS = "widgets.json"
@@ -82,7 +83,7 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name="", custo
     return_message = ""
     if addOrRemove == 'add':
         wgts = readWidgets(file)
-        bw_widget_prefix = bpy.context.preferences.addons[__package__].preferences.widget_prefix
+        bw_widget_prefix = getPreferences(context).widget_prefix
         for ob in widgets:
             if not widget_name:
                 if ob.name.startswith(bw_widget_prefix):
