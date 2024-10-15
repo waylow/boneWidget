@@ -1,6 +1,6 @@
 import bpy
 import bpy.utils.previews
-from .jsonFunctions import readWidgets, JSON_USER_WIDGETS
+from .jsonFunctions import readWidgets, getWidgetData, JSON_USER_WIDGETS
 import os
 from .. import __package__
 
@@ -55,7 +55,9 @@ def generate_previews():
                 thumb = pcoll.load(name, filepath, 'IMAGE')
             else:
                 thumb = pcoll[name]
-            enum_items.append((name, name, "", thumb.icon_id, i))
+                
+            face_data_info = "Contains Face Data" if getWidgetData(name).get("faces") else ""
+            enum_items.append((name, name, face_data_info, thumb.icon_id, i))
     
     pcoll.widget_list = enum_items
     return enum_items
