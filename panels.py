@@ -101,8 +101,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                          icon=icon, text=text)
 
         # BONE COLORS
-        if bpy.app.version >= (4,0,0) and not (context.object.mode == "EDIT"
-                                    and getPreferences(context).edit_bone_colors == False):
+        if bpy.app.version >= (4,0,0):
             
             layout.separator()
             row = layout.row(align=True)
@@ -119,7 +118,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                     row.prop(custom_pose_color, "normal", text="")
                     row.prop(custom_pose_color, "select", text="")
                     row.prop(custom_pose_color, "active", text="")
-                elif context.object.mode == "EDIT": #edit bone colors
+                elif context.object.mode == "EDIT" and getPreferences(context).edit_bone_colors: #edit bone colors
                     row.prop(custom_edit_color, "normal", text="")
                     row.prop(custom_edit_color, "select", text="")
                     row.prop(custom_edit_color, "active", text="")
@@ -142,7 +141,7 @@ class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Pa
 
     @classmethod
     def poll(self, context):
-        return bpy.app.version >= (4,1,1)
+        return bpy.app.version >= (4,0,0)
     
     def draw(self, context):
         layout = self.layout
