@@ -152,6 +152,9 @@ def createWidget(bone, widget, relative, size, slide, rotation, collection, use_
     bone.custom_shape = newObject
     bone.bone.show_wire = not use_face_data # show faces if use face data is enabled
 
+    if bpy.app.version >= (4,0,0):    
+        bone.bone.color.palette = bone_color #this will copy the selected pose bone color
+    
     if bpy.app.version >= (4,2,0):
         bone.custom_shape_wire_width = wireframe_width
         bone.bone.color.palette = bone_color
@@ -204,9 +207,12 @@ def symmetrizeWidget(bone, collection):
         findMirrorObject(bone).custom_shape = newObject
         mirrorBone.bone.show_wire = bone.bone.show_wire
 
+        if bpy.app.version >= (4,0,0):
+            mirrorBone.bone.color.palette = bone.bone.color.palette # pose bone color
+            mirrorBone.color.palette = bone.color.palette # edit bone color
+
         if bpy.app.version >= (4,2,0):
             mirrorBone.custom_shape_wire_width = bone.custom_shape_wire_width
-            mirrorBone.bone.color.palette = bone.bone.color.palette
 
     else:
         pass
