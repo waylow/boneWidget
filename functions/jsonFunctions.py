@@ -2,6 +2,7 @@ import bpy
 import os
 import json
 import numpy
+from bpy.app.handlers import persistent
 from .mainFunctions import getPreferences
 from .. import __package__
 
@@ -44,7 +45,7 @@ def readWidgets(filename = ""):
         files = [filename]
 
     for file in files:
-        jsonFile = os.path.join(os.path.dirname(os.path.dirname(__file__)), file)
+        jsonFile = os.path.join(os.path.dirname(get_addon_dir()), file)
         if os.path.exists(jsonFile):
             f = open(jsonFile, 'r')
             wgts.update(json.load(f))
@@ -61,7 +62,7 @@ def getWidgetData(widget):
 
 
 def writeWidgets(wgts, file):
-    jsonFile = os.path.join(os.path.dirname(os.path.dirname(__file__)), file)
+    jsonFile = os.path.join(os.path.dirname(get_addon_dir()), file)
     #if os.path.exists(jsonFile):
     f = open(jsonFile, 'w')
     f.write(json.dumps(wgts))
@@ -137,9 +138,9 @@ def exportWidgetLibrary(filepath):
     if wgts:
         # variables needed for exporting widgets
         dest_dir = os.path.dirname(filepath)
-        json_dir = os.path.dirname(os.path.dirname(__file__))
+        json_dir = os.path.dirname(get_addon_dir())
         image_folder = 'custom_thumbnails'
-        custom_image_dir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', image_folder))
+        custom_image_dir = os.path.abspath(os.path.join(get_addon_dir(), '..', image_folder))
         
         filename = os.path.basename(filepath)
         if not filename: filename = "widgetLibrary.zip"
@@ -290,3 +291,40 @@ def resetDefaultImages():
     
     # trigger an update and display original but updated widget
     bpy.context.window_manager.widget_list = current_widget
+
+
+def get_addon_dir():
+    return os.path.dirname(__file__)
+
+
+def saveColorSets(context):
+    if not bpy.context.scene.turn_off_colorset_save:
+        bpy.context.scene.turn_off_colorset_save = True
+        color_sets = [{
+            "name": item.name,
+            "normal": list(item.normal),
+            "select": list(item.select),
+            "active": list(item.active)
+        } for item in context.scene.custom_color_presets]
+
+        filepath = os.path.join(get_addon_dir(), '..', "custom_color_sets.json")
+        with open(filepath, 'w') as f:
+            json.dump(color_sets, f, indent=4)
+        bpy.context.scene.turn_off_colorset_save = False
+
+
+@persistent
+def loadColorPresets(_):
+    filepath = os.path.join(get_addon_dir(), '..', "custom_color_sets.json")
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as f:
+            color_sets = json.load(f)
+            for item in color_sets:
+                bpy.context.scene.turn_off_colorset_save = True
+                new_item = bpy.context.scene.custom_color_presets.add()
+                new_item.name = item["name"]
+                new_item.normal = item["normal"]
+                new_item.select = item["select"]
+                new_item.active = item["active"]
+                bpy.context.scene.turn_off_colorset_save = False
+
