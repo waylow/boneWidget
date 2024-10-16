@@ -1,6 +1,6 @@
 import bpy
 import bpy.utils.previews
-from .jsonFunctions import readWidgets, getWidgetData, JSON_USER_WIDGETS
+from .jsonFunctions import readWidgets, getWidgetData, get_addon_dir, JSON_USER_WIDGETS
 import os
 from .. import __package__
 
@@ -31,8 +31,8 @@ def generate_previews():
         return pcoll.widget_list
     
     #directory = os.path.join(os.path.dirname(__file__), "thumbnails")
-    directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'thumbnails'))
-    custom_directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'custom_thumbnails'))
+    directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'thumbnails'))
+    custom_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
 
     if directory and os.path.exists(directory):
         widget_data = {item[0]: item[1].get("image", "missing_image.png") for item in readWidgets().items()}
@@ -73,7 +73,7 @@ def get_preview_default():
 
 def copyCustomImage(filepath, filename):
     if os.path.exists(filepath):
-        image_directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'custom_thumbnails'))
+        image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
         destination_path = os.path.join(image_directory, filename)
 
         try:
@@ -90,7 +90,7 @@ def copyCustomImage(filepath, filename):
 
 
 def removeCustomImage(filename):
-    image_directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'custom_thumbnails'))
+    image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
     destination_path = os.path.join(image_directory, filename)
     
     if os.path.isfile(destination_path):

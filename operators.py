@@ -31,6 +31,8 @@ from .functions import (
     copyEditBoneColor,
     bone_color_items,
     getPreferences,
+    saveColorSets,
+    loadColorPresets,
 )
 
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
@@ -807,6 +809,157 @@ class BONEWIDGET_OT_copyBoneColor(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
+    """Adds a color set to presets from selected Theme or from custom palette"""
+    bl_idname = "bonewidget.add_color_set_from"
+    bl_label = "Add color set to presets"
+
+
+    def execute(self, context):
+
+        base_name = "Color Set"
+        new_name = base_name
+        count = 1
+
+        while any(item.name == new_name for item in context.scene.custom_color_presets):
+            new_name = f"{base_name}.{count:03d}"
+            count += 1
+
+        new_item = context.scene.custom_color_presets.add()
+
+        if context.window_manager.bone_widget_colors == "CUSTOM":
+            # add item from custom color palette
+
+            new_item.name = new_name
+            if context.object.mode == 'POSE':
+                new_item.normal = context.scene.custom_pose_color_set.normal
+                new_item.select = context.scene.custom_pose_color_set.select
+                new_item.active = context.scene.custom_pose_color_set.active
+                
+            elif context.object.mode == "EDIT" and \
+                 getPreferences(context).edit_bone_colors == True: # edit mode colors if turned on in preferences
+                
+                new_item.normal = context.scene.custom_edit_color_set.normal
+                new_item.select = context.scene.custom_edit_color_set.select
+                new_item.active = context.scene.custom_edit_color_set.active
+
+        elif "THEME" in context.window_manager.bone_widget_colors:
+            # add item from selected theme
+
+            theme = context.window_manager.bone_widget_colors
+            theme_id = int(theme[-2:]) - 1
+            theme_color_set = bpy.context.preferences.themes[0].bone_color_sets[theme_id]
+
+            new_item.name = theme
+            new_item.normal = theme_color_set.normal
+            new_item.select = theme_color_set.select
+            new_item.active = theme_color_set.active
+
+        saveColorSets(context)
+        return {'FINISHED'}
+    
+
+class BONEWIDGET_OT_add_default_colorset(bpy.types.Operator):
+    """Adds a default color set to presets"""
+    bl_idname = "bonewidget.add_default_custom_colorset"
+    bl_label = "Add a default color set"
+
+    def execute(self, context):
+        new_item = context.scene.custom_color_presets.add()
+        base_name = "Color Set"
+        new_name = base_name
+        count = 1
+
+        while any(item.name == new_name for item in context.scene.custom_color_presets):
+            new_name = f"{base_name}.{count:03d}"
+            count += 1
+
+        new_item.name = new_name
+        new_item.normal = (1.0, 0.0, 0.0)
+        new_item.select = (0.0, 1.0, 0.0)
+        new_item.active = (0.0, 0.0, 1.0)
+        
+        saveColorSets(context)
+
+        return {'FINISHED'}
+    
+
+class BONEWIDGET_OT_add_colorset_to_bone(bpy.types.Operator):
+    """Adds a bone color set to selected bones"""
+    bl_idname = "bonewidget.add_colorset_to_bone"
+    bl_label = "Apply selected color set to selected bones - mode sensitive"
+
+    @classmethod
+    def poll(cls, context):
+        bones = context.selected_pose_bones if context.object.mode == 'POSE' else context.selected_bones
+        return (context.object and context.object.type == 'ARMATURE'
+                and context.object.mode in ['POSE', 'EDIT'] and len(bones) >= 1) \
+                and not (context.object.mode == "EDIT"
+                        and getPreferences(context).edit_bone_colors == False)
+
+    def execute(self, context):
+        if context.object.mode == "EDIT" and \
+                 getPreferences(context).edit_bone_colors == True: 
+            selected_bones = context.selected_bones
+        elif context.object.mode == "POSE":
+            selected_bones = context.selected_pose_bones
+        else:
+            return {'CANCELLED'}
+        
+        if selected_bones:
+            for bone in selected_bones:
+
+                bone.color.palette = "CUSTOM"
+
+                index = context.scene.colorset_list_index
+                item = context.scene.custom_color_presets[index]
+
+                bone.color.custom.normal = item.normal
+                bone.color.custom.select = item.select
+                bone.color.custom.active = item.active
+
+        return {'FINISHED'}
+    
+
+class BONEWIDGET_OT_remove_item(bpy.types.Operator):
+    """Removes selected color set from the preset list"""
+    bl_idname = "bonewidget.remove_custom_item"
+    bl_label = "Remove Selected Color Set"
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.colorset_list_index >= 0 and not context.scene.lock_colorset_color_changes
+
+    def execute(self, context):
+        my_list = context.scene.custom_color_presets
+        index = context.scene.colorset_list_index
+        my_list.remove(index)
+        context.scene.colorset_list_index = min(max(0, index - 1), len(my_list) - 1)
+        saveColorSets(context)
+        return {'FINISHED'}
+    
+
+class BONEWIDGET_OT_lock_custom_colorset_changes(bpy.types.Operator):
+    """Locks/Unlocks the ability to save changes to color set items"""
+    bl_idname = "bonewidget.lock_custom_colorset_changes"
+    bl_label = "Lock/Unlock changes to color set presets"
+
+    def execute(self, context):
+        context.scene.lock_colorset_color_changes = not context.scene.lock_colorset_color_changes
+        return {'FINISHED'}
+    
+
+class BONEWIDGET_OT_reload_colorset_items(bpy.types.Operator):
+    """Refreshes the custom colorset list from disk"""
+    bl_idname = "bonewidget.reload_colorset_items"
+    bl_label = "Refresh the bone color set presets"
+
+    def execute(self, context):
+        context.scene.custom_color_presets.clear()
+        loadColorPresets(context)
+        return {'FINISHED'}
+
+
 classes = (
     BONEWIDGET_OT_removeWidgets,
     BONEWIDGET_OT_addWidgets,
@@ -831,6 +984,12 @@ classes = (
     BONEWIDGET_OT_setBoneColor,
     BONEWIDGET_OT_clearBoneColor,
     BONEWIDGET_OT_copyBoneColor,
+    BONEWIDGET_OT_add_color_set_from,
+    BONEWIDGET_OT_add_default_colorset,
+    BONEWIDGET_OT_add_colorset_to_bone,
+    BONEWIDGET_OT_remove_item,
+    BONEWIDGET_OT_lock_custom_colorset_changes,
+    BONEWIDGET_OT_reload_colorset_items,
 )
 
 
