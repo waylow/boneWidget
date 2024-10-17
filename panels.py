@@ -123,12 +123,12 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                     row.prop(custom_edit_color, "select", text="")
                     row.prop(custom_edit_color, "active", text="")
                 
-                if context.object.mode in ['POSE', 'EDIT']:
+                if context.object.mode == "POSE" or getPreferences(context).edit_bone_colors:
                     row.separator(factor=0.5)
                     row.prop(context.scene, "live_update_toggle", text="", icon="UV_SYNC_SELECT")
                     row = layout.row(align=True)
 
-                row.operator("bonewidget.copy_bone_color", text="Copy Bone Color", icon="COPYDOWN")
+                    row.operator("bonewidget.copy_bone_color", text="Copy Bone Color", icon="COPYDOWN")
             row = layout.row(align=True)
             row.operator("bonewidget.clear_bone_color", text="Clear Bone Color", icon="PANEL_CLOSE")
 
