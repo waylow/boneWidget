@@ -766,6 +766,7 @@ class BONEWIDGET_OT_setBoneColor(bpy.types.Operator):
     """Add bone color to selected widgets"""
     bl_idname = "bonewidget.set_bone_color"
     bl_label = "Set Bone Color to Widget"
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
@@ -780,6 +781,7 @@ class BONEWIDGET_OT_clearBoneColor(bpy.types.Operator):
     """Add bone color to selected widgets"""
     bl_idname = "bonewidget.clear_bone_color"
     bl_label = "Clear Bone Color"
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
@@ -888,6 +890,7 @@ class BONEWIDGET_OT_add_colorset_to_bone(bpy.types.Operator):
     """Adds a bone color set to selected bones"""
     bl_idname = "bonewidget.add_colorset_to_bone"
     bl_label = "Apply selected color set to selected bones - mode sensitive"
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
