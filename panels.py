@@ -107,8 +107,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
             row = layout.row(align=True)
             row.operator("bonewidget.set_bone_color", text="Set Bone Color", icon="BRUSHES_ALL")
             row.scale_x = 3.0
-            row.template_icon_view(context.window_manager, "bone_widget_colors", show_labels=False, scale=1, scale_popup=1.8)
-            if context.window_manager.bone_widget_colors == "CUSTOM":
+            row.template_icon_view(context.scene, "bone_widget_colors", show_labels=False, scale=1, scale_popup=1.8)
+            if context.scene.bone_widget_colors == "CUSTOM":
 
                 custom_pose_color = context.scene.custom_pose_color_set
                 custom_edit_color = context.scene.custom_edit_color_set
@@ -145,14 +145,14 @@ class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Pa
     
     def draw(self, context):
         layout = self.layout
-        scene = context.scene
 
         row = layout.row()
-        btn_text = "Add From Theme" if "THEME" in context.window_manager.bone_widget_colors else "Add From Palette"
+        btn_text = "Add From Theme" if "THEME" in context.scene.bone_widget_colors else "Add From Palette"
         row.operator("bonewidget.add_color_set_from", text=btn_text, icon="ADD")
 
         row = layout.row()
-        row.template_list("BONEWIDGET_UL_colorset_items", "", scene, "custom_color_presets", scene, "colorset_list_index")
+        row.template_list("BONEWIDGET_UL_colorset_items", "", context.window_manager, "custom_color_presets",
+                          context.window_manager, "colorset_list_index")
         
         col = row.column(align=True)
         col.operator("bonewidget.add_default_custom_colorset", icon='ADD', text="")
@@ -195,7 +195,7 @@ def register():
         description="Show thumbnail previews"
     )
 
-    bpy.types.WindowManager.bone_widget_colors = bpy.props.EnumProperty(
+    bpy.types.Scene.bone_widget_colors = bpy.props.EnumProperty(
         name="Colors",
         description="Select a Bone Color",
         items=bone_color_items_short,
@@ -217,10 +217,10 @@ def register():
 
     bpy.utils.register_class(PresetColorSetItem)
     bpy.utils.register_class(CustomColorSet)
-    bpy.types.Scene.custom_color_presets = bpy.props.CollectionProperty(type=PresetColorSetItem)
+    bpy.types.WindowManager.custom_color_presets = bpy.props.CollectionProperty(type=PresetColorSetItem)
     bpy.types.Scene.custom_pose_color_set = bpy.props.PointerProperty(type=CustomColorSet)
     bpy.types.Scene.custom_edit_color_set = bpy.props.PointerProperty(type=CustomColorSet)
-    bpy.types.Scene.colorset_list_index = bpy.props.IntProperty(name="Index", default=0)
+    bpy.types.WindowManager.colorset_list_index = bpy.props.IntProperty(name="Index", default=0)
     bpy.types.Scene.turn_off_colorset_save = bpy.props.BoolProperty(default=False)
     bpy.types.Scene.lock_colorset_color_changes = bpy.props.BoolProperty(default=True)
 
@@ -237,13 +237,13 @@ def register():
 def unregister():
     del bpy.types.WindowManager.widget_list
     del bpy.types.WindowManager.toggle_preview
-    del bpy.types.WindowManager.bone_widget_colors
+    del bpy.types.Scene.bone_widget_colors
     del bpy.types.Scene.live_update_on
     del bpy.types.Scene.live_update_toggle
-    del bpy.types.Scene.custom_color_presets
+    del bpy.types.WindowManager.custom_color_presets
     del bpy.types.Scene.custom_pose_color_set
     del bpy.types.Scene.custom_edit_color_set
-    del bpy.types.Scene.colorset_list_index
+    del bpy.types.WindowManager.colorset_list_index
     del bpy.types.Scene.turn_off_colorset_save
     del bpy.types.Scene.lock_colorset_color_changes
 
