@@ -55,20 +55,6 @@ def get_user_preferences(context):
     return context.preferences
 
 
-def check_version(major, minor, _):
-    """
-    Check blender version
-    """
-
-    if bpy.app.version[0] == major and bpy.app.version[1] == minor:
-        return 0
-    if bpy.app.version[0] > major:
-        return 1
-    if bpy.app.version[1] > minor:
-        return 1
-    return -1
-
-
 def register():
     operators.register()
     menus.register()
@@ -78,9 +64,6 @@ def register():
     # Apply preferences of the panel location.
     context = bpy.context
     pref = get_user_preferences(context).addons[__package__].preferences
-    # Only default panel location is available in < 2.80
-    if check_version(2, 80, 0) < 0:
-        pref.panel_category = "Rigging"
     prefs.BoneWidgetPreferences.panel_category_update_fn(pref, context)
     panels.register()
 
