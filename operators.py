@@ -772,7 +772,7 @@ class BONEWIDGET_OT_setBoneColor(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'])
 
     def execute(self, context):
-        setBoneColor(context, context.window_manager.bone_widget_colors)
+        setBoneColor(context, context.scene.bone_widget_colors)
         return {'FINISHED'}
 
 
@@ -821,13 +821,13 @@ class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
         new_name = base_name
         count = 1
 
-        while any(item.name == new_name for item in context.scene.custom_color_presets):
+        while any(item.name == new_name for item in context.window_manager.custom_color_presets):
             new_name = f"{base_name}.{count:03d}"
             count += 1
 
-        new_item = context.scene.custom_color_presets.add()
+        new_item = context.window_manager.custom_color_presets.add()
 
-        if context.window_manager.bone_widget_colors == "CUSTOM":
+        if context.scene.bone_widget_colors == "CUSTOM":
             # add item from custom color palette
 
             new_item.name = new_name
@@ -843,10 +843,10 @@ class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
                 new_item.select = context.scene.custom_edit_color_set.select
                 new_item.active = context.scene.custom_edit_color_set.active
 
-        elif "THEME" in context.window_manager.bone_widget_colors:
+        elif "THEME" in context.scene.bone_widget_colors:
             # add item from selected theme
 
-            theme = context.window_manager.bone_widget_colors
+            theme = context.scene.bone_widget_colors
             theme_id = int(theme[-2:]) - 1
             theme_color_set = bpy.context.preferences.themes[0].bone_color_sets[theme_id]
 
@@ -865,12 +865,12 @@ class BONEWIDGET_OT_add_default_colorset(bpy.types.Operator):
     bl_label = "Add a default color set"
 
     def execute(self, context):
-        new_item = context.scene.custom_color_presets.add()
+        new_item = context.window_manager.custom_color_presets.add()
         base_name = "Color Set"
         new_name = base_name
         count = 1
 
-        while any(item.name == new_name for item in context.scene.custom_color_presets):
+        while any(item.name == new_name for item in context.window_manager.custom_color_presets):
             new_name = f"{base_name}.{count:03d}"
             count += 1
 
@@ -911,8 +911,8 @@ class BONEWIDGET_OT_add_colorset_to_bone(bpy.types.Operator):
 
                 bone.color.palette = "CUSTOM"
 
-                index = context.scene.colorset_list_index
-                item = context.scene.custom_color_presets[index]
+                index = context.window_manager.colorset_list_index
+                item = context.window_manager.custom_color_presets[index]
 
                 bone.color.custom.normal = item.normal
                 bone.color.custom.select = item.select
@@ -928,13 +928,13 @@ class BONEWIDGET_OT_remove_item(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.colorset_list_index >= 0 and not context.scene.lock_colorset_color_changes
+        return context.window_manager.colorset_list_index >= 0 and not context.scene.lock_colorset_color_changes
 
     def execute(self, context):
-        my_list = context.scene.custom_color_presets
-        index = context.scene.colorset_list_index
+        my_list = context.window_manager.custom_color_presets
+        index = context.window_manager.colorset_list_index
         my_list.remove(index)
-        context.scene.colorset_list_index = min(max(0, index - 1), len(my_list) - 1)
+        context.window_manager.colorset_list_index = min(max(0, index - 1), len(my_list) - 1)
         saveColorSets(context)
         return {'FINISHED'}
     
@@ -955,7 +955,7 @@ class BONEWIDGET_OT_reload_colorset_items(bpy.types.Operator):
     bl_label = "Refresh the bone color set presets"
 
     def execute(self, context):
-        context.scene.custom_color_presets.clear()
+        context.window_manager.custom_color_presets.clear()
         loadColorPresets(context)
         return {'FINISHED'}
 

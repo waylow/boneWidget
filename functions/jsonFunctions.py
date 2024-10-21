@@ -305,7 +305,7 @@ def saveColorSets(context):
             "normal": list(item.normal),
             "select": list(item.select),
             "active": list(item.active)
-        } for item in context.scene.custom_color_presets]
+        } for item in context.window_manager.custom_color_presets]
 
         filepath = os.path.join(get_addon_dir(), '..', "custom_color_sets.json")
         with open(filepath, 'w') as f:
@@ -321,7 +321,7 @@ def loadColorPresets(_):
             color_sets = json.load(f)
             for item in color_sets:
                 bpy.context.scene.turn_off_colorset_save = True
-                new_item = bpy.context.scene.custom_color_presets.add()
+                new_item = bpy.context.window_manager.custom_color_presets.add()
                 new_item.name = item["name"]
                 new_item.normal = item["normal"]
                 new_item.select = item["select"]
