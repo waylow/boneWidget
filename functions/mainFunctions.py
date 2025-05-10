@@ -481,9 +481,11 @@ def addObjectAsWidget(context, collection):
 
 
 def setBoneColor(context, color):
+    '''This will reset the edit bone color to 'DEFAULT' but this will become a user preference later #TODO '''
     if context.object.mode == "POSE":
         for bone in context.selected_pose_bones:
             bone.color.palette = color #this will get the selected bone color
+            bone.bone.color.palette = 'DEFAULT' # this will reset the edit bone color (override what rigify does)
 
             if color == "CUSTOM":
                 bone.color.custom.normal = context.scene.custom_pose_color_set.normal
@@ -491,12 +493,15 @@ def setBoneColor(context, color):
                 bone.color.custom.active = context.scene.custom_pose_color_set.active
     elif context.object.mode == "EDIT":
         for bone in context.selected_bones:
-            bone.color.palette = color #this will get the selected bone color
-
+            bone.color.palette = 'DEFAULT' #this will get the edit bone color back to default
+            context.active_object.pose.bones[bone.name].color.palette = color
+            
             if color == "CUSTOM":
                 bone.color.custom.normal = context.scene.custom_edit_color_set.normal
                 bone.color.custom.select = context.scene.custom_edit_color_set.select
                 bone.color.custom.active = context.scene.custom_edit_color_set.active
+    
+
 
 
 def copyBoneColor(context, bone):
