@@ -33,6 +33,12 @@ from .functions import (
     getPreferences,
     saveColorSets,
     loadColorPresets,
+    create_wireframe_copy,
+    setup_viewport,
+    get_viewport_shading,
+    restore_viewport_position,
+    restore_viewport_shading,
+    render_widget_thumbnail,
 )
 
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
@@ -963,6 +969,88 @@ class BONEWIDGET_OT_reload_colorset_items(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
+    """Render a wireframe thumbnail of the active object"""
+    bl_idname = "bonewidget.render_wireframe_widget_thumbnail"
+    bl_label = "Render Wireframe Widget Thumbnail"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    output_path: bpy.props.StringProperty(
+        name="Output Path",
+        subtype='FILE_PATH',
+        default="//viewport_render.png" #TODO this should take the name from the object
+    )
+    image_resolution: bpy.props.IntVectorProperty(
+        name="Image Resolution",
+        size=2,
+        default=(512, 512)
+    )
+    wire_frame_color: bpy.props.FloatVectorProperty(
+        name="Wireframe Color",
+        subtype='COLOR',
+        size=4,
+        default=(1, 1, 1, 1),
+        min=0.0,
+        max=1.0
+    )
+    wire_frame_thickness: bpy.props.FloatProperty(
+        name="Wireframe Thickness",
+        default=0.05,
+        min=0.01,
+        max=1.0
+    )
+    use_existing_color: bpy.props.BoolProperty(
+        name="Use Object Color",
+        default=False
+    )
+    auto_frame_view: bpy.props.BoolProperty(
+        name="Auto Frame View",
+        default=True
+    )
+
+    def execute(self, context):
+        active_obj = context.view_layer.objects.active
+        if not active_obj:
+            self.report({'WARNING'}, "No active object found.")
+            return {'CANCELLED'}
+
+        widget_obj = create_wireframe_copy(
+            active_obj,
+            self.use_existing_color,
+            self.wire_frame_color,
+            self.wire_frame_thickness
+        )
+
+        # save all the viewport settings (all viewports)
+        saved_viewports = get_viewport_shading(bpy.context)
+
+        original_scene = context.scene
+        new_scene = bpy.data.scenes.new("BoneWidget_Thumbnail")
+        new_scene.collection.objects.link(widget_obj)
+        context.window.scene = new_scene
+
+        viewport_area = next((a for a in context.window.screen.areas if a.type == 'VIEW_3D'), None)
+        if not viewport_area:
+            self.report({'WARNING'}, "No 3D Viewport found.")
+            return {'CANCELLED'}
+
+        original_view_matrix = setup_viewport(context, self.auto_frame_view)
+        render_widget_thumbnail(self.output_path, self.image_resolution)
+
+        if self.auto_frame_view and original_view_matrix:
+            restore_viewport_position(context, original_view_matrix)
+
+        # Restore all the viewport settings (all viewports)
+        restore_viewport_shading(saved_viewports)
+
+        context.window.scene = original_scene
+        bpy.data.scenes.remove(new_scene)
+        bpy.data.objects.remove(widget_obj, do_unlink=True)
+
+        self.report({'INFO'}, f"Thumbnail saved to {bpy.path.abspath(self.output_path)}")
+        return {'FINISHED'}
+
+
 classes = (
     BONEWIDGET_OT_removeWidgets,
     BONEWIDGET_OT_addWidgets,
@@ -993,6 +1081,7 @@ classes = (
     BONEWIDGET_OT_remove_item,
     BONEWIDGET_OT_lock_custom_colorset_changes,
     BONEWIDGET_OT_reload_colorset_items,
+    BONEWIDGET_OT_render_wireframe_widget_thumbnail,
 )
 
 

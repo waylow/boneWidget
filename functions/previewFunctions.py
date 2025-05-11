@@ -108,3 +108,83 @@ def removeCustomImage(filename):
         except:
             pass
     return False
+
+
+####   Auto Thumbnail Functions ####
+def create_wireframe_copy(obj, use_color, color, thickness):
+    copy = obj.copy()
+    copy.data = obj.data.copy()
+    if not use_color:
+        copy.color = color
+
+    wire_mod = copy.modifiers.new(name="BONEWIDGET_Wireframe", type='WIREFRAME')
+    wire_mod.use_replace = True
+    wire_mod.thickness = thickness
+
+    return copy
+
+def setup_viewport(context, auto_frame):
+    area = context.area
+    space = context.space_data
+
+    if area.type != 'VIEW_3D' or space.type != 'VIEW_3D':
+        raise RuntimeError("Operator must be run from a 3D Viewport")
+
+    region_3d = space.region_3d
+    original_view_matrix = region_3d.view_matrix.copy()
+
+    # Prepare viewport for clean render
+    space.overlay.show_overlays = False
+    space.shading.type = 'SOLID'
+    space.shading.light = 'FLAT'
+    space.shading.color_type = 'OBJECT'
+
+    if auto_frame:
+        bpy.ops.view3d.view_selected()
+
+    return original_view_matrix
+
+def get_viewport_shading(context):
+    """Returns the shading settings for all 3D Viewport areas."""
+    viewports = []
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            for space in area.spaces:
+                if space.type == 'VIEW_3D':
+                    viewports.append({
+                        "area": area,
+                        "space": space,
+                        "show_overlays": space.overlay.show_overlays,
+                        "shading_settings": {
+                            "type": space.shading.type,
+                            "light": space.shading.light,
+                            "color_type": space.shading.color_type,
+                            }
+                    })
+                    
+    return viewports
+
+def restore_viewport_position(context, view_matrix):
+    if context.space_data.type == 'VIEW_3D':
+        context.space_data.region_3d.view_matrix = view_matrix
+
+
+def restore_viewport_shading(viewports):
+    """Restores previously saved shading settings."""
+    for vp in viewports:
+        space = vp["space"]
+        for attr, value in vp["shading_settings"].items():
+            setattr(space.shading, attr, value)
+
+            
+def render_widget_thumbnail(filepath, resolution):
+    scene = bpy.context.scene
+    scene.render.resolution_x, scene.render.resolution_y = resolution
+    scene.render.resolution_percentage = 100
+    scene.render.image_settings.file_format = 'PNG'
+    scene.render.image_settings.color_mode = 'RGB'
+    scene.view_settings.view_transform = 'Standard'
+    scene.render.film_transparent = True
+
+    bpy.ops.render.opengl(write_still=False, view_context=True)
+    bpy.data.images['Render Result'].save_render(filepath=bpy.path.abspath(filepath))
