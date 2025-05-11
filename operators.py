@@ -41,7 +41,7 @@ from .functions import (
     render_widget_thumbnail,
 )
 
-from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
+from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty, EnumProperty
 
 
 class BONEWIDGET_OT_sharedPropertyGroup(bpy.types.PropertyGroup):
@@ -127,7 +127,7 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         description="Set the thickness of a wireframe widget"
     )
 
-    bone_color: bpy.props.EnumProperty(
+    bone_color: EnumProperty(
         name="Bone Color",
         description="Color of bone widget",
         items=bone_color_items,
@@ -517,7 +517,7 @@ class BONEWIDGET_OT_importWidgetsAskPopup(bpy.types.Operator):
         # generate the x number of drop down lists and widget names needed
         for n, widget in enumerate(self.widgetImportData.skipped_widgets):
             widget_name = next(iter(widget.keys()))
-            setattr(BONEWIDGET_OT_sharedPropertyGroup, f"ImportOptions{n}", bpy.props.EnumProperty(
+            setattr(BONEWIDGET_OT_sharedPropertyGroup, f"ImportOptions{n}", EnumProperty(
                     name=f"ImportOptions{n}",
                     description="Choose an option",
                     items=self.import_options,
@@ -597,7 +597,7 @@ class BONEWIDGET_OT_importLibrary(bpy.types.Operator):
         subtype="FILE_PATH"
     )
 
-    import_option : bpy.props.EnumProperty(
+    import_option : EnumProperty(
         name="Import Option",
         items=[
             ("OVERWRITE", "Overwrite", "Overwrite existing widget"),
@@ -975,7 +975,7 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
     bl_label = "Render Wireframe Widget Thumbnail"
     bl_options = {'REGISTER', 'UNDO'}
 
-    output_path: bpy.props.StringProperty(
+    output_path: StringProperty(
         name="Output Path",
         subtype='FILE_PATH',
         default="//viewport_render.png" #TODO this should take the name from the object
@@ -985,7 +985,7 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
         size=2,
         default=(512, 512)
     )
-    wire_frame_color: bpy.props.FloatVectorProperty(
+    wire_frame_color: FloatVectorProperty(
         name="Wireframe Color",
         subtype='COLOR',
         size=4,
@@ -993,17 +993,17 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
         min=0.0,
         max=1.0
     )
-    wire_frame_thickness: bpy.props.FloatProperty(
+    wire_frame_thickness: FloatProperty(
         name="Wireframe Thickness",
         default=0.05,
         min=0.01,
         max=1.0
     )
-    use_existing_color: bpy.props.BoolProperty(
+    use_existing_color: BoolProperty(
         name="Use Object Color",
         default=False
     )
-    auto_frame_view: bpy.props.BoolProperty(
+    auto_frame_view: BoolProperty(
         name="Auto Frame View",
         default=True
     )
@@ -1046,7 +1046,7 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
         context.window.scene = original_scene
         bpy.data.scenes.remove(new_scene)
         bpy.data.objects.remove(widget_obj, do_unlink=True)
-        
+
         return {'FINISHED'}
 
 
