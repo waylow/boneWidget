@@ -40,7 +40,8 @@ def generate_previews():
 
         for i, name in enumerate(widget_names):
             image = widget_data.get(name, "")
-            filepath = os.path.join(directory, image)
+            if image is not None:
+                filepath = os.path.join(directory, image)
 
             # try in custom_thumbnails if above failed
             if not os.path.exists(filepath):
@@ -110,7 +111,7 @@ def removeCustomImage(filename):
     return False
 
 
-####   Auto Thumbnail Functions ####
+#### Auto Thumbnail Render Functions ####
 def create_wireframe_copy(obj, use_color, color, thickness):
     copy = obj.copy()
     copy.data = obj.data.copy()
@@ -177,38 +178,18 @@ def restore_viewport_shading(viewports):
             setattr(space.shading, attr, value)
 
 
-def render_widget_thumbnail(filepath, resolution):
+def render_widget_thumbnail(image_name):
     image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
-    destination_path = os.path.join(image_directory, 'test.png')
+    destination_path = os.path.join(image_directory, image_name)
 
     scene = bpy.context.scene
-    scene.render.resolution_x, scene.render.resolution_y = resolution
+    scene.render.resolution_x, scene.render.resolution_y = (512, 512)
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = 'PNG'
-    scene.render.image_settings.color_mode = 'RGB'
+    scene.render.image_settings.color_mode = 'RGBA'
     scene.view_settings.view_transform = 'Standard'
     scene.render.film_transparent = True
 
     bpy.ops.render.opengl(write_still=False, view_context=True)
     bpy.data.images['Render Result'].save_render(filepath=bpy.path.abspath(destination_path))
     print("File path:", bpy.path.abspath(destination_path))
-
-# def removeCustomImage(filename):
-#     image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
-#     destination_path = os.path.join(image_directory, filename)
-    
-#     if os.path.isfile(destination_path):
-#         # make sure the image is only used once - else stop
-#         count = 0
-#         for v in readWidgets(JSON_USER_WIDGETS).values():
-#             if v.get("image") == filename:
-#                 count += 1
-#             if count > 1:
-#                 return False
-            
-#         try:
-#             os.remove(destination_path)
-#             return True
-#         except:
-#             pass
-#     return False

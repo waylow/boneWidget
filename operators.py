@@ -1,4 +1,5 @@
 import bpy
+import os
 
 from .functions import (
     findMatchBones,
@@ -41,7 +42,7 @@ from .functions import (
     render_widget_thumbnail,
 )
 
-from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty
+from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, IntVectorProperty, StringProperty, EnumProperty
 
 
 class BONEWIDGET_OT_sharedPropertyGroup(bpy.types.PropertyGroup):
@@ -127,7 +128,7 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         description="Set the thickness of a wireframe widget"
     )
 
-    bone_color: bpy.props.EnumProperty(
+    bone_color: EnumProperty(
         name="Bone Color",
         description="Color of bone widget",
         items=bone_color_items,
@@ -343,10 +344,15 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         options={"TEXTEDIT_UPDATE"},
     )
 
-    custom_image: BoolProperty(
-        name="Custom Image",
-        default=False,
-        description="Use a custom image for the new widget"
+    image_mode: EnumProperty(
+        name="Thumbnail",
+        description="Choose how the widget image is handled",
+        items=[
+            ('AUTO_RENDER', "Auto Render", "Render the widget automatically"),
+            ('CUSTOM_IMAGE', "Custom Image", "Use a custom image"),
+            ('PLACEHOLDER_IMAGE', "Placeholder Image", "Use the placeholder image"),
+        ],
+        default='AUTO_RENDER'
     )
 
 
@@ -364,9 +370,9 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
 
         # adding custom image this way doesn't work in blender 3.6
         if bpy.app.version > (3, 7, 0):
-            row.prop(self, "custom_image", text="Custom Image")
+            row.prop(self, "image_mode")
 
-            if self.custom_image:
+            if self.image_mode == 'CUSTOM_IMAGE':
                 row = layout.row()
                 if bpy.app.version >= (4,1,0):
                     row.prop(bpy.context.window_manager.prop_grp, "custom_image_name", text="", placeholder="Choose an image...", icon="FILE_IMAGE")
@@ -406,14 +412,15 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         custom_image_name = ""
         custom_image_path = ""
         message_extra = ""
-        if self.custom_image:
+
+        if self.image_mode == 'CUSTOM_IMAGE':
             custom_image_path, custom_image_name = bpy.context.window_manager.prop_grp.custom_image_data #context.window_manager.custom_image
 
             # no image path found
             if not custom_image_path:
                 # check if user pasted an image path into text field
                 text_field = bpy.context.window_manager.prop_grp.custom_image_name
-                import os
+
                 if os.path.isfile(text_field) and text_field.endswith((".jpg", ".jpeg" ".png", ".tif")):
                     custom_image_name = os.path.basename(text_field)
                     custom_image_path = text_field
@@ -424,7 +431,23 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
                 copyCustomImage(custom_image_path, custom_image_name)
 
             bpy.context.window_manager.prop_grp.custom_image_name = ""  # make sure the field is empty for next time
+
+
+        elif self.image_mode == 'PLACEHOLDER_IMAGE':
+            # Use the user_defined image
+            directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'thumbnails'))
+            custom_image_path = os.path.join(directory, "user_defined.png")
+
+
+        elif self.image_mode == 'AUTO_RENDER':
+            # Render the widget
+            custom_image_name = self.widget_name + '.png'
+            bpy.ops.bonewidget.render_wireframe_widget_thumbnail(image_name=custom_image_name)
+            custom_image_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'custom_thumbnails'))
+            
+
         
+                
         message_type, return_message = addRemoveWidgets(context, "add", bpy.types.WindowManager.widget_list.keywords['items'],
                                                         objects, self.widget_name, custom_image_name)
 
@@ -517,7 +540,7 @@ class BONEWIDGET_OT_importWidgetsAskPopup(bpy.types.Operator):
         # generate the x number of drop down lists and widget names needed
         for n, widget in enumerate(self.widgetImportData.skipped_widgets):
             widget_name = next(iter(widget.keys()))
-            setattr(BONEWIDGET_OT_sharedPropertyGroup, f"ImportOptions{n}", bpy.props.EnumProperty(
+            setattr(BONEWIDGET_OT_sharedPropertyGroup, f"ImportOptions{n}", EnumProperty(
                     name=f"ImportOptions{n}",
                     description="Choose an option",
                     items=self.import_options,
@@ -597,7 +620,7 @@ class BONEWIDGET_OT_importLibrary(bpy.types.Operator):
         subtype="FILE_PATH"
     )
 
-    import_option : bpy.props.EnumProperty(
+    import_option : EnumProperty(
         name="Import Option",
         items=[
             ("OVERWRITE", "Overwrite", "Overwrite existing widget"),
@@ -975,17 +998,11 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
     bl_label = "Render Wireframe Widget Thumbnail"
     bl_options = {'REGISTER', 'UNDO'}
 
-    output_path: bpy.props.StringProperty(
-        name="Output Path",
-        subtype='FILE_PATH',
-        default="//viewport_render.png" #TODO this should take the name from the object
+    image_name: StringProperty(
+        name="Image Name",
+        default="widget_thumbnail.png"
     )
-    image_resolution: bpy.props.IntVectorProperty(
-        name="Image Resolution",
-        size=2,
-        default=(512, 512)
-    )
-    wire_frame_color: bpy.props.FloatVectorProperty(
+    wire_frame_color: FloatVectorProperty(
         name="Wireframe Color",
         subtype='COLOR',
         size=4,
@@ -993,17 +1010,17 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
         min=0.0,
         max=1.0
     )
-    wire_frame_thickness: bpy.props.FloatProperty(
+    wire_frame_thickness: FloatProperty(
         name="Wireframe Thickness",
         default=0.05,
         min=0.01,
         max=1.0
     )
-    use_existing_color: bpy.props.BoolProperty(
+    use_existing_color: BoolProperty(
         name="Use Object Color",
         default=False
     )
-    auto_frame_view: bpy.props.BoolProperty(
+    auto_frame_view: BoolProperty(
         name="Auto Frame View",
         default=True
     )
@@ -1035,7 +1052,7 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
             return {'CANCELLED'}
 
         original_view_matrix = setup_viewport(context, self.auto_frame_view)
-        render_widget_thumbnail(self.output_path, self.image_resolution)
+        render_widget_thumbnail(self.image_name)
 
         if self.auto_frame_view and original_view_matrix:
             restore_viewport_position(context, original_view_matrix)
