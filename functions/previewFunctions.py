@@ -191,24 +191,3 @@ def render_widget_thumbnail(filepath, resolution):
 
     bpy.ops.render.opengl(write_still=False, view_context=True)
     bpy.data.images['Render Result'].save_render(filepath=bpy.path.abspath(destination_path))
-    print("File path:", bpy.path.abspath(destination_path))
-
-# def removeCustomImage(filename):
-#     image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
-#     destination_path = os.path.join(image_directory, filename)
-    
-#     if os.path.isfile(destination_path):
-#         # make sure the image is only used once - else stop
-#         count = 0
-#         for v in readWidgets(JSON_USER_WIDGETS).values():
-#             if v.get("image") == filename:
-#                 count += 1
-#             if count > 1:
-#                 return False
-            
-#         try:
-#             os.remove(destination_path)
-#             return True
-#         except:
-#             pass
-#     return False
