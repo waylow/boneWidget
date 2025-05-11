@@ -1046,8 +1046,7 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
         context.window.scene = original_scene
         bpy.data.scenes.remove(new_scene)
         bpy.data.objects.remove(widget_obj, do_unlink=True)
-
-        self.report({'INFO'}, f"Thumbnail saved to {bpy.path.abspath(self.output_path)}")
+        
         return {'FINISHED'}
 
 
