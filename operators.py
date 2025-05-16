@@ -36,9 +36,7 @@ from .functions import (
     loadColorPresets,
     create_wireframe_copy,
     setup_viewport,
-    get_viewport_shading,
     restore_viewport_position,
-    restore_viewport_shading,
     render_widget_thumbnail,
 )
 
@@ -1038,9 +1036,6 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
             self.wire_frame_thickness
         )
 
-        # save all the viewport settings (all viewports)
-        saved_viewports = get_viewport_shading(bpy.context)
-
         original_scene = context.scene
         new_scene = bpy.data.scenes.new("BoneWidget_Thumbnail")
         new_scene.collection.objects.link(widget_obj)
@@ -1056,9 +1051,6 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
 
         if self.auto_frame_view and original_view_matrix:
             restore_viewport_position(context, original_view_matrix)
-
-        # Restore all the viewport settings (all viewports)
-        restore_viewport_shading(saved_viewports)
 
         context.window.scene = original_scene
         bpy.data.scenes.remove(new_scene)
