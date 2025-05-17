@@ -3,6 +3,7 @@ import bpy.utils.previews
 from .jsonFunctions import readWidgets, getWidgetData, get_addon_dir, JSON_USER_WIDGETS
 import os
 from .. import __package__
+from mathutils import Vector
 
 preview_collections = {}
 
@@ -111,7 +112,7 @@ def removeCustomImage(filename):
     return False
 
 
-#### Auto Thumbnail Render Functions ####
+#### Thumbnail Render Functions ####
 def create_wireframe_copy(obj, use_color, color, thickness):
     copy = obj.copy()
     copy.data = obj.data.copy()
@@ -124,27 +125,30 @@ def create_wireframe_copy(obj, use_color, color, thickness):
 
     return copy
 
+
 def setup_viewport(context, auto_frame):
     area = context.area
     space = context.space_data
     region_3d = space.region_3d
     original_view_matrix = region_3d.view_matrix.copy()
 
-
     if auto_frame:
         bpy.ops.view3d.view_selected()
-    
-    # add the camera
-    add_camera_from_view(context)
 
     return original_view_matrix
+
 
 def restore_viewport_position(context, view_matrix):
     if context.space_data.type == 'VIEW_3D':
         context.space_data.region_3d.view_matrix = view_matrix
 
 
-def render_widget_thumbnail(image_name):
+def render_widget_thumbnail(image_name, widget_object):
+    # if render_location == "LOCAL":
+    #     image_directory = os.path.dirname(bpy.data.filepath)
+    # else:
+    #     image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
+    
     image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
     destination_path = os.path.join(image_directory, image_name)
 
@@ -160,9 +164,15 @@ def render_widget_thumbnail(image_name):
     scene.display.shading.color_type = 'OBJECT'
     scene.render.filepath = image_directory
 
-    bpy.ops.render.render(write_still=True)
+    # Reframe Camera
+    camera = scene.camera
+    obj = widget_object
+    frame_object_with_padding(camera, obj, padding=0.1)
+
+    bpy.ops.render.render(write_still=False)
     bpy.data.images['Render Result'].save_render(filepath=bpy.path.abspath(destination_path))
     print("File path:", bpy.path.abspath(destination_path)) # DEBUG
+
 
 def add_camera_from_view(context):
     name = "BoneWidget_Thumbnail_Camera"
@@ -186,3 +196,23 @@ def add_camera_from_view(context):
     context.scene.camera = cam_obj
 
     return cam_obj
+
+
+def frame_object_with_padding(camera, obj, padding=0.1):
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+
+    # Get bounding box corners in world space
+    coords = [obj.matrix_world @ Vector(corner) for corner in obj.bound_box]
+
+    # Find center of bounding box
+    center = sum(coords, Vector()) / len(coords)
+
+    # Scale each point away from the center to apply padding
+    scaled_coords = [(center + (co - center) * (1 + padding)) for co in coords]
+
+    # Flatten the list of Vectors into a list of floats
+    flat_coords = [v for co in scaled_coords for v in co]
+
+    # Use the camera fitting function
+    cam_location, _ = camera.camera_fit_coords(depsgraph, flat_coords)
+    camera.location = cam_location

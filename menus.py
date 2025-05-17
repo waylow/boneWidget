@@ -10,7 +10,7 @@ class BONEWIDGET_MT_bw_specials(Menu):
                         text="Remove Widget from library")
         layout.operator("bonewidget.add_custom_image", icon="FILE_IMAGE",
                         text="Add Custom Image to Widget")
-        layout.operator("bonewidget.render_wireframe_widget_thumbnail", icon="RESTRICT_RENDER_OFF",
+        layout.operator("bonewidget.render_widget_thumbnail", icon="RESTRICT_RENDER_OFF",
                         text="Render object as thumbnail")
         layout.separator()
         layout.operator("bonewidget.import_library", icon="IMPORT", text="Import Widget Library")

@@ -38,6 +38,8 @@ from .functions import (
     setup_viewport,
     restore_viewport_position,
     render_widget_thumbnail,
+    add_camera_from_view,
+    frame_object_with_padding,
 )
 
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, IntVectorProperty, StringProperty, EnumProperty
@@ -295,6 +297,7 @@ class BONEWIDGET_OT_addCustomImage(bpy.types.Operator):
     """Add a custom image to selected preview panel widget"""
     bl_idname = "bonewidget.add_custom_image"
     bl_label = "Select Image"
+    bl_options = {'REGISTER', 'UNDO'}
 
     filter_glob: StringProperty(
         default='*.jpg;*.jpeg;*.png;*.tif;',
@@ -333,6 +336,7 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
     """Add selected mesh object to Bone Widget Library"""
     bl_idname = "bonewidget.add_widgets"
     bl_label = "Add New Widget to Library"
+    bl_options = {'REGISTER', 'UNDO'}
 
 
     widget_name: StringProperty(
@@ -440,12 +444,10 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         elif self.image_mode == 'AUTO_RENDER':
             # Render the widget
             custom_image_name = self.widget_name + '.png'
-            bpy.ops.bonewidget.render_wireframe_widget_thumbnail(image_name=custom_image_name)
+            bpy.ops.bonewidget.render_widget_thumbnail(image_name=custom_image_name) #TODO: add the parameters to edit this
             custom_image_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'custom_thumbnails'))
             
 
-        
-                
         message_type, return_message = addRemoveWidgets(context, "add", bpy.types.WindowManager.widget_list.keywords['items'],
                                                         objects, self.widget_name, custom_image_name)
 
@@ -990,10 +992,10 @@ class BONEWIDGET_OT_reload_colorset_items(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
+class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
     """Render a wireframe thumbnail of the active object"""
-    bl_idname = "bonewidget.render_wireframe_widget_thumbnail"
-    bl_label = "Render Wireframe Widget Thumbnail"
+    bl_idname = "bonewidget.render_widget_thumbnail"
+    bl_label = "Render Widget Thumbnail"
     bl_options = {'REGISTER', 'UNDO'}
 
     image_name: StringProperty(
@@ -1010,7 +1012,7 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
     )
     wire_frame_thickness: FloatProperty(
         name="Wireframe Thickness",
-        default=0.05,
+        default=0.1,
         min=0.01,
         max=1.0
     )
@@ -1022,6 +1024,7 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
         name="Auto Frame View",
         default=True
     )
+
 
     def execute(self, context):
         active_obj = context.view_layer.objects.active
@@ -1047,14 +1050,26 @@ class BONEWIDGET_OT_render_wireframe_widget_thumbnail(bpy.types.Operator):
             return {'CANCELLED'}
 
         original_view_matrix = setup_viewport(context, self.auto_frame_view)
-        render_widget_thumbnail(self.image_name)
+        new_camera = add_camera_from_view(context)
+
+        render_widget_thumbnail(self.image_name, widget_obj)
 
         if self.auto_frame_view and original_view_matrix:
             restore_viewport_position(context, original_view_matrix)
 
         context.window.scene = original_scene
-        bpy.data.scenes.remove(new_scene)
+        # Clean up (widget and camera objs and data)
+        widget_data = widget_obj.data
+        camera_data = new_camera.data
+
         bpy.data.objects.remove(widget_obj, do_unlink=True)
+        bpy.data.meshes.remove(widget_data)
+        
+        bpy.data.objects.remove(new_camera, do_unlink=True)
+        bpy.data.cameras.remove(camera_data)
+        
+        # Remove Scene
+        bpy.data.scenes.remove(new_scene)
         
         return {'FINISHED'}
 
@@ -1089,7 +1104,7 @@ classes = (
     BONEWIDGET_OT_remove_item,
     BONEWIDGET_OT_lock_custom_colorset_changes,
     BONEWIDGET_OT_reload_colorset_items,
-    BONEWIDGET_OT_render_wireframe_widget_thumbnail,
+    BONEWIDGET_OT_render_widget_thumbnail,
 )
 
 
