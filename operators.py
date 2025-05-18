@@ -1016,7 +1016,7 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
         min=0.01,
         max=1.0
     )
-    use_existing_color: BoolProperty(
+    use_object_color: BoolProperty(
         name="Use Object Color",
         default=False
     )
@@ -1029,6 +1029,19 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
         default=True
     )
 
+    def invoke(self, context, event):
+        # Show the popup dialog
+        return context.window_manager.invoke_props_dialog(self)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "image_name")
+        layout.prop(self, "use_object_color")
+        if not self.use_object_color:
+            layout.prop(self, "wire_frame_color")
+        layout.prop(self, "wire_frame_thickness")
+        layout.prop(self, "auto_frame_view")
+        layout.prop(self, "use_blend_path")
 
     def execute(self, context):
         active_obj = context.view_layer.objects.active
@@ -1038,7 +1051,7 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
 
         widget_obj = create_wireframe_copy(
             active_obj,
-            self.use_existing_color,
+            self.use_object_color,
             self.wire_frame_color,
             self.wire_frame_thickness
         )
