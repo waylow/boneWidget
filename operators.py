@@ -1020,10 +1020,6 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
         name="Use Object Color",
         default=False
     )
-    auto_frame_view: BoolProperty(
-        name="Auto Frame View",
-        default=True
-    )
     use_blend_path: BoolProperty(
         name="Save to Current Directory",
         default=True
@@ -1045,7 +1041,6 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
         if not self.use_object_color:
             layout.prop(self, "wire_frame_color")
         layout.prop(self, "wire_frame_thickness")
-        layout.prop(self, "auto_frame_view")
         layout.prop(self, "use_blend_path")
 
     def execute(self, context):
@@ -1071,13 +1066,12 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
             self.report({'WARNING'}, "No 3D Viewport found.")
             return {'CANCELLED'}
 
-        original_view_matrix = setup_viewport(context, self.auto_frame_view)
+        original_view_matrix = setup_viewport(context)
         new_camera = add_camera_from_view(context)
 
         render_widget_thumbnail(self.image_name, widget_obj, image_directory=self.use_blend_path)
 
-        if self.auto_frame_view and original_view_matrix:
-            restore_viewport_position(context, original_view_matrix)
+        restore_viewport_position(context, original_view_matrix)
 
         context.window.scene = original_scene
         # Clean up (widget and camera objs and data)

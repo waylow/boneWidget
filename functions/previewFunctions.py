@@ -126,14 +126,13 @@ def create_wireframe_copy(obj, use_color, color, thickness):
     return copy
 
 
-def setup_viewport(context, auto_frame):
+def setup_viewport(context):
     area = context.area
     space = context.space_data
     region_3d = space.region_3d
     original_view_matrix = region_3d.view_matrix.copy()
 
-    if auto_frame:
-        bpy.ops.view3d.view_selected()
+    bpy.ops.view3d.view_selected()
 
     return original_view_matrix
 
