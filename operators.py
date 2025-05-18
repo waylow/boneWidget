@@ -333,7 +333,7 @@ class BONEWIDGET_OT_addCustomImage(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
-    """Add selected mesh object to Bone Widget Library"""
+    """Add selected mesh object to Bone Widget Library and optionally Render Thumbnail"""
     bl_idname = "bonewidget.add_widgets"
     bl_label = "Add New Widget to Library"
     bl_options = {'REGISTER', 'UNDO'}
@@ -444,7 +444,7 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         elif self.image_mode == 'AUTO_RENDER':
             # Render the widget
             custom_image_name = self.widget_name + '.png'
-            bpy.ops.bonewidget.render_widget_thumbnail(image_name=custom_image_name) #TODO: add the parameters to edit this
+            bpy.ops.bonewidget.render_widget_thumbnail(image_name=custom_image_name, use_blend_path=False)
             custom_image_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'custom_thumbnails'))
             
 
@@ -1024,6 +1024,10 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
         name="Auto Frame View",
         default=True
     )
+    use_blend_path: BoolProperty(
+        name="Save to Current Directory",
+        default=True
+    )
 
 
     def execute(self, context):
@@ -1052,7 +1056,7 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
         original_view_matrix = setup_viewport(context, self.auto_frame_view)
         new_camera = add_camera_from_view(context)
 
-        render_widget_thumbnail(self.image_name, widget_obj)
+        render_widget_thumbnail(self.image_name, widget_obj, image_directory=self.use_blend_path)
 
         if self.auto_frame_view and original_view_matrix:
             restore_viewport_position(context, original_view_matrix)

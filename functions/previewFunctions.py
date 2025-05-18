@@ -143,13 +143,12 @@ def restore_viewport_position(context, view_matrix):
         context.space_data.region_3d.view_matrix = view_matrix
 
 
-def render_widget_thumbnail(image_name, widget_object):
-    # if render_location == "LOCAL":
-    #     image_directory = os.path.dirname(bpy.data.filepath)
-    # else:
-    #     image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
+def render_widget_thumbnail(image_name, widget_object, image_directory):
+    if image_directory:
+        image_directory = os.path.dirname(bpy.data.filepath)
+    else:
+        image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
     
-    image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
     destination_path = os.path.join(image_directory, image_name)
 
     scene = bpy.context.scene
