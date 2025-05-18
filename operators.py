@@ -1029,6 +1029,11 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
         default=True
     )
 
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        return obj is not None and obj.type == 'MESH'
+
     def invoke(self, context, event):
         # Show the popup dialog
         return context.window_manager.invoke_props_dialog(self)
