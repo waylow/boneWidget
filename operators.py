@@ -1056,6 +1056,9 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
             self.wire_frame_thickness
         )
 
+        # store the current view perspective
+        original_view_perspective = context.space_data.region_3d.view_perspective
+
         original_scene = context.scene
         new_scene = bpy.data.scenes.new("BoneWidget_Thumbnail")
         new_scene.collection.objects.link(widget_obj)
@@ -1071,7 +1074,7 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
 
         render_widget_thumbnail(self.image_name, widget_obj, image_directory=self.use_blend_path)
 
-        restore_viewport_position(context, original_view_matrix)
+        restore_viewport_position(context, original_view_matrix, original_view_perspective)
 
         context.window.scene = original_scene
         # Clean up (widget and camera objs and data)
