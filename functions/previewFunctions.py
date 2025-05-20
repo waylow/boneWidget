@@ -137,9 +137,15 @@ def setup_viewport(context):
     return original_view_matrix
 
 
-def restore_viewport_position(context, view_matrix):
+def restore_viewport_position(context, view_matrix, view_perspective):
     if context.space_data.type == 'VIEW_3D':
-        context.space_data.region_3d.view_matrix = view_matrix
+        region_3d = context.space_data.region_3d
+
+        # Restore viewport matrix position
+        region_3d.view_matrix = view_matrix
+
+        # Restore viewport perspective
+        region_3d.view_perspective = view_perspective
 
 
 def render_widget_thumbnail(image_name, widget_object, image_directory):
