@@ -1000,7 +1000,7 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
 
     image_name: StringProperty(
         name="Image Name",
-        default="widget_thumbnail.png"
+        default="widget_thumbnail"
     )
     wire_frame_color: FloatVectorProperty(
         name="Wireframe Color",

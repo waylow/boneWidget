@@ -206,7 +206,7 @@ def render_widget_thumbnail(image_name, widget_object, image_directory):
     else:
         image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
     
-    destination_path = os.path.join(image_directory, image_name)
+    destination_path = os.path.join(image_directory, image_name + '.png')
 
     scene = bpy.context.scene
     scene.render.engine = 'BLENDER_WORKBENCH'
