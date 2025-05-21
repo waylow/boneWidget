@@ -1012,7 +1012,7 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
     )
     wire_frame_thickness: FloatProperty(
         name="Wireframe Thickness",
-        default=0.1,
+        default=0.05,
         min=0.01,
         max=1.0
     )

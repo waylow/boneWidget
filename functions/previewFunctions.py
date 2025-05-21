@@ -119,9 +119,61 @@ def create_wireframe_copy(obj, use_color, color, thickness):
     if not use_color:
         copy.color = color
 
-    wire_mod = copy.modifiers.new(name="BONEWIDGET_Wireframe", type='WIREFRAME')
-    wire_mod.use_replace = True
-    wire_mod.thickness = thickness
+    # Create a new Geometry Nodes modifier
+    geo_mod = copy.modifiers.new(name="BoneWidget_WireFrame", type='NODES')
+
+    # Create a new node group and assign it to the modifier
+    node_group = bpy.data.node_groups.new(name="BONEWIDGET_GeometryGroup", type='GeometryNodeTree')
+    geo_mod.node_group = node_group
+
+    # Add input and output sockets
+    node_group.interface.new_socket(name="Geometry", in_out="INPUT", socket_type="NodeSocketGeometry")
+    node_group.interface.new_socket(name="Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
+
+    # Add Thickness input
+    thickness_socket = node_group.interface.new_socket(name="Thickness", in_out="INPUT", socket_type="NodeSocketFloat")
+    thickness_socket.default_value = 0.05
+    thickness_socket.min_value = 0.01
+    thickness_socket.max_value = 1
+
+    # Create nodes
+    node_input = node_group.nodes.new('NodeGroupInput')
+    node_output = node_group.nodes.new('NodeGroupOutput')
+    node_uv_sphere = node_group.nodes.new('GeometryNodeMeshUVSphere')
+    node_mesh_to_curve = node_group.nodes.new('GeometryNodeMeshToCurve')
+    node_curve_circle = node_group.nodes.new('GeometryNodeCurvePrimitiveCircle')
+    node_instance_on_points = node_group.nodes.new('GeometryNodeInstanceOnPoints')
+    node_curve_to_mesh = node_group.nodes.new('GeometryNodeCurveToMesh')
+    node_join_geometry = node_group.nodes.new('GeometryNodeJoinGeometry')
+
+    # Set initial values (internal)
+    node_uv_sphere.inputs["Segments"].default_value = 8
+    node_uv_sphere.inputs["Rings"].default_value = 8
+    node_curve_circle.inputs["Resolution"].default_value = 8
+
+    # Position nodes for better visualization (optional)
+    node_input.location = (-400, 0)
+    node_uv_sphere.location = (-150, 100)
+    node_mesh_to_curve.location = (-150, -50)
+    node_curve_circle.location = (-150, -150)
+    node_instance_on_points.location = (100,250)
+    node_curve_to_mesh.location = (100, -100)
+    node_join_geometry.location = (350, 0)
+    node_output.location = (550, 0)
+
+    # Connect nodes
+    node_group.links.new(node_input.outputs["Geometry"], node_instance_on_points.inputs["Points"])
+    node_group.links.new(node_input.outputs["Geometry"], node_mesh_to_curve.inputs["Mesh"])
+    node_group.links.new(node_input.outputs["Thickness"], node_uv_sphere.inputs["Radius"])
+    node_group.links.new(node_input.outputs["Thickness"], node_curve_circle.inputs["Radius"])
+    node_group.links.new(node_uv_sphere.outputs["Mesh"], node_instance_on_points.inputs["Instance"])
+    node_group.links.new(node_mesh_to_curve.outputs["Curve"], node_curve_to_mesh.inputs["Curve"])
+    node_group.links.new(node_curve_circle.outputs["Curve"], node_curve_to_mesh.inputs["Profile Curve"])
+    node_group.links.new(node_instance_on_points.outputs["Instances"], node_join_geometry.inputs["Geometry"])
+    node_group.links.new(node_curve_to_mesh.outputs["Mesh"], node_join_geometry.inputs["Geometry"])
+    node_group.links.new(node_join_geometry.outputs["Geometry"], node_output.inputs["Geometry"])
+    
+    geo_mod["Socket_2"] = thickness
 
     return copy
 
