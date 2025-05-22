@@ -1000,7 +1000,7 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
 
     image_name: StringProperty(
         name="Image Name",
-        default="widget_thumbnail"
+        default=""
     )
     wire_frame_color: FloatVectorProperty(
         name="Wireframe Color",
@@ -1031,17 +1031,21 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
         return obj is not None and obj.type == 'MESH'
 
     def invoke(self, context, event):
-        # Show the popup dialog
+        # Set the image name to the active object
+        if context.active_object:
+            self.image_name = context.active_object.name + "_thumbnail"
+        else:
+            self.image_name = "widget_thumbnail"
         return context.window_manager.invoke_props_dialog(self)
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, "image_name")
+        # layout.prop(self, "image_name")
         layout.prop(self, "use_object_color")
         if not self.use_object_color:
             layout.prop(self, "wire_frame_color")
         layout.prop(self, "wire_frame_thickness")
-        layout.prop(self, "use_blend_path")
+        # layout.prop(self, "use_blend_path")
 
     def execute(self, context):
         active_obj = context.view_layer.objects.active
@@ -1072,7 +1076,7 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
         original_view_matrix = setup_viewport(context)
         new_camera = add_camera_from_view(context)
 
-        render_widget_thumbnail(self.image_name, widget_obj, image_directory=self.use_blend_path)
+        destination_path = render_widget_thumbnail(self.image_name, widget_obj, image_directory=self.use_blend_path)
 
         restore_viewport_position(context, original_view_matrix, original_view_perspective)
 
@@ -1089,6 +1093,9 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
         
         # Remove Scene
         bpy.data.scenes.remove(new_scene)
+
+        if self.use_blend_path:
+            self.report({'INFO'}, "Thumbnail saved at: " + destination_path)
         
         return {'FINISHED'}
 

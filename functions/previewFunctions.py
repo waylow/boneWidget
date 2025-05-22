@@ -31,7 +31,6 @@ def generate_previews():
     if pcoll.widget_list:
         return pcoll.widget_list
     
-    #directory = os.path.join(os.path.dirname(__file__), "thumbnails")
     directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'thumbnails'))
     custom_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
 
@@ -201,12 +200,18 @@ def restore_viewport_position(context, view_matrix, view_perspective):
 
 
 def render_widget_thumbnail(image_name, widget_object, image_directory):
-    if image_directory:
-        image_directory = os.path.dirname(bpy.data.filepath)
-    else:
+    if image_directory: # If True save to the current directory but...
+        if bpy.data.filepath: # Check the file has been saved
+            image_directory = os.path.dirname(bpy.data.filepath)
+        else:
+            image_directory = os.path.expanduser("~") # Fall back if it hasn't been daved
+        # add '.png' to the name
+        image_name = image_name + '.png'
+        
+    else: # if False use the add-on location
         image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
-    
-    destination_path = os.path.join(image_directory, image_name + '.png')
+
+    destination_path = os.path.join(image_directory, image_name)
 
     scene = bpy.context.scene
     scene.render.engine = 'BLENDER_WORKBENCH'
@@ -227,7 +232,8 @@ def render_widget_thumbnail(image_name, widget_object, image_directory):
 
     bpy.ops.render.render(write_still=False)
     bpy.data.images['Render Result'].save_render(filepath=bpy.path.abspath(destination_path))
-    print("File path:", bpy.path.abspath(destination_path)) # DEBUG
+
+    return bpy.path.abspath(destination_path)
 
 
 def add_camera_from_view(context):
