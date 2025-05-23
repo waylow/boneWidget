@@ -21,7 +21,7 @@ Created by Manuel Rais and Christophe Seux
 bl_info = {
     "name": "Bone Widget",
     "author": "Manuel Rais, Christophe Seux, Bassam Kurdali, Wayne Dixon, Blender Defender, Max Nadolny, Markus Berg",
-    "version": (2, 1),
+    "version": (2, 2),
     "blender": (4, 1, 0),
     "location": "UI > Properties Panel",
     "description": "Easily Create Bone Widgets",
@@ -64,7 +64,7 @@ def register():
     # Apply preferences of the panel location.
     context = bpy.context
     pref = get_user_preferences(context).addons[__package__].preferences
-    prefs.BoneWidgetPreferences.panel_category_update_fn(pref, context)
+    prefs.BoneWidget_preferences.panel_category_update_fn(pref, context)
     panels.register()
 
 def unregister():

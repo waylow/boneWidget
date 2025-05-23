@@ -2,22 +2,22 @@ import bpy
 import os
 
 from .functions import (
-    findMatchBones,
-    fromWidgetFindBone,
-    symmetrizeWidget_helper,
-    boneMatrix,
-    createWidget,
-    editWidget,
-    returnToArmature,
+    find_match_bones,
+    from_widget_find_bone,
+    symmetrize_widget_helper,
+    match_bone_matrix,
+    create_widget,
+    edit_widget,
+    return_to_armature,
     add_remove_widgets,
     get_widget_data,
-    getCollection,
-    getViewLayerCollection,
-    recurLayerCollection,
-    deleteUnusedWidgets,
-    clearBoneWidgets,
-    resyncWidgetNames,
-    addObjectAsWidget,
+    get_collection,
+    get_view_layer_collection,
+    recursive_layer_collection,
+    delete_unused_widgets,
+    clear_bone_widgets,
+    resync_widget_names,
+    add_object_as_widget,
     import_widget_library,
     export_widge_library,
     advanced_options_toggled,
@@ -27,11 +27,11 @@ from .functions import (
     update_custom_image,
     reset_default_images,
     update_Widget_library,
-    setBoneColor,
-    copyBoneColor,
-    copyEditBoneColor,
+    set_bone_color,
+    copy_bone_color,
+    copy_edit_bone_color,
     bone_color_items,
-    getPreferences,
+    get_preferences,
     save_color_sets,
     load_color_presets,
     create_wireframe_copy,
@@ -52,7 +52,7 @@ class BONEWIDGET_OT_sharedPropertyGroup(bpy.types.PropertyGroup):
     import_library_filepath = ""
 
 
-class BONEWIDGET_OT_createWidget(bpy.types.Operator):
+class BONEWIDGET_OT_create_widget(bpy.types.Operator):
     """Creates a widget for selected bone"""
     bl_idname = "bonewidget.create_widget"
     bl_label = "Create"
@@ -165,12 +165,12 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
         bone_color = self.bone_color if self.advanced_options else "DEFAULT"
         for bone in bpy.context.selected_pose_bones:
-            createWidget(bone, widget_data, self.relative_size, global_size, slide, self.rotation,
-                         getCollection(context), self.use_face_data, self.wireframe_width, bone_color)
+            create_widget(bone, widget_data, self.relative_size, global_size, slide, self.rotation,
+                         get_collection(context), self.use_face_data, self.wireframe_width, bone_color)
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_editWidget(bpy.types.Operator):
+class BONEWIDGET_OT_edit_widget(bpy.types.Operator):
     """Edit the widget for selected bone"""
     bl_idname = "bonewidget.edit_widget"
     bl_label = "Edit"
@@ -183,13 +183,13 @@ class BONEWIDGET_OT_editWidget(bpy.types.Operator):
     def execute(self, context):
         active_bone = context.active_pose_bone
         try:
-            editWidget(active_bone)
+            edit_widget(active_bone)
         except KeyError:
             self.report({'INFO'}, 'This widget is the Widget Collection')
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_returnToArmature(bpy.types.Operator):
+class BONEWIDGET_OT_return_to_armature(bpy.types.Operator):
     """Switch back to the armature"""
     bl_idname = "bonewidget.return_to_armature"
     bl_label = "Return to armature"
@@ -201,8 +201,8 @@ class BONEWIDGET_OT_returnToArmature(bpy.types.Operator):
 
     def execute(self, context):
         b = bpy.context.object
-        if fromWidgetFindBone(bpy.context.object):
-            returnToArmature(bpy.context.object)
+        if from_widget_find_bone(bpy.context.object):
+            return_to_armature(bpy.context.object)
         else:
             self.report({'INFO'}, 'Object is not a bone widget')
         return {'FINISHED'}
@@ -216,14 +216,14 @@ class BONEWIDGET_OT_matchBoneTransforms(bpy.types.Operator):
     def execute(self, context):
         if bpy.context.mode == "POSE":
             for bone in bpy.context.selected_pose_bones:
-                boneMatrix(bone.custom_shape, bone)
+                match_bone_matrix(bone.custom_shape, bone)
 
         else:
             for ob in bpy.context.selected_objects:
                 if ob.type == 'MESH':
-                    matchBone = fromWidgetFindBone(ob)
+                    matchBone = from_widget_find_bone(ob)
                     if matchBone:
-                        boneMatrix(ob, matchBone)
+                        match_bone_matrix(ob, matchBone)
         return {'FINISHED'}
 
 
@@ -244,17 +244,17 @@ class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
         if widget is None:
             self.report({"INFO"}, "There is no widget on this bone.")
             return {'FINISHED'}
-        collection = getViewLayerCollection(context, widget)
-        widgetsAndBones = findMatchBones()[0]
-        activeObject = findMatchBones()[1]
-        widgetsAndBones = findMatchBones()[0]
+        collection = get_view_layer_collection(context, widget)
+        widgetsAndBones = find_match_bones()[0]
+        activeObject = find_match_bones()[1]
+        widgetsAndBones = find_match_bones()[0]
 
         if not activeObject:
             self.report({"INFO"}, "No active bone or object")
             return {'FINISHED'}
 
         for bone in widgetsAndBones:
-            symmetrizeWidget_helper(bone, collection, activeObject, widgetsAndBones)
+            symmetrize_widget_helper(bone, collection, activeObject, widgetsAndBones)
 
         return {'FINISHED'}
 
@@ -710,19 +710,19 @@ class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
 
     def execute(self, context):
-        if not getPreferences(context).use_rigify_defaults:
-            bw_collection_name = getPreferences(context).bonewidget_collection_name
+        if not get_preferences(context).use_rigify_defaults:
+            bw_collection_name = get_preferences(context).bonewidget_collection_name
         else:
             bw_collection_name = 'WGTS_' + context.active_object.name
 
-        bw_collection = recurLayerCollection(bpy.context.view_layer.layer_collection, bw_collection_name)
+        bw_collection = recursive_layer_collection(bpy.context.view_layer.layer_collection, bw_collection_name)
         bw_collection.hide_viewport = not bw_collection.hide_viewport
         #need to recursivly search for the view_layer
         bw_collection.exclude = False
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_deleteUnusedWidgets(bpy.types.Operator):
+class BONEWIDGET_OT_delete_unused_widgets(bpy.types.Operator):
     """Delete unused objects in the WGT collection"""
     bl_idname = "bonewidget.delete_unused_widgets"
     bl_label = "Delete Unused Widgets"
@@ -733,13 +733,13 @@ class BONEWIDGET_OT_deleteUnusedWidgets(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            deleteUnusedWidgets()
+            delete_unused_widgets()
         except:
             self.report({'INFO'}, "Can't find the Widget Collection. Does it exist?")
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_clearBoneWidgets(bpy.types.Operator):
+class BONEWIDGET_OT_clear_bone_widgets(bpy.types.Operator):
     """Clears widgets from selected pose bones but doesn't remove them from the scene"""
     bl_idname = "bonewidget.clear_widgets"
     bl_label = "Clear Widgets"
@@ -749,11 +749,11 @@ class BONEWIDGET_OT_clearBoneWidgets(bpy.types.Operator):
          return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
 
     def execute(self, context):
-        clearBoneWidgets()
+        clear_bone_widgets()
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_resyncWidgetNames(bpy.types.Operator):
+class BONEWIDGET_OT_resync_widget_names(bpy.types.Operator):
     """Clear widgets from selected pose bones"""
     bl_idname = "bonewidget.resync_widget_names"
     bl_label = "Resync Widget Names"
@@ -763,11 +763,11 @@ class BONEWIDGET_OT_resyncWidgetNames(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode == 'POSE')
 
     def execute(self, context):
-        resyncWidgetNames()
+        resync_widget_names()
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_addObjectAsWidget(bpy.types.Operator):
+class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
     """Add selected object as widget for active bone"""
     bl_idname = "bonewidget.add_as_widget"
     bl_label = "Confirm selected Object as widget shape"
@@ -777,7 +777,7 @@ class BONEWIDGET_OT_addObjectAsWidget(bpy.types.Operator):
         return (len(context.selected_objects) == 2 and context.object.mode == 'POSE')
 
     def execute(self, context):
-        addObjectAsWidget(context, getCollection(context))
+        add_object_as_widget(context, get_collection(context))
         return {'FINISHED'}
 
 
@@ -791,7 +791,7 @@ class BONEWIDGET_OT_reset_default_images(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_setBoneColor(bpy.types.Operator):
+class BONEWIDGET_OT_set_bone_color(bpy.types.Operator):
     """Add bone color to selected widgets"""
     bl_idname = "bonewidget.set_bone_color"
     bl_label = "Set Bone Color to Widget"
@@ -802,7 +802,7 @@ class BONEWIDGET_OT_setBoneColor(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'])
 
     def execute(self, context):
-        setBoneColor(context, context.scene.bone_widget_colors)
+        set_bone_color(context, context.scene.bone_widget_colors)
         return {'FINISHED'}
 
 
@@ -817,11 +817,11 @@ class BONEWIDGET_OT_clearBoneColor(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'])
 
     def execute(self, context):
-        setBoneColor(context, "DEFAULT")
+        set_bone_color(context, "DEFAULT")
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_copyBoneColor(bpy.types.Operator):
+class BONEWIDGET_OT_copy_bone_color(bpy.types.Operator):
     """Copy the colors of the active bone to the custom colors above (ignores default colors)"""
     bl_idname = "bonewidget.copy_bone_color"
     bl_label = "Copy Bone Color"
@@ -834,9 +834,9 @@ class BONEWIDGET_OT_copyBoneColor(bpy.types.Operator):
 
     def execute(self, context):
         if context.object.mode == 'POSE':
-            copyBoneColor(context, context.selected_pose_bones[0]) #changed
+            copy_bone_color(context, context.selected_pose_bones[0]) #changed
         elif context.object.mode == 'EDIT':
-            copyEditBoneColor(context, context.selected_bones[0])
+            copy_edit_bone_color(context, context.selected_bones[0])
         return {'FINISHED'}
 
 
@@ -868,7 +868,7 @@ class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
                 new_item.active = context.scene.custom_pose_color_set.active
                 
             elif context.object.mode == "EDIT" and \
-                 getPreferences(context).edit_bone_colors == True: # edit mode colors if turned on in preferences
+                 get_preferences(context).edit_bone_colors == True: # edit mode colors if turned on in preferences
                 
                 new_item.normal = context.scene.custom_edit_color_set.normal
                 new_item.select = context.scene.custom_edit_color_set.select
@@ -927,11 +927,11 @@ class BONEWIDGET_OT_add_colorset_to_bone(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE'
                 and context.object.mode in ['POSE', 'EDIT'] and len(bones) >= 1) \
                 and not (context.object.mode == "EDIT"
-                        and getPreferences(context).edit_bone_colors == False)
+                        and get_preferences(context).edit_bone_colors == False)
 
     def execute(self, context):
         if context.object.mode == "EDIT" and \
-                 getPreferences(context).edit_bone_colors == True: 
+                 get_preferences(context).edit_bone_colors == True: 
             selected_bones = context.selected_bones
         elif context.object.mode == "POSE":
             selected_bones = context.selected_pose_bones
@@ -1107,23 +1107,23 @@ classes = (
     BONEWIDGET_OT_exportLibrary,
     BONEWIDGET_OT_matchSymmetrizeShape,
     BONEWIDGET_OT_matchBoneTransforms,
-    BONEWIDGET_OT_returnToArmature,
-    BONEWIDGET_OT_editWidget,
-    BONEWIDGET_OT_createWidget,
+    BONEWIDGET_OT_return_to_armature,
+    BONEWIDGET_OT_edit_widget,
+    BONEWIDGET_OT_create_widget,
     BONEWIDGET_OT_toggleCollectionVisibility,
-    BONEWIDGET_OT_deleteUnusedWidgets,
-    BONEWIDGET_OT_clearBoneWidgets,
-    BONEWIDGET_OT_resyncWidgetNames,
-    BONEWIDGET_OT_addObjectAsWidget,
+    BONEWIDGET_OT_delete_unused_widgets,
+    BONEWIDGET_OT_clear_bone_widgets,
+    BONEWIDGET_OT_resync_widget_names,
+    BONEWIDGET_OT_add_object_as_widget,
     BONEWIDGET_OT_importWidgetsSummaryPopup,
     BONEWIDGET_OT_importWidgetsAskPopup,
     BONEWIDGET_OT_sharedPropertyGroup,
     BONEWIDGET_OT_imageSelect,
     BONEWIDGET_OT_addCustomImage,
     BONEWIDGET_OT_reset_default_images,
-    BONEWIDGET_OT_setBoneColor,
+    BONEWIDGET_OT_set_bone_color,
     BONEWIDGET_OT_clearBoneColor,
-    BONEWIDGET_OT_copyBoneColor,
+    BONEWIDGET_OT_copy_bone_color,
     BONEWIDGET_OT_add_color_set_from,
     BONEWIDGET_OT_add_default_colorset,
     BONEWIDGET_OT_add_colorset_to_bone,

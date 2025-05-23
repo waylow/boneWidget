@@ -2,14 +2,14 @@ import bpy
 import bpy.utils.previews
 from .props import PresetColorSetItem, CustomColorSet
 from .functions import (
-    recurLayerCollection,
+    recursive_layer_collection,
     preview_collections,
     createPreviewCollection,
     get_preview_default,
     bone_color_items_short,
     live_update_toggle,
     load_color_presets,
-    getPreferences,
+    get_preferences,
 )
 
 from .menus import BONEWIDGET_MT_bw_specials
@@ -39,8 +39,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         # preview view
         if context.window_manager.toggle_preview:
             row = layout.row(align=True)
-            preview_panel_size = getPreferences(context).preview_panel_size
-            preview_popup_size = getPreferences(context).preview_popup_size
+            preview_panel_size = get_preferences(context).preview_panel_size
+            preview_popup_size = get_preferences(context).preview_popup_size
             row.template_icon_view(context.window_manager, "widget_list", show_labels=True,
                                    scale=preview_panel_size, scale_popup=preview_popup_size)
 
@@ -76,8 +76,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                             icon='RESTRICT_SELECT_OFF')
 
         # if the bw collection exists, show the visibility toggle
-        if not getPreferences(context).use_rigify_defaults: #rigify
-            bw_collection_name = getPreferences(context).bonewidget_collection_name
+        if not get_preferences(context).use_rigify_defaults: #rigify
+            bw_collection_name = get_preferences(context).bonewidget_collection_name
         
         elif context.active_object: # active  object
             bw_collection_name = 'WGTS_' + context.active_object.name
@@ -85,7 +85,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         else: # this is needed because sometimes there is no active object
             bw_collection_name = None 
         
-        bw_collection = recurLayerCollection(bpy.context.view_layer.layer_collection, bw_collection_name)
+        bw_collection = recursive_layer_collection(bpy.context.view_layer.layer_collection, bw_collection_name)
 
         if bw_collection is not None:
             if bw_collection.hide_viewport:
@@ -118,12 +118,12 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                     row.prop(custom_pose_color, "normal", text="")
                     row.prop(custom_pose_color, "select", text="")
                     row.prop(custom_pose_color, "active", text="")
-                elif context.object.mode == "EDIT" and getPreferences(context).edit_bone_colors: #edit bone colors
+                elif context.object.mode == "EDIT" and get_preferences(context).edit_bone_colors: #edit bone colors
                     row.prop(custom_edit_color, "normal", text="")
                     row.prop(custom_edit_color, "select", text="")
                     row.prop(custom_edit_color, "active", text="")
                 
-                if context.object.mode == "POSE" or getPreferences(context).edit_bone_colors:
+                if context.object.mode == "POSE" or get_preferences(context).edit_bone_colors:
                     row.separator(factor=0.5)
                     row.prop(context.scene, "live_update_toggle", text="", icon="UV_SYNC_SELECT")
                     row = layout.row(align=True)

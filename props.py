@@ -1,6 +1,6 @@
 import bpy
 import threading
-from .functions import save_color_sets, updateBoneColor
+from .functions import save_color_sets, uodate_bone_color
 
 save_timer = None
 
@@ -57,7 +57,7 @@ class CustomColorSet(bpy.types.PropertyGroup):
         size=3,
         min=0.0, max=1.0,
         description="Color used for the surface of bones",
-        update=updateBoneColor,
+        update=uodate_bone_color,
     )
 
     select: bpy.props.FloatVectorProperty(
@@ -67,7 +67,7 @@ class CustomColorSet(bpy.types.PropertyGroup):
         size=3,
         min=0.0, max=1.0,
         description="Color used for selected bones",
-        update=updateBoneColor,
+        update=uodate_bone_color,
     )
 
     active: bpy.props.FloatVectorProperty(
@@ -77,5 +77,5 @@ class CustomColorSet(bpy.types.PropertyGroup):
         size=3,
         min=0.0, max=1.0,
         description="Color used for active bones",
-        update=updateBoneColor,
+        update=uodate_bone_color,
     )

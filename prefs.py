@@ -8,7 +8,7 @@ from .operators import BONEWIDGET_OT_reset_default_images
 
 
 @BlClassRegistry()
-class BoneWidgetPreferences(AddonPreferences):
+class BoneWidget_preferences(AddonPreferences):
     bl_idname = __package__
 
     #Use Rigify Defaults
