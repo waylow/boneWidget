@@ -132,7 +132,7 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
         return 'WARNING', "Widget - " + ob_name + " already exists!"
 
 
-def export_widge_library(filepath):
+def export_widget_library(filepath):
     wgts = read_widgets(JSON_USER_WIDGETS)
 
     if wgts:
@@ -221,7 +221,7 @@ def import_widget_library(filepath, action=""):
     return widgetImport
 
 
-def update_Widget_library(new_widgets, new_images, zip_filepath):
+def update_widget_library(new_widgets, new_images, zip_filepath):
     current_widget = bpy.context.window_manager.widget_list
     wgts = read_widgets(JSON_USER_WIDGETS)
 

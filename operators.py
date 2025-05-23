@@ -19,14 +19,14 @@ from .functions import (
     resync_widget_names,
     add_object_as_widget,
     import_widget_library,
-    export_widge_library,
+    export_widget_library,
     advanced_options_toggled,
     remove_custom_image,
     copy_custom_image,
     get_widget_data,
     update_custom_image,
     reset_default_images,
-    update_Widget_library,
+    update_widget_library,
     set_bone_color,
     copy_bone_color,
     copy_edit_bone_color,
@@ -584,7 +584,7 @@ class BONEWIDGET_OT_import_widgets_ask_popup(bpy.types.Operator):
                 self.widgetImportData.new_widgets += 1
                 self.widgetImportData.skipped_widgets.remove(widget)
                 
-        update_Widget_library(widget_results, widget_images, bpy.context.window_manager.prop_grp.import_library_filepath)
+        update_widget_library(widget_results, widget_images, bpy.context.window_manager.prop_grp.import_library_filepath)
 
         # clean up the data from the property group
         for i in range(self.widgetImportData.skipped()):
@@ -654,7 +654,7 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
                 for _, value in import_libraryData.widgets.items():
                     widget_images.add(value['image'])
 
-                update_Widget_library(import_libraryData.widgets, widget_images, self.filepath)
+                update_widget_library(import_libraryData.widgets, widget_images, self.filepath)
 
                 bpy.ops.bonewidget.widget_summary_popup('INVOKE_DEFAULT')
             else:
@@ -690,7 +690,7 @@ class BONEWIDGET_OT_export_library(bpy.types.Operator):
 
     def execute(self, context):
         if self.filepath and self.filename:
-            num_widgets = export_widge_library(self.filepath)
+            num_widgets = export_widget_library(self.filepath)
             self.report({'INFO'}, f"{num_widgets} user defined widgets exported successfully!")
         return {'FINISHED'}
 
