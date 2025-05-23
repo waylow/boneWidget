@@ -45,7 +45,7 @@ from .functions import (
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, IntVectorProperty, StringProperty, EnumProperty
 
 
-class BONEWIDGET_OT_sharedPropertyGroup(bpy.types.PropertyGroup):
+class BONEWIDGET_OT_shared_property_group(bpy.types.PropertyGroup):
     """Storage class for Shared Attribute Properties"""
     
     custom_image_data = ("", "")
@@ -208,7 +208,7 @@ class BONEWIDGET_OT_return_to_armature(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_matchBoneTransforms(bpy.types.Operator):
+class BONEWIDGET_OT_match_bone_transforms(bpy.types.Operator):
     """Match the widget to the bone transforms"""
     bl_idname = "bonewidget.match_bone_transforms"
     bl_label = "Match bone transforms"
@@ -227,7 +227,7 @@ class BONEWIDGET_OT_matchBoneTransforms(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
+class BONEWIDGET_OT_match_symmetrize_shape(bpy.types.Operator):
     """Symmetrize to the opposite side ONLY if it is named with a .L or .R (default settings)"""
     bl_idname = "bonewidget.symmetrize_shape"
     bl_label = "Symmetrize"
@@ -259,7 +259,7 @@ class BONEWIDGET_OT_matchSymmetrizeShape(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_imageSelect(bpy.types.Operator):
+class BONEWIDGET_OT_image_select(bpy.types.Operator):
     """Open a Fileselect browser and get the image location"""
     bl_idname = "bonewidget.image_select"
     bl_label = "Select Image"
@@ -288,12 +288,12 @@ class BONEWIDGET_OT_imageSelect(bpy.types.Operator):
 
     def execute(self, context):
         bpy.context.window_manager.prop_grp.custom_image_name = self.filename
-        setattr(BONEWIDGET_OT_sharedPropertyGroup, "custom_image_data", (self.filepath, self.filename))
+        setattr(BONEWIDGET_OT_shared_property_group, "custom_image_data", (self.filepath, self.filename))
         context.area.tag_redraw()
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_addCustomImage(bpy.types.Operator):
+class BONEWIDGET_OT_add_custom_image(bpy.types.Operator):
     """Add a custom image to selected preview panel widget"""
     bl_idname = "bonewidget.add_custom_image"
     bl_label = "Select Image"
@@ -332,7 +332,7 @@ class BONEWIDGET_OT_addCustomImage(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
+class BONEWIDGET_OT_add_widgets(bpy.types.Operator):
     """Add selected mesh object to Bone Widget Library and optionally Render Thumbnail"""
     bl_idname = "bonewidget.add_widgets"
     bl_label = "Add New Widget to Library"
@@ -385,7 +385,7 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
     def invoke(self, context, event):
         if bpy.context.selected_objects:
             self.widget_name = context.active_object.name
-            setattr(BONEWIDGET_OT_sharedPropertyGroup, "custom_image_name", StringProperty(name="Image Name"))
+            setattr(BONEWIDGET_OT_shared_property_group, "custom_image_name", StringProperty(name="Image Name"))
             return context.window_manager.invoke_props_dialog(self)
             
         self.report({'WARNING'}, 'Please select an object first!')
@@ -457,7 +457,7 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
+class BONEWIDGET_OT_remove_widgets(bpy.types.Operator):
     """Remove selected widget object from the Bone Widget Library"""
     bl_idname = "bonewidget.remove_widgets"
     bl_label = "Remove Widgets"
@@ -476,7 +476,7 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_importWidgetsSummaryPopup(bpy.types.Operator):
+class BONEWIDGET_OT_import_widgets_summary_popup(bpy.types.Operator):
     """Display summary of imported Widget Library"""
     bl_idname = "bonewidget.widget_summary_popup"
     bl_label = "Imported Widget Summary"
@@ -504,7 +504,7 @@ class BONEWIDGET_OT_importWidgetsSummaryPopup(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_importWidgetsAskPopup(bpy.types.Operator):
+class BONEWIDGET_OT_import_widgets_ask_popup(bpy.types.Operator):
     """Ask user how to handle name collisions from the imported Widget Library"""
     bl_idname = "bonewidget.widget_ask_popup"
     bl_label = "Imported Widget Choice Popup"
@@ -540,7 +540,7 @@ class BONEWIDGET_OT_importWidgetsAskPopup(bpy.types.Operator):
         # generate the x number of drop down lists and widget names needed
         for n, widget in enumerate(self.widgetImportData.skipped_widgets):
             widget_name = next(iter(widget.keys()))
-            setattr(BONEWIDGET_OT_sharedPropertyGroup, f"ImportOptions{n}", EnumProperty(
+            setattr(BONEWIDGET_OT_shared_property_group, f"ImportOptions{n}", EnumProperty(
                     name=f"ImportOptions{n}",
                     description="Choose an option",
                     items=self.import_options,
@@ -548,7 +548,7 @@ class BONEWIDGET_OT_importWidgetsAskPopup(bpy.types.Operator):
             ))
             setattr(bpy.context.window_manager.prop_grp, f"ImportOptions{n}", "SKIP")
             
-            setattr(BONEWIDGET_OT_sharedPropertyGroup, f"EditName{n}", StringProperty(
+            setattr(BONEWIDGET_OT_shared_property_group, f"EditName{n}", StringProperty(
                     name=f"EditName{n}",
                     default=widget_name,
                     description="The name of the widget",
@@ -588,8 +588,8 @@ class BONEWIDGET_OT_importWidgetsAskPopup(bpy.types.Operator):
 
         # clean up the data from the property group
         for i in range(self.widgetImportData.skipped()):
-            delattr(BONEWIDGET_OT_sharedPropertyGroup, f"ImportOptions{i}")
-            delattr(BONEWIDGET_OT_sharedPropertyGroup, f"EditName{i}")
+            delattr(BONEWIDGET_OT_shared_property_group, f"ImportOptions{i}")
+            delattr(BONEWIDGET_OT_shared_property_group, f"EditName{i}")
 
         #del bpy.types.WindowManager.custom_data
         self.widgetImportData = None
@@ -600,7 +600,7 @@ class BONEWIDGET_OT_importWidgetsAskPopup(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_importLibrary(bpy.types.Operator):
+class BONEWIDGET_OT_import_library(bpy.types.Operator):
     """Import User Defined Widgets"""
     bl_idname = "bonewidget.import_library"
     bl_label = "Import Library"
@@ -638,23 +638,23 @@ class BONEWIDGET_OT_importLibrary(bpy.types.Operator):
 
     def execute(self, context):
         if self.filepath and self.import_option:
-            importLibraryData = import_widget_library(self.filepath, self.import_option)
+            import_libraryData = import_widget_library(self.filepath, self.import_option)
             bpy.context.window_manager.prop_grp.import_library_filepath = self.filepath
 
-            bpy.types.WindowManager.custom_data = importLibraryData
+            bpy.types.WindowManager.custom_data = import_libraryData
 
             if self.import_option == "ASK":
-                bpy.types.WindowManager.custom_data = importLibraryData
+                bpy.types.WindowManager.custom_data = import_libraryData
                 bpy.ops.bonewidget.widget_ask_popup('INVOKE_DEFAULT')
 
             elif self.import_option == "OVERWRITE" or self.import_option == "SKIP":
                 widget_images = set()
 
                 # extract image names if any
-                for _, value in importLibraryData.widgets.items():
+                for _, value in import_libraryData.widgets.items():
                     widget_images.add(value['image'])
 
-                update_Widget_library(importLibraryData.widgets, widget_images, self.filepath)
+                update_Widget_library(import_libraryData.widgets, widget_images, self.filepath)
 
                 bpy.ops.bonewidget.widget_summary_popup('INVOKE_DEFAULT')
             else:
@@ -668,7 +668,7 @@ class BONEWIDGET_OT_importLibrary(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 
-class BONEWIDGET_OT_exportLibrary(bpy.types.Operator):
+class BONEWIDGET_OT_export_library(bpy.types.Operator):
     """Export User Defined Widgets"""
     bl_idname = "bonewidget.export_library"
     bl_label = "Export Library"
@@ -700,7 +700,7 @@ class BONEWIDGET_OT_exportLibrary(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 
-class BONEWIDGET_OT_toggleCollectionVisibility(bpy.types.Operator):
+class BONEWIDGET_OT_toggle_collection_visibility(bpy.types.Operator):
     """Show/hide the bone widget collection"""
     bl_idname = "bonewidget.toggle_collection_visibilty"
     bl_label = "Collection Visibilty"
@@ -806,7 +806,7 @@ class BONEWIDGET_OT_set_bone_color(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_clearBoneColor(bpy.types.Operator):
+class BONEWIDGET_OT_clear_bone_color(bpy.types.Operator):
     """Add bone color to selected widgets"""
     bl_idname = "bonewidget.clear_bone_color"
     bl_label = "Clear Bone Color"
@@ -1101,28 +1101,28 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
 
 
 classes = (
-    BONEWIDGET_OT_removeWidgets,
-    BONEWIDGET_OT_addWidgets,
-    BONEWIDGET_OT_importLibrary,
-    BONEWIDGET_OT_exportLibrary,
-    BONEWIDGET_OT_matchSymmetrizeShape,
-    BONEWIDGET_OT_matchBoneTransforms,
+    BONEWIDGET_OT_remove_widgets,
+    BONEWIDGET_OT_add_widgets,
+    BONEWIDGET_OT_import_library,
+    BONEWIDGET_OT_export_library,
+    BONEWIDGET_OT_match_symmetrize_shape,
+    BONEWIDGET_OT_match_bone_transforms,
     BONEWIDGET_OT_return_to_armature,
     BONEWIDGET_OT_edit_widget,
     BONEWIDGET_OT_create_widget,
-    BONEWIDGET_OT_toggleCollectionVisibility,
+    BONEWIDGET_OT_toggle_collection_visibility,
     BONEWIDGET_OT_delete_unused_widgets,
     BONEWIDGET_OT_clear_bone_widgets,
     BONEWIDGET_OT_resync_widget_names,
     BONEWIDGET_OT_add_object_as_widget,
-    BONEWIDGET_OT_importWidgetsSummaryPopup,
-    BONEWIDGET_OT_importWidgetsAskPopup,
-    BONEWIDGET_OT_sharedPropertyGroup,
-    BONEWIDGET_OT_imageSelect,
-    BONEWIDGET_OT_addCustomImage,
+    BONEWIDGET_OT_import_widgets_summary_popup,
+    BONEWIDGET_OT_import_widgets_ask_popup,
+    BONEWIDGET_OT_shared_property_group,
+    BONEWIDGET_OT_image_select,
+    BONEWIDGET_OT_add_custom_image,
     BONEWIDGET_OT_reset_default_images,
     BONEWIDGET_OT_set_bone_color,
-    BONEWIDGET_OT_clearBoneColor,
+    BONEWIDGET_OT_clear_bone_color,
     BONEWIDGET_OT_copy_bone_color,
     BONEWIDGET_OT_add_color_set_from,
     BONEWIDGET_OT_add_default_colorset,
@@ -1139,7 +1139,7 @@ def register():
     for cls in classes:
         register_class(cls)
 
-    bpy.types.WindowManager.prop_grp = bpy.props.PointerProperty(type=BONEWIDGET_OT_sharedPropertyGroup)
+    bpy.types.WindowManager.prop_grp = bpy.props.PointerProperty(type=BONEWIDGET_OT_shared_property_group)
 
 
 def unregister():
