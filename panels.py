@@ -4,7 +4,7 @@ from .props import PresetColorSetItem, CustomColorSet
 from .functions import (
     recursive_layer_collection,
     preview_collections,
-    createPreviewCollection,
+    create_preview_collection,
     get_preview_default,
     bone_color_items_short,
     live_update_toggle,
@@ -27,7 +27,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_label = "Bone Widget"
 
 
-    createPreviewCollection()
+    create_preview_collection()
 
     def draw(self, context):
         layout = self.layout

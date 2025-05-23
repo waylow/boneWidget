@@ -21,8 +21,8 @@ from .functions import (
     import_widget_library,
     export_widge_library,
     advanced_options_toggled,
-    removeCustomImage,
-    copyCustomImage,
+    remove_custom_image,
+    copy_custom_image,
     get_widget_data,
     update_custom_image,
     reset_default_images,
@@ -322,9 +322,9 @@ class BONEWIDGET_OT_addCustomImage(bpy.types.Operator):
         if self.filepath:
             # first remove previous custom image if present
             current_widget = context.window_manager.widget_list
-            removeCustomImage(get_widget_data(current_widget).get("image"))
+            remove_custom_image(get_widget_data(current_widget).get("image"))
             # copy over the image to custom folder
-            copyCustomImage(self.filepath, self.filename)
+            copy_custom_image(self.filepath, self.filename)
             # update the json files with new image data
             update_custom_image(self.filename)
 
@@ -430,7 +430,7 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
                     message_extra = " - WARNING - No custom image specified!"
             
             if custom_image_name and custom_image_path:
-                copyCustomImage(custom_image_path, custom_image_name)
+                copy_custom_image(custom_image_path, custom_image_name)
 
             bpy.context.window_manager.prop_grp.custom_image_name = ""  # make sure the field is empty for next time
 
@@ -466,7 +466,7 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
         objects = bpy.context.window_manager.widget_list
 
         # try and remove the image - will abort if no custom image assigned or if missing
-        removeCustomImage(get_widget_data(objects).get("image"))
+        remove_custom_image(get_widget_data(objects).get("image"))
         
         message_type, return_message = add_remove_widgets(context, "remove", bpy.types.WindowManager.widget_list.keywords['items'], objects)
 

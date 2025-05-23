@@ -120,9 +120,9 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
         write_widgets(wgts, file)
 
         # to handle circular import error
-        from .functions import createPreviewCollection
+        from .functions import create_preview_collection
 
-        createPreviewCollection()
+        create_preview_collection()
     
         # trigger an update and display widget
         bpy.context.window_manager.widget_list = activeShape
@@ -243,8 +243,8 @@ def update_Widget_library(new_widgets, new_images, zip_filepath):
                 pass
 
     # update the preview panel
-    from .functions import createPreviewCollection
-    createPreviewCollection()
+    from .functions import create_preview_collection
+    create_preview_collection()
     
     # trigger an update and display original but updated widget
     bpy.context.window_manager.widget_list = current_widget
@@ -268,8 +268,8 @@ def update_custom_image(image_name):
         write_widgets(wgts, JSON_DEFAULT_WIDGETS)
 
     # update the preview panel
-    from .functions import createPreviewCollection
-    createPreviewCollection()
+    from .functions import create_preview_collection
+    create_preview_collection()
     
     # trigger an update and display original but updated widget
     bpy.context.window_manager.widget_list = current_widget
@@ -286,8 +286,8 @@ def reset_default_images():
     write_widgets(wgts, JSON_DEFAULT_WIDGETS)
 
     # update the preview panel
-    from .functions import createPreviewCollection
-    createPreviewCollection()
+    from .functions import create_preview_collection
+    create_preview_collection()
     
     # trigger an update and display original but updated widget
     bpy.context.window_manager.widget_list = current_widget

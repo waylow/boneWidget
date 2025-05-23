@@ -8,7 +8,7 @@ from mathutils import Vector
 preview_collections = {}
 
 
-def createPreviewCollection():
+def create_preview_collection():
     if preview_collections:
         del bpy.types.WindowManager.widget_list
         for pcoll in preview_collections.values():
@@ -72,7 +72,7 @@ def get_preview_default():
     return bpy.context.preferences.addons[__package__].preferences.preview_default
 
 
-def copyCustomImage(filepath, filename):
+def copy_custom_image(filepath, filename):
     if os.path.exists(filepath):
         image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
         destination_path = os.path.join(image_directory, filename)
@@ -90,7 +90,7 @@ def copyCustomImage(filepath, filename):
     return False
 
 
-def removeCustomImage(filename):
+def remove_custom_image(filename):
     image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
     destination_path = os.path.join(image_directory, filename)
     
