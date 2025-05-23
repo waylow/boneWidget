@@ -4,7 +4,7 @@ from bpy.props import StringProperty, BoolProperty, FloatProperty
 
 from .bl_class_registry import BlClassRegistry
 from .panels import BONEWIDGET_PT_bw_panel_main
-from .operators import BONEWIDGET_OT_resetDefaultImages
+from .operators import BONEWIDGET_OT_reset_default_images
 
 
 @BlClassRegistry()

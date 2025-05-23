@@ -1,3 +1,3 @@
 from .mainFunctions import *
-from .jsonFunctions import *
+from .json_functions import *
 from .previewFunctions import *

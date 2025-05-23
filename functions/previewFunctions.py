@@ -1,6 +1,6 @@
 import bpy
 import bpy.utils.previews
-from .jsonFunctions import readWidgets, getWidgetData, get_addon_dir, JSON_USER_WIDGETS
+from .json_functions import read_widgets, get_widget_data, get_addon_dir, JSON_USER_WIDGETS
 import os
 from .. import __package__
 from mathutils import Vector
@@ -35,7 +35,7 @@ def generate_previews():
     custom_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
 
     if directory and os.path.exists(directory):
-        widget_data = {item[0]: item[1].get("image", "missing_image.png") for item in readWidgets().items()}
+        widget_data = {item[0]: item[1].get("image", "missing_image.png") for item in read_widgets().items()}
         widget_names = sorted(widget_data.keys())
 
         for i, name in enumerate(widget_names):
@@ -57,7 +57,7 @@ def generate_previews():
             else:
                 thumb = pcoll[name]
                 
-            face_data_info = "Contains Face Data" if getWidgetData(name).get("faces") else ""
+            face_data_info = "Contains Face Data" if get_widget_data(name).get("faces") else ""
             enum_items.append((name, name, face_data_info, thumb.icon_id, i))
     
     pcoll.widget_list = enum_items
@@ -97,7 +97,7 @@ def removeCustomImage(filename):
     if os.path.isfile(destination_path):
         # make sure the image is only used once - else stop
         count = 0
-        for v in readWidgets(JSON_USER_WIDGETS).values():
+        for v in read_widgets(JSON_USER_WIDGETS).values():
             if v.get("image") == filename:
                 count += 1
             if count > 1:

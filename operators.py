@@ -9,8 +9,8 @@ from .functions import (
     createWidget,
     editWidget,
     returnToArmature,
-    addRemoveWidgets,
-    getWidgetData,
+    add_remove_widgets,
+    get_widget_data,
     getCollection,
     getViewLayerCollection,
     recurLayerCollection,
@@ -18,22 +18,22 @@ from .functions import (
     clearBoneWidgets,
     resyncWidgetNames,
     addObjectAsWidget,
-    importWidgetLibrary,
-    exportWidgetLibrary,
+    import_widget_library,
+    export_widge_library,
     advanced_options_toggled,
     removeCustomImage,
     copyCustomImage,
-    getWidgetData,
-    updateCustomImage,
-    resetDefaultImages,
-    updateWidgetLibrary,
+    get_widget_data,
+    update_custom_image,
+    reset_default_images,
+    update_Widget_library,
     setBoneColor,
     copyBoneColor,
     copyEditBoneColor,
     bone_color_items,
     getPreferences,
-    saveColorSets,
-    loadColorPresets,
+    save_color_sets,
+    load_color_presets,
     create_wireframe_copy,
     setup_viewport,
     restore_viewport_position,
@@ -160,7 +160,7 @@ class BONEWIDGET_OT_createWidget(bpy.types.Operator):
         row.prop(self, "advanced_options")
 
     def execute(self, context):
-        widget_data = getWidgetData(context.window_manager.widget_list)
+        widget_data = get_widget_data(context.window_manager.widget_list)
         slide = self.slide_advanced if self.advanced_options else (0.0, self.slide_simple, 0.0)
         global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
         bone_color = self.bone_color if self.advanced_options else "DEFAULT"
@@ -322,11 +322,11 @@ class BONEWIDGET_OT_addCustomImage(bpy.types.Operator):
         if self.filepath:
             # first remove previous custom image if present
             current_widget = context.window_manager.widget_list
-            removeCustomImage(getWidgetData(current_widget).get("image"))
+            removeCustomImage(get_widget_data(current_widget).get("image"))
             # copy over the image to custom folder
             copyCustomImage(self.filepath, self.filename)
             # update the json files with new image data
-            updateCustomImage(self.filename)
+            update_custom_image(self.filename)
 
             self.report({'INFO'}, "Custom image has been added!")
         return {'FINISHED'}
@@ -448,7 +448,7 @@ class BONEWIDGET_OT_addWidgets(bpy.types.Operator):
             custom_image_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'custom_thumbnails'))
             
 
-        message_type, return_message = addRemoveWidgets(context, "add", bpy.types.WindowManager.widget_list.keywords['items'],
+        message_type, return_message = add_remove_widgets(context, "add", bpy.types.WindowManager.widget_list.keywords['items'],
                                                         objects, self.widget_name, custom_image_name)
 
         if return_message:
@@ -466,9 +466,9 @@ class BONEWIDGET_OT_removeWidgets(bpy.types.Operator):
         objects = bpy.context.window_manager.widget_list
 
         # try and remove the image - will abort if no custom image assigned or if missing
-        removeCustomImage(getWidgetData(objects).get("image"))
+        removeCustomImage(get_widget_data(objects).get("image"))
         
-        message_type, return_message = addRemoveWidgets(context, "remove", bpy.types.WindowManager.widget_list.keywords['items'], objects)
+        message_type, return_message = add_remove_widgets(context, "remove", bpy.types.WindowManager.widget_list.keywords['items'], objects)
 
         if return_message:
             self.report({message_type}, return_message)
@@ -584,7 +584,7 @@ class BONEWIDGET_OT_importWidgetsAskPopup(bpy.types.Operator):
                 self.widgetImportData.new_widgets += 1
                 self.widgetImportData.skipped_widgets.remove(widget)
                 
-        updateWidgetLibrary(widget_results, widget_images, bpy.context.window_manager.prop_grp.import_library_filepath)
+        update_Widget_library(widget_results, widget_images, bpy.context.window_manager.prop_grp.import_library_filepath)
 
         # clean up the data from the property group
         for i in range(self.widgetImportData.skipped()):
@@ -638,7 +638,7 @@ class BONEWIDGET_OT_importLibrary(bpy.types.Operator):
 
     def execute(self, context):
         if self.filepath and self.import_option:
-            importLibraryData = importWidgetLibrary(self.filepath, self.import_option)
+            importLibraryData = import_widget_library(self.filepath, self.import_option)
             bpy.context.window_manager.prop_grp.import_library_filepath = self.filepath
 
             bpy.types.WindowManager.custom_data = importLibraryData
@@ -654,7 +654,7 @@ class BONEWIDGET_OT_importLibrary(bpy.types.Operator):
                 for _, value in importLibraryData.widgets.items():
                     widget_images.add(value['image'])
 
-                updateWidgetLibrary(importLibraryData.widgets, widget_images, self.filepath)
+                update_Widget_library(importLibraryData.widgets, widget_images, self.filepath)
 
                 bpy.ops.bonewidget.widget_summary_popup('INVOKE_DEFAULT')
             else:
@@ -690,7 +690,7 @@ class BONEWIDGET_OT_exportLibrary(bpy.types.Operator):
 
     def execute(self, context):
         if self.filepath and self.filename:
-            num_widgets = exportWidgetLibrary(self.filepath)
+            num_widgets = export_widge_library(self.filepath)
             self.report({'INFO'}, f"{num_widgets} user defined widgets exported successfully!")
         return {'FINISHED'}
 
@@ -781,13 +781,13 @@ class BONEWIDGET_OT_addObjectAsWidget(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_resetDefaultImages(bpy.types.Operator):
+class BONEWIDGET_OT_reset_default_images(bpy.types.Operator):
     """Resets the thumbnails for all default widgets"""
     bl_idname = "bonewidget.reset_default_images"
     bl_label = "Reset"
 
     def execute(self, context):
-        resetDefaultImages()
+        reset_default_images()
         return {'FINISHED'}
 
 
@@ -886,7 +886,7 @@ class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
             new_item.select = theme_color_set.select
             new_item.active = theme_color_set.active
 
-        saveColorSets(context)
+        save_color_sets(context)
         return {'FINISHED'}
     
 
@@ -910,7 +910,7 @@ class BONEWIDGET_OT_add_default_colorset(bpy.types.Operator):
         new_item.select = (0.0, 1.0, 0.0)
         new_item.active = (0.0, 0.0, 1.0)
         
-        saveColorSets(context)
+        save_color_sets(context)
 
         return {'FINISHED'}
     
@@ -967,7 +967,7 @@ class BONEWIDGET_OT_remove_item(bpy.types.Operator):
         index = context.window_manager.colorset_list_index
         my_list.remove(index)
         context.window_manager.colorset_list_index = min(max(0, index - 1), len(my_list) - 1)
-        saveColorSets(context)
+        save_color_sets(context)
         return {'FINISHED'}
     
 
@@ -988,7 +988,7 @@ class BONEWIDGET_OT_reload_colorset_items(bpy.types.Operator):
 
     def execute(self, context):
         context.window_manager.custom_color_presets.clear()
-        loadColorPresets(context)
+        load_color_presets(context)
         return {'FINISHED'}
 
 
@@ -1120,7 +1120,7 @@ classes = (
     BONEWIDGET_OT_sharedPropertyGroup,
     BONEWIDGET_OT_imageSelect,
     BONEWIDGET_OT_addCustomImage,
-    BONEWIDGET_OT_resetDefaultImages,
+    BONEWIDGET_OT_reset_default_images,
     BONEWIDGET_OT_setBoneColor,
     BONEWIDGET_OT_clearBoneColor,
     BONEWIDGET_OT_copyBoneColor,

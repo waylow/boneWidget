@@ -35,7 +35,7 @@ def objectDataToDico(object, custom_image):
     return(wgts)
 
 
-def readWidgets(filename = ""):
+def read_widgets(filename = ""):
     global widget_data
     wgts = {}
 
@@ -57,11 +57,11 @@ def readWidgets(filename = ""):
     return (wgts)
 
 
-def getWidgetData(widget):
+def get_widget_data(widget):
     return widget_data[widget]
 
 
-def writeWidgets(wgts, file):
+def write_widgets(wgts, file):
     jsonFile = os.path.join(os.path.dirname(get_addon_dir()), file)
     #if os.path.exists(jsonFile):
     f = open(jsonFile, 'w')
@@ -69,7 +69,7 @@ def writeWidgets(wgts, file):
     f.close()
 
 
-def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name="", custom_image=""):
+def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", custom_image=""):
     wgts = {}
 
     # file from where the widget should be read or written to
@@ -83,7 +83,7 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name="", custo
     ob_name = None
     return_message = ""
     if addOrRemove == 'add':
-        wgts = readWidgets(file)
+        wgts = read_widgets(file)
         bw_widget_prefix = getPreferences(context).widget_prefix
         for ob in widgets:
             if not widget_name:
@@ -101,12 +101,12 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name="", custo
                 return_message = "Widget - " + ob_name + " has been added!"
 
     elif addOrRemove == 'remove':
-        user_widgets = readWidgets(file)
+        user_widgets = read_widgets(file)
         if widgets in user_widgets:
             wgts = user_widgets
         else:
             file = JSON_DEFAULT_WIDGETS
-            wgts = readWidgets(file)
+            wgts = read_widgets(file)
         
         del wgts[widgets]
         if widgets in widget_items:
@@ -117,7 +117,7 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name="", custo
 
     if activeShape is not None:
 
-        writeWidgets(wgts, file)
+        write_widgets(wgts, file)
 
         # to handle circular import error
         from .functions import createPreviewCollection
@@ -132,8 +132,8 @@ def addRemoveWidgets(context, addOrRemove, items, widgets, widget_name="", custo
         return 'WARNING', "Widget - " + ob_name + " already exists!"
 
 
-def exportWidgetLibrary(filepath):
-    wgts = readWidgets(JSON_USER_WIDGETS)
+def export_widge_library(filepath):
+    wgts = read_widgets(JSON_USER_WIDGETS)
 
     if wgts:
         # variables needed for exporting widgets
@@ -178,7 +178,7 @@ class WidgetImportStats:
         return len(self.failed_widgets)
 
 
-def importWidgetLibrary(filepath, action=""):
+def import_widget_library(filepath, action=""):
     wgts = {}
 
     from zipfile import ZipFile
@@ -196,7 +196,7 @@ def importWidgetLibrary(filepath, action=""):
                         json_data = f.decode('utf8').replace("'", '"')
                         wgts = json.loads(json_data)
 
-            current_wgts = readWidgets(JSON_USER_WIDGETS)
+            current_wgts = read_widgets(JSON_USER_WIDGETS)
 
             widgetImport = WidgetImportStats()
 
@@ -221,13 +221,13 @@ def importWidgetLibrary(filepath, action=""):
     return widgetImport
 
 
-def updateWidgetLibrary(new_widgets, new_images, zip_filepath):
+def update_Widget_library(new_widgets, new_images, zip_filepath):
     current_widget = bpy.context.window_manager.widget_list
-    wgts = readWidgets(JSON_USER_WIDGETS)
+    wgts = read_widgets(JSON_USER_WIDGETS)
 
     wgts.update(new_widgets)
     
-    writeWidgets(wgts, JSON_USER_WIDGETS)
+    write_widgets(wgts, JSON_USER_WIDGETS)
 
     # extract any images needed from zip library
     if new_images:
@@ -250,22 +250,22 @@ def updateWidgetLibrary(new_widgets, new_images, zip_filepath):
     bpy.context.window_manager.widget_list = current_widget
 
 
-def updateCustomImage(image_name):
+def update_custom_image(image_name):
     current_widget = bpy.context.window_manager.widget_list
-    current_widget_data = getWidgetData(current_widget)
+    current_widget_data = get_widget_data(current_widget)
 
     # swap out the image
     current_widget_data['image'] = image_name
 
      # update and write the new data
-    wgts = readWidgets(JSON_USER_WIDGETS)
+    wgts = read_widgets(JSON_USER_WIDGETS)
     if current_widget in wgts:
         wgts[current_widget] = current_widget_data
-        writeWidgets(wgts, JSON_USER_WIDGETS)
+        write_widgets(wgts, JSON_USER_WIDGETS)
     else:
-        wgts = readWidgets(JSON_DEFAULT_WIDGETS)
+        wgts = read_widgets(JSON_DEFAULT_WIDGETS)
         wgts[current_widget] = current_widget_data
-        writeWidgets(wgts, JSON_DEFAULT_WIDGETS)
+        write_widgets(wgts, JSON_DEFAULT_WIDGETS)
 
     # update the preview panel
     from .functions import createPreviewCollection
@@ -275,15 +275,15 @@ def updateCustomImage(image_name):
     bpy.context.window_manager.widget_list = current_widget
 
 
-def resetDefaultImages():
+def reset_default_images():
     current_widget = bpy.context.window_manager.widget_list
-    wgts = readWidgets(JSON_DEFAULT_WIDGETS)
+    wgts = read_widgets(JSON_DEFAULT_WIDGETS)
 
     for name, data in wgts.items():
         image = f"{name}.png"
         data["image"] = image
     
-    writeWidgets(wgts, JSON_DEFAULT_WIDGETS)
+    write_widgets(wgts, JSON_DEFAULT_WIDGETS)
 
     # update the preview panel
     from .functions import createPreviewCollection
@@ -297,7 +297,7 @@ def get_addon_dir():
     return os.path.dirname(__file__)
 
 
-def saveColorSets(context):
+def save_color_sets(context):
     if not bpy.context.scene.turn_off_colorset_save:
         bpy.context.scene.turn_off_colorset_save = True
         color_sets = [{
@@ -314,7 +314,7 @@ def saveColorSets(context):
 
 
 @persistent
-def loadColorPresets(_):
+def load_color_presets(_):
     filepath = os.path.join(get_addon_dir(), '..', "custom_color_sets.json")
     if os.path.exists(filepath):
         with open(filepath, 'r') as f:

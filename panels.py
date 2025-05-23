@@ -8,7 +8,7 @@ from .functions import (
     get_preview_default,
     bone_color_items_short,
     live_update_toggle,
-    loadColorPresets,
+    load_color_presets,
     getPreferences,
 )
 
@@ -224,7 +224,7 @@ def register():
     bpy.types.Scene.turn_off_colorset_save = bpy.props.BoolProperty(default=False)
     bpy.types.Scene.lock_colorset_color_changes = bpy.props.BoolProperty(default=True)
 
-    bpy.app.handlers.load_post.append(loadColorPresets)
+    bpy.app.handlers.load_post.append(load_color_presets)
     
     from bpy.utils import register_class
     for cls in classes:
