@@ -992,6 +992,42 @@ class BONEWIDGET_OT_reload_colorset_items(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_move_custom_item_up(bpy.types.Operator):
+    """Moves the selected color set up in the list"""
+    bl_idname = "bonewidget.move_custom_item_up"
+    bl_label = "Move Custom Item Up"
+
+    def execute(self, context):
+        wm = context.window_manager
+        idx = wm.colorset_list_index
+
+        if idx > 0:
+            wm.custom_color_presets.move(idx, idx - 1)
+            wm.colorset_list_index -= 1
+
+            save_color_sets(context)
+
+        return {'FINISHED'}
+
+
+class BONEWIDGET_OT_move_custom_item_down(bpy.types.Operator):
+    """Moves the selected color set down in the list"""
+    bl_idname = "bonewidget.move_custom_item_down"
+    bl_label = "Move Custom Item Down"
+
+    def execute(self, context):
+        wm = context.window_manager
+        idx = wm.colorset_list_index
+
+        if idx < len(wm.custom_color_presets) - 1:
+            wm.custom_color_presets.move(idx, idx + 1)
+            wm.colorset_list_index += 1
+
+            save_color_sets(context)
+
+        return {'FINISHED'}
+
+
 class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
     """Render a wireframe thumbnail of the active object"""
     bl_idname = "bonewidget.render_widget_thumbnail"
@@ -1137,6 +1173,8 @@ classes = (
     BONEWIDGET_OT_remove_item,
     BONEWIDGET_OT_lock_custom_colorset_changes,
     BONEWIDGET_OT_reload_colorset_items,
+    BONEWIDGET_OT_move_custom_item_up,
+    BONEWIDGET_OT_move_custom_item_down,
     BONEWIDGET_OT_render_widget_thumbnail,
 )
 
