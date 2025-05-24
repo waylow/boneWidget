@@ -542,7 +542,7 @@ def copy_edit_bone_color(context, bone):
     context.scene.live_update_on = live_update_current_state
 
 
-def uodate_bone_color(self, context):
+def update_bone_color(self, context):
     if context.scene.live_update_on:
         set_bone_color(context, "CUSTOM")
 
