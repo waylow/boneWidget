@@ -1040,12 +1040,19 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout
-        # layout.prop(self, "image_name")
-        layout.prop(self, "use_object_color")
+        row = layout.row()
+        row.prop(self, "use_object_color", text="Use Object Color")
+
         if not self.use_object_color:
-            layout.prop(self, "wire_frame_color")
-        layout.prop(self, "wire_frame_thickness")
-        # layout.prop(self, "use_blend_path")
+            row = layout.row()
+            split = row.split(factor=0.6)
+            split.label(text="Wireframe Color:")
+            split.prop(self, "wire_frame_color", text="")
+        row = layout.row()
+        split = row.split(factor=0.6)
+        split.label(text="Wireframe Thickness:")
+        split.prop(self, "wire_frame_thickness", text="")
+
 
     def execute(self, context):
         active_obj = context.view_layer.objects.active
