@@ -8,6 +8,7 @@ class BONEWIDGET_MT_bw_specials(Menu):
         layout.operator("bonewidget.add_widgets", icon="ADD", text="Add Widget to Library")
         layout.operator("bonewidget.remove_widgets", icon="REMOVE",
                         text="Remove Widget from Library")
+        layout.separator()
         layout.operator("bonewidget.add_custom_image", icon="FILE_IMAGE",
                         text="Add Custom Image to Widget")
         layout.operator("bonewidget.render_widget_thumbnail", icon="RESTRICT_RENDER_OFF",
