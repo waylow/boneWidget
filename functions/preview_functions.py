@@ -131,9 +131,9 @@ def create_wireframe_copy(obj, use_color, color, thickness):
 
     # Add Thickness input
     thickness_socket = node_group.interface.new_socket(name="Thickness", in_out="INPUT", socket_type="NodeSocketFloat")
-    thickness_socket.default_value = 0.05
+    thickness_socket.default_value = 0.5
     thickness_socket.min_value = 0.01
-    thickness_socket.max_value = 1
+    thickness_socket.max_value = 2
 
     # Create nodes
     node_input = node_group.nodes.new('NodeGroupInput')
@@ -172,7 +172,7 @@ def create_wireframe_copy(obj, use_color, color, thickness):
     node_group.links.new(node_curve_to_mesh.outputs["Mesh"], node_join_geometry.inputs["Geometry"])
     node_group.links.new(node_join_geometry.outputs["Geometry"], node_output.inputs["Geometry"])
     
-    geo_mod["Socket_2"] = thickness
+    geo_mod["Socket_2"] = (thickness / 10) # scale this so it isn't so sensitive
 
     return copy
 
