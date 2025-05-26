@@ -923,11 +923,12 @@ class BONEWIDGET_OT_add_colorset_to_bone(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        bones = context.selected_pose_bones if context.object.mode == 'POSE' else context.selected_bones
-        return (context.object and context.object.type == 'ARMATURE'
-                and context.object.mode in ['POSE', 'EDIT'] and len(bones) >= 1) \
-                and not (context.object.mode == "EDIT"
-                        and get_preferences(context).edit_bone_colors == False)
+        if context.object:
+            bones = context.selected_pose_bones if context.object.mode == 'POSE' else context.selected_bones
+            return (context.object.type == 'ARMATURE'
+                    and context.object.mode in ['POSE', 'EDIT'] and len(bones) >= 1) \
+                    and not (context.object.mode == "EDIT"
+                            and get_preferences(context).edit_bone_colors == False)
 
     def execute(self, context):
         if context.object.mode == "EDIT" and \
