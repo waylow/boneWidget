@@ -515,29 +515,12 @@ def copy_bone_color(context, bone):
         theme_id = int(theme[-2:]) - 1
         theme_color_set = bpy.context.preferences.themes[0].bone_color_sets[theme_id]
 
-        context.scene.custom_pose_color_set.normal = theme_color_set.normal
-        context.scene.custom_pose_color_set.select = theme_color_set.select
-        context.scene.custom_pose_color_set.active = theme_color_set.active
-        
-    context.scene.live_update_on = live_update_current_state
+        palette = context.scene.custom_pose_color_set if context.object.mode == 'POSE' \
+                    else context.scene.custom_edit_color_set
 
-
-def copy_edit_bone_color(context, bone):
-    live_update_current_state = context.scene.live_update_on
-    context.scene.live_update_on = False
-    
-    if bone.color.is_custom:
-        context.scene.custom_edit_color_set.normal = bone.color.custom.normal
-        context.scene.custom_edit_color_set.select = bone.color.custom.select
-        context.scene.custom_edit_color_set.active = bone.color.custom.active
-    elif bone.color.palette != "DEFAULT": # bone has a theme assigned
-        theme = bone.color.palette
-        theme_id = int(theme[-2:]) - 1
-        theme_color_set = bpy.context.preferences.themes[0].bone_color_sets[theme_id]
-
-        context.scene.custom_edit_color_set.normal = theme_color_set.normal
-        context.scene.custom_edit_color_set.select = theme_color_set.select
-        context.scene.custom_edit_color_set.active = theme_color_set.active
+        palette.normal = theme_color_set.normal
+        palette.select = theme_color_set.select
+        palette.active = theme_color_set.active
         
     context.scene.live_update_on = live_update_current_state
 

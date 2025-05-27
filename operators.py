@@ -29,7 +29,6 @@ from .functions import (
     update_widget_library,
     set_bone_color,
     copy_bone_color,
-    copy_edit_bone_color,
     bone_color_items,
     get_preferences,
     save_color_sets,
@@ -834,9 +833,9 @@ class BONEWIDGET_OT_copy_bone_color(bpy.types.Operator):
 
     def execute(self, context):
         if context.object.mode == 'POSE':
-            copy_bone_color(context, context.selected_pose_bones[0]) #changed
+            copy_bone_color(context, context.selected_pose_bones[0])
         elif context.object.mode == 'EDIT':
-            copy_edit_bone_color(context, context.selected_bones[0])
+            copy_bone_color(context, context.selected_bones[0])
         return {'FINISHED'}
 
 
