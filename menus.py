@@ -18,8 +18,17 @@ class BONEWIDGET_MT_bw_specials(Menu):
         layout.operator("bonewidget.export_library", icon="EXPORT", text="Export Widget Library")
 
 
+class BONEWIDGET_MT_bw_color_presets_specials(Menu):
+    bl_label = "Color Presets Specials"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator("bonewidget.add_preset_from_bone", icon="ADD", text="Add Preset from Bone")        
+
+
 classes = (
     BONEWIDGET_MT_bw_specials,
+    BONEWIDGET_MT_bw_color_presets_specials,
 )
 
 

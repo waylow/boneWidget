@@ -158,6 +158,8 @@ class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Pa
         col.operator("bonewidget.add_default_custom_colorset", icon='ADD', text="")
         col.operator("bonewidget.remove_custom_item", icon='REMOVE', text="")
         col.separator()
+        col.menu("BONEWIDGET_MT_bw_color_presets_specials", icon="DOWNARROW_HLT", text="")
+        col.separator()
         col.operator("bonewidget.move_custom_item_up", icon="TRIA_UP", text="")
         col.operator("bonewidget.move_custom_item_down", icon="TRIA_DOWN", text="")
         col.separator()
