@@ -867,7 +867,7 @@ class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
                 new_item.active = context.scene.custom_pose_color_set.active
                 
             elif context.object.mode == "EDIT" and \
-                 get_preferences(context).edit_bone_colors == True: # edit mode colors if turned on in preferences
+                 get_preferences(context).edit_bone_colors != 'DEFAULT': # edit mode colors if turned on in preferences
                 
                 new_item.normal = context.scene.custom_edit_color_set.normal
                 new_item.select = context.scene.custom_edit_color_set.select
@@ -927,11 +927,11 @@ class BONEWIDGET_OT_add_colorset_to_bone(bpy.types.Operator):
             return (context.object.type == 'ARMATURE'
                     and context.object.mode in ['POSE', 'EDIT'] and len(bones) >= 1) \
                     and not (context.object.mode == "EDIT"
-                            and get_preferences(context).edit_bone_colors == False)
+                            and get_preferences(context).edit_bone_colors == 'DEFAULT')
 
     def execute(self, context):
         if context.object.mode == "EDIT" and \
-                 get_preferences(context).edit_bone_colors == True: 
+                 get_preferences(context).edit_bone_colors != 'DEFAULT': 
             selected_bones = context.selected_bones
         elif context.object.mode == "POSE":
             selected_bones = context.selected_pose_bones

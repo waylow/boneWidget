@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import AddonPreferences
-from bpy.props import StringProperty, BoolProperty, FloatProperty
+from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 
 from .bl_class_registry import BlClassRegistry
 from .panels import BONEWIDGET_PT_bw_panel_main
@@ -80,11 +80,17 @@ class BoneWidget_preferences(AddonPreferences):
         default=True,
     )
 
-    edit_bone_colors: BoolProperty(
-        name="Edit Mode Bone Colors",
-        description="Enable Edit Mode Bone Colors",
-        default=False,
+    edit_bone_colors: EnumProperty(
+        name="Edit Bone Colors",
+        description="Behavior of Edit Bone colors",
+        items=[
+            ('DEFAULT', "Default", "Set the Edit Bone color to the default colors"),
+            ('LINKED', "Linked", "Use the same colors for both the Edit bones and Pose bones"),
+            ('SEPARATE', "Separate", "Edit bones and Pose bones will have their own colors"),
+        ],
+        default='DEFAULT'
     )
+    
 
     def draw(self, context):
         layout = self.layout
@@ -112,7 +118,7 @@ class BoneWidget_preferences(AddonPreferences):
         # edit bone colors
         row = layout.row()
         box = layout.box()
-        box.label(text="Bone Colors:")
+        box.label(text="Edit Bone Color Behavior:")
         row = box.row()
         row.prop(self, "edit_bone_colors")
 
