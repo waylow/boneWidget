@@ -29,7 +29,6 @@ from .functions import (
     update_widget_library,
     set_bone_color,
     copy_bone_color,
-    copy_edit_bone_color,
     bone_color_items,
     get_preferences,
     save_color_sets,
@@ -834,9 +833,9 @@ class BONEWIDGET_OT_copy_bone_color(bpy.types.Operator):
 
     def execute(self, context):
         if context.object.mode == 'POSE':
-            copy_bone_color(context, context.selected_pose_bones[0]) #changed
+            copy_bone_color(context, context.selected_pose_bones[0])
         elif context.object.mode == 'EDIT':
-            copy_edit_bone_color(context, context.selected_bones[0])
+            copy_bone_color(context, context.selected_bones[0])
         return {'FINISHED'}
 
 
@@ -923,11 +922,12 @@ class BONEWIDGET_OT_add_colorset_to_bone(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        bones = context.selected_pose_bones if context.object.mode == 'POSE' else context.selected_bones
-        return (context.object and context.object.type == 'ARMATURE'
-                and context.object.mode in ['POSE', 'EDIT'] and len(bones) >= 1) \
-                and not (context.object.mode == "EDIT"
-                        and get_preferences(context).edit_bone_colors == False)
+        if context.object:
+            bones = context.selected_pose_bones if context.object.mode == 'POSE' else context.selected_bones
+            return (context.object.type == 'ARMATURE'
+                    and context.object.mode in ['POSE', 'EDIT'] and len(bones) >= 1) \
+                    and not (context.object.mode == "EDIT"
+                            and get_preferences(context).edit_bone_colors == False)
 
     def execute(self, context):
         if context.object.mode == "EDIT" and \
@@ -989,6 +989,95 @@ class BONEWIDGET_OT_reload_colorset_items(bpy.types.Operator):
     def execute(self, context):
         context.window_manager.custom_color_presets.clear()
         load_color_presets(context)
+        return {'FINISHED'}
+
+
+class BONEWIDGET_OT_move_custom_item_up(bpy.types.Operator):
+    """Moves the selected color set up in the list"""
+    bl_idname = "bonewidget.move_custom_item_up"
+    bl_label = "Move Custom Item Up"
+
+    def execute(self, context):
+        wm = context.window_manager
+        idx = wm.colorset_list_index
+
+        if idx > 0:
+            wm.custom_color_presets.move(idx, idx - 1)
+            wm.colorset_list_index -= 1
+
+            save_color_sets(context)
+
+        return {'FINISHED'}
+
+
+class BONEWIDGET_OT_move_custom_item_down(bpy.types.Operator):
+    """Moves the selected color set down in the list"""
+    bl_idname = "bonewidget.move_custom_item_down"
+    bl_label = "Move Custom Item Down"
+
+    def execute(self, context):
+        wm = context.window_manager
+        idx = wm.colorset_list_index
+
+        if idx < len(wm.custom_color_presets) - 1:
+            wm.custom_color_presets.move(idx, idx + 1)
+            wm.colorset_list_index += 1
+
+            save_color_sets(context)
+
+        return {'FINISHED'}
+
+
+class BONEWIDGET_OT_add_preset_from_bone(bpy.types.Operator):
+    """Adds new preset from the active bone's color palette"""
+    bl_idname = "bonewidget.add_preset_from_bone"
+    bl_label = "Add Preset from active Bone"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.object and 
+            context.object.type == 'ARMATURE' and 
+            (
+                (context.object.mode == 'POSE' and context.selected_pose_bones) or 
+                (context.object.mode == 'EDIT' and context.selected_editable_bones)
+            )
+        )
+    
+    def execute(self, context):
+        base_name = "Color Set"
+        new_name = base_name
+        count = 1
+
+        bone = context.active_pose_bone if context.object.mode == 'POSE' else context.active_bone
+
+        existing_names = {item.name for item in context.window_manager.custom_color_presets}
+        while new_name in existing_names:
+            new_name = f"{base_name}.{count:03d}"
+            count += 1
+
+        new_item = context.window_manager.custom_color_presets.add()
+
+        if bone.color.is_custom:
+            # add item from custom color palette of active bone
+            new_item.name = new_name
+            new_item.normal = bone.color.custom.normal
+            new_item.select = bone.color.custom.select
+            new_item.active = bone.color.custom.active
+        
+        elif "THEME" in bone.color.palette:
+            # add item from selected theme of active bone
+            theme = bone.color.palette
+            theme_id = int(theme[-2:]) - 1
+            theme_color_set = bpy.context.preferences.themes[0].bone_color_sets[theme_id]
+
+            new_item.name = theme
+            new_item.normal = theme_color_set.normal
+            new_item.select = theme_color_set.select
+            new_item.active = theme_color_set.active
+
+        save_color_sets(context)
         return {'FINISHED'}
 
 
@@ -1137,6 +1226,9 @@ classes = (
     BONEWIDGET_OT_remove_item,
     BONEWIDGET_OT_lock_custom_colorset_changes,
     BONEWIDGET_OT_reload_colorset_items,
+    BONEWIDGET_OT_move_custom_item_up,
+    BONEWIDGET_OT_move_custom_item_down,
+    BONEWIDGET_OT_add_preset_from_bone,
     BONEWIDGET_OT_render_widget_thumbnail,
 )
 
