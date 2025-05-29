@@ -128,9 +128,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                     row.separator(factor=0.5)
                     row.prop(context.scene, "live_update_toggle", text="", icon="UV_SYNC_SELECT")
 
-                row = layout.row(align=True)
+                row = layout.row()
                 row.operator("bonewidget.copy_bone_color", text="Copy Bone Color", icon="COPYDOWN")
-                row = layout.row(align=True)
             row = layout.row()
             row.operator("bonewidget.clear_bone_color", text="Clear Bone Color", icon="PANEL_CLOSE")
 
