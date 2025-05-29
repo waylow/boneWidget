@@ -979,17 +979,6 @@ class BONEWIDGET_OT_lock_custom_colorset_changes(bpy.types.Operator):
     def execute(self, context):
         context.scene.lock_colorset_color_changes = not context.scene.lock_colorset_color_changes
         return {'FINISHED'}
-    
-
-class BONEWIDGET_OT_reload_colorset_items(bpy.types.Operator):
-    """Refreshes the custom colorset list from disk"""
-    bl_idname = "bonewidget.reload_colorset_items"
-    bl_label = "Refresh the bone color set presets"
-
-    def execute(self, context):
-        context.window_manager.custom_color_presets.clear()
-        load_color_presets(context)
-        return {'FINISHED'}
 
 
 class BONEWIDGET_OT_move_custom_item_up(bpy.types.Operator):
@@ -1225,7 +1214,6 @@ classes = (
     BONEWIDGET_OT_add_colorset_to_bone,
     BONEWIDGET_OT_remove_item,
     BONEWIDGET_OT_lock_custom_colorset_changes,
-    BONEWIDGET_OT_reload_colorset_items,
     BONEWIDGET_OT_move_custom_item_up,
     BONEWIDGET_OT_move_custom_item_down,
     BONEWIDGET_OT_add_preset_from_bone,

@@ -23,6 +23,8 @@ class BONEWIDGET_MT_bw_color_presets_specials(Menu):
 
     def draw(self, context):
         layout = self.layout
+        btn_text = "Add Preset from Theme" if "THEME" in context.scene.bone_widget_colors else "Add Preset from Palette"
+        layout.operator("bonewidget.add_color_set_from", text=btn_text, icon="ADD")
         layout.operator("bonewidget.add_preset_from_bone", icon="ADD", text="Add Preset from Bone")        
 
 

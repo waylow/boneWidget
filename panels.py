@@ -149,10 +149,6 @@ class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Pa
         layout = self.layout
 
         row = layout.row()
-        btn_text = "Add From Theme" if "THEME" in context.scene.bone_widget_colors else "Add From Palette"
-        row.operator("bonewidget.add_color_set_from", text=btn_text, icon="ADD")
-
-        row = layout.row()
         row.template_list("BONEWIDGET_UL_colorset_items", "", context.window_manager, "custom_color_presets",
                           context.window_manager, "colorset_list_index")
         
@@ -164,15 +160,6 @@ class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Pa
         col.separator()
         col.operator("bonewidget.move_custom_item_up", icon="TRIA_UP", text="")
         col.operator("bonewidget.move_custom_item_down", icon="TRIA_DOWN", text="")
-        col.separator()
-        col.separator()
-        colorset_locked = context.scene.lock_colorset_color_changes
-        col.operator("bonewidget.lock_custom_colorset_changes", icon="LOCKED" if colorset_locked else "UNLOCKED", text="")
-
-        if colorset_locked: # only allow refresh if list is locked
-            col.separator()
-            col.operator("bonewidget.reload_colorset_items", icon="FILE_REFRESH", text="")
-
         row = layout.row()
         row.operator("bonewidget.add_colorset_to_bone", text="Apply To Selected Bones")
 
@@ -229,7 +216,7 @@ def register():
     bpy.types.Scene.custom_edit_color_set = bpy.props.PointerProperty(type=CustomColorSet)
     bpy.types.WindowManager.colorset_list_index = bpy.props.IntProperty(name="Index", default=0)
     bpy.types.Scene.turn_off_colorset_save = bpy.props.BoolProperty(default=False)
-    bpy.types.Scene.lock_colorset_color_changes = bpy.props.BoolProperty(default=True)
+    bpy.types.Scene.lock_colorset_color_changes = bpy.props.BoolProperty(default=False)
 
     bpy.app.handlers.load_post.append(load_color_presets)
     
