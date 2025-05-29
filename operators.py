@@ -844,6 +844,17 @@ class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
     bl_idname = "bonewidget.add_color_set_from"
     bl_label = "Add color set to presets"
 
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.object and 
+            context.object.type == 'ARMATURE' and 
+            (
+                (context.object.mode == 'POSE' and context.selected_pose_bones) or 
+                (context.object.mode == 'EDIT' and context.selected_editable_bones and get_preferences(context).edit_bone_colors != 'DEFAULT')
+            )
+        )
+
 
     def execute(self, context):
 
@@ -1030,7 +1041,7 @@ class BONEWIDGET_OT_add_preset_from_bone(bpy.types.Operator):
             context.object.type == 'ARMATURE' and 
             (
                 (context.object.mode == 'POSE' and context.selected_pose_bones) or 
-                (context.object.mode == 'EDIT' and context.selected_editable_bones)
+                (context.object.mode == 'EDIT' and context.selected_editable_bones and get_preferences(context).edit_bone_colors != 'DEFAULT')
             )
         )
     
