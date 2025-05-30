@@ -220,9 +220,9 @@ class BONEWIDGET_OT_match_bone_transforms(bpy.types.Operator):
         else:
             for ob in bpy.context.selected_objects:
                 if ob.type == 'MESH':
-                    matchBone = from_widget_find_bone(ob)
-                    if matchBone:
-                        match_bone_matrix(ob, matchBone)
+                    match_bone = from_widget_find_bone(ob)
+                    if match_bone:
+                        match_bone_matrix(ob, match_bone)
         return {'FINISHED'}
 
 
@@ -244,16 +244,16 @@ class BONEWIDGET_OT_match_symmetrize_shape(bpy.types.Operator):
             self.report({"INFO"}, "There is no widget on this bone.")
             return {'FINISHED'}
         collection = get_view_layer_collection(context, widget)
-        widgetsAndBones = find_match_bones()[0]
-        activeObject = find_match_bones()[1]
-        widgetsAndBones = find_match_bones()[0]
+        widgets_and_bones = find_match_bones()[0]
+        active_object = find_match_bones()[1]
+        widgets_and_bones = find_match_bones()[0]
 
-        if not activeObject:
+        if not active_object:
             self.report({"INFO"}, "No active bone or object")
             return {'FINISHED'}
 
-        for bone in widgetsAndBones:
-            symmetrize_widget_helper(bone, collection, activeObject, widgetsAndBones)
+        for bone in widgets_and_bones:
+            symmetrize_widget_helper(bone, collection, active_object, widgets_and_bones)
 
         return {'FINISHED'}
 
@@ -508,7 +508,7 @@ class BONEWIDGET_OT_import_widgets_ask_popup(bpy.types.Operator):
     bl_idname = "bonewidget.widget_ask_popup"
     bl_label = "Imported Widget Choice Popup"
 
-    widgetImportData = None
+    widget_import_data = None
 
     import_options = [
         ("OVERWRITE", "Overwrite", "Overwrite existing widget"),
@@ -525,7 +525,7 @@ class BONEWIDGET_OT_import_widgets_ask_popup(bpy.types.Operator):
         row.label(text="Choose an action:")
 
         row = layout.row()
-        for i, _ in enumerate(self.widgetImportData.skipped_widgets):
+        for i, _ in enumerate(self.widget_import_data.skipped_widgets):
             if getattr(context.window_manager.prop_grp, f"ImportOptions{i}") == self.import_options[2][0]: # Rename
                 row.prop(context.window_manager.prop_grp, f"EditName{i}", text="")
             else:
@@ -534,10 +534,10 @@ class BONEWIDGET_OT_import_widgets_ask_popup(bpy.types.Operator):
             row = layout.row()
 
     def invoke(self, context, event):
-        self.widgetImportData = bpy.context.window_manager.custom_data
+        self.widget_import_data = bpy.context.window_manager.custom_data
         
         # generate the x number of drop down lists and widget names needed
-        for n, widget in enumerate(self.widgetImportData.skipped_widgets):
+        for n, widget in enumerate(self.widget_import_data.skipped_widgets):
             widget_name = next(iter(widget.keys()))
             setattr(BONEWIDGET_OT_shared_property_group, f"ImportOptions{n}", EnumProperty(
                     name=f"ImportOptions{n}",
@@ -560,7 +560,7 @@ class BONEWIDGET_OT_import_widgets_ask_popup(bpy.types.Operator):
         widget_results = {}
         widget_images = set()
 
-        for i, widget in enumerate(self.widgetImportData.skipped_widgets):
+        for i, widget in enumerate(self.widget_import_data.skipped_widgets):
             widget_name, widget_data = next(iter(widget.items()))
             widget_image = widget_data.get('image')
             widget_image = widget_image if widget_image != "user_defined.png" else ""  # only append custom images
@@ -569,29 +569,29 @@ class BONEWIDGET_OT_import_widgets_ask_popup(bpy.types.Operator):
 
             # error check before proceeding - widget renamed to empty string
             if widget_name != new_widget_name and new_widget_name.strip() == "":
-                self.widgetImportData.failed_widgets.update(widget)
+                self.widget_import_data.failed_widgets.update(widget)
                 continue
 
             if action == self.import_options[0][0]: # overwrite
                 widget_results.update(widget)
                 if widget_image: widget_images.add(widget_image)
-                self.widgetImportData.new_widgets += 1
-                self.widgetImportData.skipped_widgets.remove(widget)
+                self.widget_import_data.new_widgets += 1
+                self.widget_import_data.skipped_widgets.remove(widget)
             elif action == self.import_options[2][0]: # Rename
                 widget_results.update({new_widget_name: widget_data})
                 if widget_image: widget_images.add(widget_image)
-                self.widgetImportData.new_widgets += 1
-                self.widgetImportData.skipped_widgets.remove(widget)
+                self.widget_import_data.new_widgets += 1
+                self.widget_import_data.skipped_widgets.remove(widget)
                 
         update_widget_library(widget_results, widget_images, bpy.context.window_manager.prop_grp.import_library_filepath)
 
         # clean up the data from the property group
-        for i in range(self.widgetImportData.skipped()):
+        for i in range(self.widget_import_data.skipped()):
             delattr(BONEWIDGET_OT_shared_property_group, f"ImportOptions{i}")
             delattr(BONEWIDGET_OT_shared_property_group, f"EditName{i}")
 
         #del bpy.types.WindowManager.custom_data
-        self.widgetImportData = None
+        self.widget_import_data = None
 
         # display summary of imported widgets
         bpy.ops.bonewidget.widget_summary_popup('INVOKE_DEFAULT')
