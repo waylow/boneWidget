@@ -54,7 +54,7 @@ class BONEWIDGET_OT_shared_property_group(bpy.types.PropertyGroup):
 class BONEWIDGET_OT_create_widget(bpy.types.Operator):
     """Creates a widget for selected bone"""
     bl_idname = "bonewidget.create_widget"
-    bl_label = "Create"
+    bl_label = "Create Widget"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
