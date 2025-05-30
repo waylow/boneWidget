@@ -335,7 +335,7 @@ class BONEWIDGET_OT_add_widgets(bpy.types.Operator):
     """Add selected mesh object to Bone Widget Library and optionally Render Thumbnail"""
     bl_idname = "bonewidget.add_widgets"
     bl_label = "Add New Widget to Library"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'UNDO'}
 
 
     widget_name: StringProperty(
