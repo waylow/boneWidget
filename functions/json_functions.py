@@ -8,6 +8,7 @@ from .. import __package__
 
 JSON_DEFAULT_WIDGETS = "widgets.json"
 JSON_USER_WIDGETS = "user_widgets.json"
+JSON_COLOR_PRESETS = "custom_color_sets.json"
 
 widget_data = {}
 
@@ -162,6 +163,35 @@ def export_widget_library(filepath):
                     zip.write(filepath, arcname=arcname)
 
     return len(wgts)
+
+
+def export_color_presets(filepath, context):
+    color_presets = len(context.window_manager.custom_color_presets)
+
+    if color_presets:
+        # variables needed for exporting widgets
+        dest_dir = os.path.dirname(filepath)
+        json_dir = os.path.dirname(get_addon_dir())
+        #image_folder = 'preset_thumbnails'
+        #custom_image_dir = os.path.abspath(os.path.join(get_addon_dir(), '..', image_folder))
+        
+        filename = os.path.basename(filepath)
+        if not filename: filename = "color_presets.zip"
+        elif not filename.endswith('.zip'): filename += ".zip"
+
+        # start the zipping process
+        try:
+            from zipfile import ZipFile
+            with ZipFile(os.path.join(dest_dir, filename), "w") as zip:
+                # write the json file
+                file = os.path.join(json_dir, JSON_COLOR_PRESETS)
+                arcname = os.path.basename(file)
+                zip.write(file, arcname=arcname)
+        except Exception as e:
+            print("Error exporting color presets: ", e)
+            return 0
+
+    return color_presets
 
 
 class WidgetImportStats:

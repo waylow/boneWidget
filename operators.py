@@ -33,6 +33,7 @@ from .functions import (
     get_preferences,
     save_color_sets,
     load_color_presets,
+    export_color_presets,
     create_wireframe_copy,
     setup_viewport,
     restore_viewport_position,
@@ -1087,6 +1088,41 @@ class BONEWIDGET_OT_add_preset_from_bone(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_export_color_presets(bpy.types.Operator):
+    """Export User Defined Color Presets"""
+    bl_idname = "bonewidget.export_color_presets"
+    bl_label = "Export Color Presets"
+
+
+    filter_glob: StringProperty(
+        default='*.zip',
+        options={'HIDDEN'}
+    )
+    
+    filename: StringProperty(
+        name='Filename',
+        description='Name of file to be exported',
+    )
+
+    filepath: StringProperty(
+        subtype="FILE_PATH"
+    )
+
+    def execute(self, context):
+        if self.filepath and self.filename:
+            num_presets = export_color_presets(self.filepath, context)
+            if num_presets:
+                self.report({'INFO'}, f"{num_presets} color presets exported successfully!")
+            else:
+                self.report({'WARNING'}, "Warning: Color Presets failed to export!")
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        self.filename = "color_presets.zip"
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+
 class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
     """Render a wireframe thumbnail of the active object"""
     bl_idname = "bonewidget.render_widget_thumbnail"
@@ -1234,6 +1270,7 @@ classes = (
     BONEWIDGET_OT_move_custom_item_up,
     BONEWIDGET_OT_move_custom_item_down,
     BONEWIDGET_OT_add_preset_from_bone,
+    BONEWIDGET_OT_export_color_presets,
     BONEWIDGET_OT_render_widget_thumbnail,
 )
 
