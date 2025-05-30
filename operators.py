@@ -262,6 +262,7 @@ class BONEWIDGET_OT_image_select(bpy.types.Operator):
     """Open a Fileselect browser and get the image location"""
     bl_idname = "bonewidget.image_select"
     bl_label = "Select Image"
+    bl_options = {'INTERNAL'}
 
 
     filter_glob: StringProperty(
@@ -479,6 +480,7 @@ class BONEWIDGET_OT_import_widgets_summary_popup(bpy.types.Operator):
     """Display summary of imported Widget Library"""
     bl_idname = "bonewidget.widget_summary_popup"
     bl_label = "Imported Widget Summary"
+    bl_options = {'INTERNAL'}
 
  
     def draw(self, context):
@@ -507,6 +509,7 @@ class BONEWIDGET_OT_import_widgets_ask_popup(bpy.types.Operator):
     """Ask user how to handle name collisions from the imported Widget Library"""
     bl_idname = "bonewidget.widget_ask_popup"
     bl_label = "Imported Widget Choice Popup"
+    bl_options = {'INTERNAL'}
 
     widget_import_data = None
 
@@ -986,6 +989,7 @@ class BONEWIDGET_OT_lock_custom_colorset_changes(bpy.types.Operator):
     """Locks/Unlocks the ability to save changes to color set items"""
     bl_idname = "bonewidget.lock_custom_colorset_changes"
     bl_label = "Lock/Unlock changes to color set presets"
+    bl_options = {'INTERNAL'}
 
     def execute(self, context):
         context.scene.lock_colorset_color_changes = not context.scene.lock_colorset_color_changes
@@ -996,6 +1000,7 @@ class BONEWIDGET_OT_move_custom_item_up(bpy.types.Operator):
     """Moves the selected color set up in the list"""
     bl_idname = "bonewidget.move_custom_item_up"
     bl_label = "Move Custom Item Up"
+    bl_options = {'INTERNAL'}
 
     def execute(self, context):
         wm = context.window_manager
@@ -1014,6 +1019,7 @@ class BONEWIDGET_OT_move_custom_item_down(bpy.types.Operator):
     """Moves the selected color set down in the list"""
     bl_idname = "bonewidget.move_custom_item_down"
     bl_label = "Move Custom Item Down"
+    bl_options = {'INTERNAL'}
 
     def execute(self, context):
         wm = context.window_manager
