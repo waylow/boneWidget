@@ -148,19 +148,23 @@ def export_widget_library(filepath):
         elif not filename.endswith('.zip'): filename += ".zip"
 
         # start the zipping process
-        from zipfile import ZipFile
-        with ZipFile(os.path.join(dest_dir, filename), "w") as zip:
-            # write the json file
-            file = os.path.join(json_dir, JSON_USER_WIDGETS)
-            arcname = os.path.basename(file)
-            zip.write(file, arcname=arcname)
+        try:
+            from zipfile import ZipFile
+            with ZipFile(os.path.join(dest_dir, filename), "w") as zip:
+                # write the json file
+                file = os.path.join(json_dir, JSON_USER_WIDGETS)
+                arcname = os.path.basename(file)
+                zip.write(file, arcname=arcname)
 
-            # write the custom images if present
-            if os.path.exists(custom_image_dir):
-                from pathlib import Path
-                for filepath in Path(custom_image_dir).iterdir():
-                    arcname = os.path.join(image_folder, os.path.basename(filepath))
-                    zip.write(filepath, arcname=arcname)
+                # write the custom images if present
+                if os.path.exists(custom_image_dir):
+                    from pathlib import Path
+                    for filepath in Path(custom_image_dir).iterdir():
+                        arcname = os.path.join(image_folder, os.path.basename(filepath))
+                        zip.write(filepath, arcname=arcname)
+        except Exception as e:
+            print("Error exporting widget library: ", e)
+            return 0
 
     return len(wgts)
 
