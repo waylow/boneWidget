@@ -143,7 +143,7 @@ def export_widget_library(filepath):
         custom_image_dir = os.path.abspath(os.path.join(get_addon_dir(), '..', image_folder))
         
         filename = os.path.basename(filepath)
-        if not filename: filename = "widgetLibrary.zip"
+        if not filename: filename = "widget_library.zip"
         elif not filename.endswith('.zip'): filename += ".zip"
 
         # start the zipping process
@@ -184,6 +184,8 @@ def import_widget_library(filepath, action=""):
     from zipfile import ZipFile
     dest_dir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
 
+    widget_import = WidgetImportStats()
+
     if os.path.exists(filepath) and action:
         try:
             with ZipFile(filepath, 'r') as zip_file:
@@ -198,27 +200,25 @@ def import_widget_library(filepath, action=""):
 
             current_wgts = read_widgets(JSON_USER_WIDGETS)
 
-            widgetImport = WidgetImportStats()
-
             # check for duplicate names
             for name, data in sorted(wgts.items()): # sorting by keys
                 if action == "ASK":
-                    widgetImport.skipped_widgets.append({name : data})
+                    widget_import.skipped_widgets.append({name : data})
                 elif action == "OVERWRITE":
-                    widgetImport.widgets.update({name : data})
-                    widgetImport.new_widgets += 1
+                    widget_import.widgets.update({name : data})
+                    widget_import.new_widgets += 1
                 elif action == "SKIP":
                     if not name in current_wgts:
-                        widgetImport.widgets.update({name : data})
-                        widgetImport.new_widgets += 1
+                        widget_import.widgets.update({name : data})
+                        widget_import.new_widgets += 1
                     else:
-                        widgetImport.skipped_widgets.append({name : data})
+                        widget_import.skipped_widgets.append({name : data})
                 else:
-                    widgetImport.failed_widgets.update({name : data})
+                    widget_import.failed_widgets.update({name : data})
 
-        except:
-            pass
-    return widgetImport
+        except Exception as e:
+            print(f"Error while importing widget library: {e}")
+    return widget_import
 
 
 def update_widget_library(new_widgets, new_images, zip_filepath):

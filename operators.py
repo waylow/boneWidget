@@ -697,7 +697,7 @@ class BONEWIDGET_OT_export_library(bpy.types.Operator):
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        self.filename = "widgetLibrary.zip"
+        self.filename = "widget_library.zip"
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
