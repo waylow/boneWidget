@@ -1117,7 +1117,7 @@ class BONEWIDGET_OT_export_color_presets(bpy.types.Operator):
             if num_presets:
                 self.report({'INFO'}, f"{num_presets} color presets exported successfully!")
             else:
-                self.report({'WARNING'}, "Warning: Color Presets failed to export!")
+                self.report({'INFO'}, "0 color presets exported!")
         return {'FINISHED'}
 
     def invoke(self, context, event):
