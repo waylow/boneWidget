@@ -99,13 +99,10 @@ def from_widget_find_bone(widget):
 
 
 def create_widget(bone, widget, relative, size, slide, rotation, collection, use_face_data, wireframe_width, bone_color):
-    C = bpy.context
-    D = bpy.data
-
-    if not get_preferences(C).use_rigify_defaults:
-        bw_widget_prefix = get_preferences(C).widget_prefix
+    if not get_preferences(bpy.context).use_rigify_defaults:
+        bw_widget_prefix = get_preferences(bpy.context).widget_prefix
     else:
-        bw_widget_prefix = "WGT-" + C.active_object.name + "_"
+        bw_widget_prefix = "WGT-" + bpy.context.active_object.name + "_"
 
     matrix_bone = bone
 
@@ -114,7 +111,7 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
         bpy.data.objects.remove(bpy.data.objects[bone.custom_shape.name], do_unlink=True)
 
     # make the data name include the prefix
-    new_data = D.meshes.new(bw_widget_prefix + bone.name)
+    new_data = bpy.data.meshes.new(bw_widget_prefix + bone.name)
 
     bone.use_custom_shape_bone_size = relative
 
@@ -138,7 +135,7 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
 
     new_data.update(calc_edges=True)
 
-    new_object = D.objects.new(bw_widget_prefix + bone.name, new_data)
+    new_object = bpy.data.objects.new(bw_widget_prefix + bone.name, new_data)
 
     new_object.data = new_data
     new_object.name = bw_widget_prefix + bone.name
@@ -161,15 +158,12 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
 
 
 def symmetrize_widget(bone, collection):
-    C = bpy.context
-    D = bpy.data
-
-    if not get_preferences(C).use_rigify_defaults:
-        bw_widget_prefix = get_preferences(C).widget_prefix
+    if not get_preferences(bpy.context).use_rigify_defaults:
+        bw_widget_prefix = get_preferences(bpy.context).widget_prefix
         rigify_object_name = ''
     else:
         bw_widget_prefix = "WGT-"
-        rigify_object_name = C.active_object.name + "_"
+        rigify_object_name = bpy.context.active_object.name + "_"
 
     widget = bone.custom_shape
 
@@ -180,8 +174,8 @@ def symmetrize_widget(bone, collection):
 
         if mirror_widget is not None:
             if mirror_widget != widget:
-                if C.scene.objects.get(mirror_widget.name):
-                    D.objects.remove(mirror_widget)
+                if bpy.context.scene.objects.get(mirror_widget.name):
+                    bpy.data.objects.remove(mirror_widget)
 
         new_data = widget.data.copy()
         for vert in new_data.vertices:
@@ -191,7 +185,7 @@ def symmetrize_widget(bone, collection):
         new_object.data = new_data
         new_data.update()
         new_object.name = bw_widget_prefix + rigify_object_name + find_mirror_object(bone).name
-        D.collections[collection.name].objects.link(new_object)
+        bpy.data.collections[collection.name].objects.link(new_object)
 
         #if there is a override transform, use that bone matrix in the next step
         if find_mirror_object(bone).custom_shape_transform:
@@ -219,9 +213,7 @@ def symmetrize_widget(bone, collection):
 
 
 def symmetrize_widget_helper(bone, collection, active_object, widgets_and_bones):
-    C = bpy.context
-
-    bw_symmetry_suffix = get_preferences(C).symmetry_suffix
+    bw_symmetry_suffix = get_preferences(bpy.context).symmetry_suffix
     bw_symmetry_suffix = bw_symmetry_suffix.split(";")
 
     suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
@@ -236,31 +228,28 @@ def symmetrize_widget_helper(bone, collection, active_object, widgets_and_bones)
 
 
 def delete_unused_widgets():
-    C = bpy.context
-    D = bpy.data
-
-    if not get_preferences(C).use_rigify_defaults:
-        bw_collection_name = get_preferences(C).bonewidget_collection_name
+    if not get_preferences(bpy.context).use_rigify_defaults:
+        bw_collection_name = get_preferences(bpy.context).bonewidget_collection_name
     else:
-        bw_collection_name = 'WGTS_' + C.active_object.name
+        bw_collection_name = 'WGTS_' + bpy.context.active_object.name
 
-    collection = recursive_layer_collection(C.scene.collection, bw_collection_name)
-    widgetList = []
+    collection = recursive_layer_collection(bpy.context.scene.collection, bw_collection_name)
+    widget_list = []
 
-    for ob in D.objects:
+    for ob in bpy.data.objects:
         if ob.type == 'ARMATURE':
             for bone in ob.pose.bones:
                 if bone.custom_shape:
-                    widgetList.append(bone.custom_shape)
+                    widget_list.append(bone.custom_shape)
 
-    unwantedList = [
-        ob for ob in collection.all_objects if ob not in widgetList]
+    unwanted_list = [
+        ob for ob in collection.all_objects if ob not in widget_list]
     # save the current context mode
-    mode = C.mode
+    mode = bpy.context.mode
     # jump into object mode
     bpy.ops.object.mode_set(mode='OBJECT')
     # delete unwanted widgets
-    for ob in unwantedList:
+    for ob in unwanted_list:
         bpy.data.objects.remove(bpy.data.objects[ob.name], do_unlink=True)
     # jump back to current mode
     bpy.ops.object.mode_set(mode=mode)
@@ -268,11 +257,9 @@ def delete_unused_widgets():
 
 
 def edit_widget(active_bone):
-    C = bpy.context
-    D = bpy.data
     widget = active_bone.custom_shape
 
-    collection = get_view_layer_collection(C, widget)
+    collection = get_view_layer_collection(bpy.context, widget)
     collection.hide_viewport = False
 
     # hide all other objects in collection
@@ -284,9 +271,9 @@ def edit_widget(active_bone):
 
     armature = active_bone.id_data
     bpy.ops.object.mode_set(mode='OBJECT')
-    C.active_object.select_set(False)
+    bpy.context.active_object.select_set(False)
 
-    if C.space_data.local_view:
+    if bpy.context.space_data.local_view:
         bpy.ops.view3d.localview()
 
     # select object and make it active
@@ -297,25 +284,22 @@ def edit_widget(active_bone):
 
 
 def return_to_armature(widget):
-    C = bpy.context
-    D = bpy.data
-
     bone = from_widget_find_bone(widget)
     armature = bone.id_data
 
-    if C.active_object.mode == 'EDIT':
+    if bpy.context.active_object.mode == 'EDIT':
         bpy.ops.object.mode_set(mode='OBJECT')
 
     bpy.ops.object.select_all(action='DESELECT')
 
-    collection = get_view_layer_collection(C, widget)
+    collection = get_view_layer_collection(bpy.context, widget)
     collection.hide_viewport = True
 
     # unhide all objects in the collection
     for obj in collection.collection.all_objects:
         obj.hide_set(False)
     
-    if C.space_data.local_view:
+    if bpy.context.space_data.local_view:
         bpy.ops.view3d.localview()
     
     bpy.context.view_layer.objects.active = armature
@@ -326,10 +310,7 @@ def return_to_armature(widget):
 
 
 def find_mirror_object(object):
-    C = bpy.context
-    D = bpy.data
-
-    bw_symmetry_suffix = get_preferences(C).symmetry_suffix
+    bw_symmetry_suffix = get_preferences(bpy.context).symmetry_suffix
     bw_symmetry_suffix = bw_symmetry_suffix.split(";")
 
     suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
@@ -364,10 +345,7 @@ def find_mirror_object(object):
 
 
 def find_match_bones():
-    C = bpy.context
-    D = bpy.data
-
-    bw_symmetry_suffix = get_preferences(C).symmetry_suffix
+    bw_symmetry_suffix = get_preferences(bpy.context).symmetry_suffix
     bw_symmetry_suffix = bw_symmetry_suffix.split(";")
 
     suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
@@ -376,7 +354,7 @@ def find_match_bones():
     widgets_and_bones = {}
 
     if bpy.context.object.type == 'ARMATURE':
-        for bone in C.selected_pose_bones:
+        for bone in bpy.context.selected_pose_bones:
             if bone.name.endswith(suffix_1) or bone.name.endswith(suffix_2):
                 widgets_and_bones[bone] = bone.custom_shape
                 mirror_bone = find_mirror_object(bone)
@@ -384,9 +362,9 @@ def find_match_bones():
                     widgets_and_bones[mirror_bone] = mirror_bone.custom_shape
 
         armature = bpy.context.object
-        active_object = C.active_pose_bone
+        active_object = bpy.context.active_pose_bone
     else:
-        for shape in C.selected_objects:
+        for shape in bpy.context.selected_objects:
             bone = from_widget_find_bone(shape)
             if bone.name.endswith(("L","R")):
                 widgets_and_bones[from_widget_find_bone(shape)] = shape
@@ -395,40 +373,34 @@ def find_match_bones():
                 if mirrorShape:
                     widgets_and_bones[mirrorShape] = mirrorShape
 
-        active_object = from_widget_find_bone(C.object)
+        active_object = from_widget_find_bone(bpy.context.object)
         armature = active_object.id_data
     return (widgets_and_bones, active_object, armature)
 
 
 def resync_widget_names():
-    C = bpy.context
-    D = bpy.data
-
-    if not get_preferences(C).use_rigify_defaults:
-        bw_collection_name = get_preferences(C).bonewidget_collection_name
-        bw_widget_prefix = get_preferences(C).widget_prefix
+    if not get_preferences(bpy.context).use_rigify_defaults:
+        bw_collection_name = get_preferences(bpy.context).bonewidget_collection_name
+        bw_widget_prefix = get_preferences(bpy.context).widget_prefix
     else:
-        bw_collection_name = 'WGTS_' + C.active_object.name
-        bw_widget_prefix = 'WGT-' + C.active_object.name + '_'
+        bw_collection_name = 'WGTS_' + bpy.context.active_object.name
+        bw_widget_prefix = 'WGT-' + bpy.context.active_object.name + '_'
 
     widgets_and_bones = {}
 
     if bpy.context.object.type == 'ARMATURE':
-        for bone in C.active_object.pose.bones:
+        for bone in bpy.context.active_object.pose.bones:
             if bone.custom_shape:
                 widgets_and_bones[bone] = bone.custom_shape
 
     for k, v in widgets_and_bones.items():
         if k.name != (bw_widget_prefix + k.name):
-            D.objects[v.name].name = str(bw_widget_prefix + k.name)
+            bpy.data.objects[v.name].name = str(bw_widget_prefix + k.name)
 
 
 def clear_bone_widgets():
-    C = bpy.context
-    D = bpy.data
-
     if bpy.context.object.type == 'ARMATURE':
-        for bone in C.selected_pose_bones:
+        for bone in bpy.context.selected_pose_bones:
             if bone.custom_shape:
                 bone.custom_shape = None
                 bone.custom_shape_transform = None
