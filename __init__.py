@@ -32,14 +32,12 @@ bl_info = {
 
 if "bpy" in locals():
     import importlib
-    bl_class_registry.BlClassRegistry.cleanup()
     importlib.reload(prefs)
     importlib.reload(panels)
     importlib.reload(menus)
 
 else:
     import bpy
-    from . import bl_class_registry
     from . import operators
     from . import panels
     from . import prefs
@@ -58,8 +56,7 @@ def get_user_preferences(context):
 def register():
     operators.register()
     menus.register()
-
-    bl_class_registry.BlClassRegistry.register()
+    prefs.register()
 
     # Apply preferences of the panel location.
     context = bpy.context
@@ -70,12 +67,6 @@ def register():
 def unregister():
     operators.unregister()
     menus.unregister()
-
-    # TODO: Unregister by BlClassRegistry
-    bl_class_registry.BlClassRegistry.unregister()
+    prefs.unregister()
 
     panels.unregister()
-
-
-if __name__ == "__main__":
-    register()

@@ -2,12 +2,10 @@ import bpy
 from bpy.types import AddonPreferences
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 
-from .bl_class_registry import BlClassRegistry
 from .panels import BONEWIDGET_PT_bw_panel_main
 from .operators import BONEWIDGET_OT_reset_default_images
 
 
-@BlClassRegistry()
 class BoneWidget_preferences(AddonPreferences):
     bl_idname = __package__
 
@@ -145,3 +143,10 @@ class BoneWidget_preferences(AddonPreferences):
         row = row.split(factor=.75)
         row.label(text="Reset Default Widget Thumbnails")
         row.operator("bonewidget.reset_default_images", icon="ERROR")
+
+
+def register():
+    bpy.utils.register_class(BoneWidget_preferences)
+
+def unregister():
+    bpy.utils.register_class(BoneWidget_preferences)
