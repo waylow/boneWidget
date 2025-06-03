@@ -2,6 +2,7 @@ import bpy
 import os
 import json
 import numpy
+import re
 from bpy.app.handlers import persistent
 from .main_functions import get_preferences
 from .. import __package__
@@ -13,10 +14,19 @@ JSON_COLOR_PRESETS = "custom_color_sets.json"
 widget_data = {}
 
 
+def get_addon_dir():
+    return os.path.dirname(__file__)
+
+
+def get_custom_image_dir(image_folder):
+    return os.path.abspath(os.path.join(get_addon_dir(), '..', image_folder))
+
+
 def objectDataToDico(object, custom_image):
     verts = []
     depsgraph = bpy.context.evaluated_depsgraph_get()
     mesh = object.evaluated_get(depsgraph).to_mesh()
+    
     for v in mesh.vertices:
         verts.append(tuple(numpy.array(tuple(v.co)) *
                            (object.scale[0], object.scale[1], object.scale[2])))
@@ -141,7 +151,7 @@ def export_widget_library(filepath):
         dest_dir = os.path.dirname(filepath)
         json_dir = os.path.dirname(get_addon_dir())
         image_folder = 'custom_thumbnails'
-        custom_image_dir = os.path.abspath(os.path.join(get_addon_dir(), '..', image_folder))
+        custom_image_dir = get_custom_image_dir(image_folder)
         
         filename = os.path.basename(filepath)
         if not filename: filename = "widget_library.zip"
@@ -169,56 +179,34 @@ def export_widget_library(filepath):
     return len(wgts)
 
 
-def export_color_presets(filepath, context):
-    color_presets = len(context.window_manager.custom_color_presets)
-
-    if color_presets:
-        # variables needed for exporting widgets
-        dest_dir = os.path.dirname(filepath)
-        json_dir = os.path.dirname(get_addon_dir())
-        #image_folder = 'preset_thumbnails'
-        #custom_image_dir = os.path.abspath(os.path.join(get_addon_dir(), '..', image_folder))
-        
-        filename = os.path.basename(filepath)
-        if not filename: filename = "color_presets.zip"
-        elif not filename.endswith('.zip'): filename += ".zip"
-
-        # start the zipping process
-        try:
-            from zipfile import ZipFile
-            with ZipFile(os.path.join(dest_dir, filename), "w") as zip:
-                # write the json file
-                file = os.path.join(json_dir, JSON_COLOR_PRESETS)
-                arcname = os.path.basename(file)
-                zip.write(file, arcname=arcname)
-        except Exception as e:
-            print("Error exporting color presets: ", e)
-            return 0
-
-    return color_presets
-
-
-class WidgetImportStats:
+class BoneWidgetImportStats:
     def __init__(self):
         self.new_widgets = 0
-        self.failed_widgets = {}
-        self.skipped_widgets = [] # to make sure the data won't change order
+        self.failed_imports = {}
+        self.skipped_imports = [] # to make sure the data won't change order
         self.widgets = {}
+        self.duplicate_imports = {} # store duplicated import items
+        self.import_type = None
+
+    def imported(self):
+        return self.new_widgets
     
     def skipped(self):
-        return len(self.skipped_widgets)
+        return len(self.skipped_imports)
     
     def failed(self):
-        return len(self.failed_widgets)
-
+        return len(self.failed_imports)
+    
 
 def import_widget_library(filepath, action=""):
     wgts = {}
 
     from zipfile import ZipFile
-    dest_dir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
+    dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
 
-    widget_import = WidgetImportStats()
+    widget_import = BoneWidgetImportStats()
+
+    widget_import.import_type = "widget"
 
     if os.path.exists(filepath) and action:
         try:
@@ -237,18 +225,21 @@ def import_widget_library(filepath, action=""):
             # check for duplicate names
             for name, data in sorted(wgts.items()): # sorting by keys
                 if action == "ASK":
-                    widget_import.skipped_widgets.append({name : data})
+                    widget_import.skipped_imports.append({name : data})
                 elif action == "OVERWRITE":
                     widget_import.widgets.update({name : data})
-                    widget_import.new_widgets += 1
                 elif action == "SKIP":
-                    if not name in current_wgts:
+                    # check for duplicates
+                    data_match = data == current_wgts[name]
+                    if name in current_wgts and data_match or data_match:
+                        widget_import.skipped_imports.append({name : data})
+                        #widget_import.duplicate_imports.update({name : data})
+                    elif name not in current_wgts:
                         widget_import.widgets.update({name : data})
-                        widget_import.new_widgets += 1
                     else:
-                        widget_import.skipped_widgets.append({name : data})
+                        widget_import.skipped_imports.append({name : data})
                 else:
-                    widget_import.failed_widgets.update({name : data})
+                    widget_import.failed_imports.update({name : data})
 
         except Exception as e:
             print(f"Error while importing widget library: {e}")
@@ -256,9 +247,9 @@ def import_widget_library(filepath, action=""):
 
 
 def update_widget_library(new_widgets, new_images, zip_filepath):
-    current_widget = bpy.context.window_manager.widget_list
-    wgts = read_widgets(JSON_USER_WIDGETS)
+    current_widget = bpy.context.window_manager.widget_list  # store the currently selected widget
 
+    wgts = read_widgets(JSON_USER_WIDGETS)
     wgts.update(new_widgets)
     
     write_widgets(wgts, JSON_USER_WIDGETS)
@@ -266,7 +257,7 @@ def update_widget_library(new_widgets, new_images, zip_filepath):
     # extract any images needed from zip library
     if new_images:
         from zipfile import ZipFile
-        dest_dir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
+        dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
         if os.path.exists(zip_filepath):
             try:
                 with ZipFile(zip_filepath, 'r') as zip_file:
@@ -327,8 +318,146 @@ def reset_default_images():
     bpy.context.window_manager.widget_list = current_widget
 
 
-def get_addon_dir():
-    return os.path.dirname(__file__)
+################ COLOR PRESETS ################
+
+def read_color_presets():
+    presets = {}
+
+    # Read the JSON file
+    json_file = os.path.join(os.path.dirname(get_addon_dir()), JSON_COLOR_PRESETS)
+    if os.path.exists(json_file):
+        with open(json_file, "r") as file:
+            presets = json.load(file)
+    
+    presets = {item["name"]: item for item in presets} # convert to dictionary
+
+    return presets
+
+
+def update_color_presets(new_presets, new_images, zip_filepath):
+    for preset in new_presets.values():
+        add_color_set(bpy.context, preset)
+
+    # extract any images needed from zip library
+    # if new_images:
+    #     from zipfile import ZipFile
+    #     dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
+    #     if os.path.exists(zip_filepath):
+    #         try:
+    #             with ZipFile(zip_filepath, 'r') as zip_file:
+    #                 for file in zip_file.namelist():
+    #                     if file.startswith('custom_thumbnails/') and file.split("/")[1] in new_images:
+    #                         zip_file.extract(file, dest_dir)
+    #         except:
+    #             pass
+
+
+def import_color_presets(filepath, action=""):
+    presets = None
+
+    from zipfile import ZipFile
+    dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
+
+    presets_import = BoneWidgetImportStats()
+
+    presets_import.import_type = "colorset"
+
+    if os.path.exists(filepath) and action:
+        try:
+            with ZipFile(filepath, 'r') as zip_file:
+                # extract images
+                for file in zip_file.namelist():
+                    #if file.startswith('preset_thumbnails/'):
+                        #zip_file.extract(file, dest_dir)
+                    if file.endswith('.json'): # extract data from the .json file
+                        f = zip_file.read(file)
+                        json_data = f.decode('utf8').replace("'", '"')
+                        presets = json.loads(json_data)
+
+            current_presets = read_color_presets()
+
+            # check for duplicate presets
+            for preset in presets:
+                name = preset['name']
+                if action == "ASK":
+                    presets_import.skipped_imports.append({name: preset})
+                elif action == "OVERWRITE":
+                    presets_import.widgets.update({name: preset})
+                elif action == "SKIP":
+                    # name and colors match or just colors match
+                    if name in current_presets and colors_match(preset, current_presets[name]) or \
+                                colors_match(preset, current_presets[name]):
+                        presets_import.skipped_imports.append({name: preset})
+                    elif not name in current_presets:
+                        presets_import.widgets.update({name: preset})
+                    else:
+                        presets_import.skipped_imports.append({name: preset})
+                else:
+                    presets_import.failed_imports.update({name: preset})
+
+        except Exception as e:
+            print(f"Error while importing color presets: {e}")
+    return presets_import
+
+
+def colors_match(set1, set2):
+    return set1['normal'] == set2['normal'] \
+            and set1['select'] == set2['select'] \
+            and set1['active'] == set2['active']
+
+
+def export_color_presets(filepath, context):
+    color_presets = len(context.window_manager.custom_color_presets)
+
+    if color_presets:
+        dest_dir = os.path.dirname(filepath)
+        json_dir = os.path.dirname(get_addon_dir())
+        #image_folder = 'preset_thumbnails'
+        #custom_image_dir = get_custom_image_dir(image_folder)
+        
+        filename = os.path.basename(filepath)
+        if not filename: filename = "color_presets.zip"
+        elif not filename.endswith('.zip'): filename += ".zip"
+
+        # start the zipping process
+        try:
+            from zipfile import ZipFile
+            with ZipFile(os.path.join(dest_dir, filename), "w") as zip:
+                # write the json file
+                file = os.path.join(json_dir, JSON_COLOR_PRESETS)
+                arcname = os.path.basename(file)
+                zip.write(file, arcname=arcname)
+        except Exception as e:
+            print("Error exporting color presets: ", e)
+            return 0
+
+    return color_presets
+
+
+def add_color_set(context, color_set = None):
+    new_item = context.window_manager.custom_color_presets.add()
+
+    base_name = "Color Set" if not color_set else color_set['name']
+    new_name = base_name
+
+    # check if the name already ends with an incremented number
+    match = re.search(r"\.(\d{3})$", base_name)
+    count = match.group(1) if match else 1
+
+    while any(item.name == new_name for item in context.window_manager.custom_color_presets):
+        new_name = f"{base_name}.{count:03d}"
+        count += 1
+
+    new_item.name = new_name
+
+    if not color_set: # new default color set
+        new_item.normal = (1.0, 0.0, 0.0)
+        new_item.select = (0.0, 1.0, 0.0)
+        new_item.active = (0.0, 0.0, 1.0)
+    else:
+        new_item.normal = color_set['normal']
+        new_item.select = color_set['select']
+        new_item.active = color_set['active']
 
 
 def save_color_sets(context):
@@ -341,7 +470,7 @@ def save_color_sets(context):
             "active": list(item.active)
         } for item in context.window_manager.custom_color_presets]
 
-        filepath = os.path.join(get_addon_dir(), '..', "custom_color_sets.json")
+        filepath = os.path.join(get_addon_dir(), '..', JSON_COLOR_PRESETS)
         with open(filepath, 'w') as f:
             json.dump(color_sets, f, indent=4)
         bpy.context.scene.turn_off_colorset_save = False
@@ -349,16 +478,16 @@ def save_color_sets(context):
 
 @persistent
 def load_color_presets(_):
-    filepath = os.path.join(get_addon_dir(), '..', "custom_color_sets.json")
+    filepath = os.path.join(get_addon_dir(), '..', JSON_COLOR_PRESETS)
     if os.path.exists(filepath):
         with open(filepath, 'r') as f:
             color_sets = json.load(f)
+            bpy.context.window_manager.custom_color_presets.clear() # TEST
+            bpy.context.scene.turn_off_colorset_save = True
             for item in color_sets:
-                bpy.context.scene.turn_off_colorset_save = True
                 new_item = bpy.context.window_manager.custom_color_presets.add()
                 new_item.name = item["name"]
                 new_item.normal = item["normal"]
                 new_item.select = item["select"]
                 new_item.active = item["active"]
-                bpy.context.scene.turn_off_colorset_save = False
-
+            bpy.context.scene.turn_off_colorset_save = False

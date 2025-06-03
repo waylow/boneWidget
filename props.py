@@ -50,6 +50,8 @@ class PresetColorSetItem(bpy.types.PropertyGroup):
 
 class CustomColorSet(bpy.types.PropertyGroup):
 
+    name: bpy.props.StringProperty(name="Name", default="Untitled")
+
     normal: bpy.props.FloatVectorProperty(
         name="Normal",
         subtype='COLOR_GAMMA',
@@ -78,4 +80,34 @@ class CustomColorSet(bpy.types.PropertyGroup):
         min=0.0, max=1.0,
         description="Color used for active bones",
         update=update_bone_color,
+    )
+
+
+class ImportColorSet(bpy.types.PropertyGroup):
+
+    normal: bpy.props.FloatVectorProperty(
+        name="Normal",
+        subtype='COLOR_GAMMA',
+        default=(0.0, 0.0, 0.0),
+        size=3,
+        min=0.0, max=1.0,
+        description="Color used for the surface of bones",
+    )
+
+    select: bpy.props.FloatVectorProperty(
+        name="Select",
+        subtype='COLOR_GAMMA',
+        default=(0.0, 0.0, 0.0),
+        size=3,
+        min=0.0, max=1.0,
+        description="Color used for selected bones",
+    )
+
+    active: bpy.props.FloatVectorProperty(
+        name="Active",
+        subtype='COLOR_GAMMA',
+        default=(0.0, 0.0, 0.0),
+        size=3,
+        min=0.0, max=1.0,
+        description="Color used for active bones",
     )
