@@ -182,6 +182,7 @@ def export_widget_library(filepath):
 class BoneWidgetImportStats:
     def __init__(self):
         self.new_widgets = 0
+        self.total_num_imports = 0
         self.failed_imports = {}
         self.skipped_imports = [] # to make sure the data won't change order
         self.widgets = {}
@@ -189,13 +190,21 @@ class BoneWidgetImportStats:
         self.import_type = None
 
     def imported(self):
-        return self.new_widgets
+        return self.new_widgets or len(self.widgets)
     
     def skipped(self):
         return len(self.skipped_imports)
     
     def failed(self):
         return len(self.failed_imports)
+    
+    def total(self):
+        return self.total_num_imports
+    
+    def reset_imports(self):
+        self.skipped_imports = []
+        self.widgets = {}
+        self.duplicate_imports = {}
     
 
 def import_widget_library(filepath, action=""):
@@ -224,6 +233,7 @@ def import_widget_library(filepath, action=""):
 
             # check for duplicate names
             for name, data in sorted(wgts.items()): # sorting by keys
+                widget_import.total_num_imports += 1
                 if action == "ASK":
                     widget_import.skipped_imports.append({name : data})
                 elif action == "OVERWRITE":
@@ -243,6 +253,9 @@ def import_widget_library(filepath, action=""):
 
         except Exception as e:
             print(f"Error while importing widget library: {e}")
+            for name, data in wgts.items():
+                widget_import.failed_imports.update({name : data})
+                widget_import.total_num_imports = widget_import.failed()
     return widget_import
 
 
@@ -378,6 +391,7 @@ def import_color_presets(filepath, action=""):
 
             # check for duplicate presets
             for preset in presets:
+                presets_import.total_num_imports += 1
                 name = preset['name']
                 if action == "ASK":
                     presets_import.skipped_imports.append({name: preset})
@@ -397,6 +411,9 @@ def import_color_presets(filepath, action=""):
 
         except Exception as e:
             print(f"Error while importing color presets: {e}")
+            for preset in presets:
+                presets_import.failed_imports.update({preset['name'] : preset})
+                presets_import.total_num_imports = presets_import.failed()
     return presets_import
 
 

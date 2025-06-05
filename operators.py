@@ -746,8 +746,12 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
 
             bpy.types.WindowManager.custom_data = import_library_data
 
-            if self.import_option == "ASK":
-                #bpy.types.WindowManager.custom_data = import_library_data
+            # if the number of failed widgets are equal to total imported widgets - call summary popup
+            if import_library_data.failed() == import_library_data.total():
+                import_library_data.reset_imports()
+                bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
+
+            elif self.import_option == "ASK":
                 bpy.ops.bonewidget.widget_ask_popup('INVOKE_DEFAULT')
 
             elif self.import_option in ["OVERWRITE", "SKIP"]:
@@ -1221,8 +1225,12 @@ class BONEWIDGET_OT_import_color_presets(bpy.types.Operator):
 
             bpy.types.WindowManager.custom_data = import_preset_data
 
-            if self.import_option == "ASK":
-                #bpy.types.WindowManager.custom_data = import_preset_data
+            # if the number of failed presets are equal to total imported presets - call summary popup
+            if import_preset_data.failed() == import_preset_data.total():
+                import_preset_data.reset_imports()
+                bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
+
+            elif self.import_option == "ASK":
                 bpy.ops.bonewidget.widget_ask_popup('INVOKE_DEFAULT')
 
             elif self.import_option in ["OVERWRITE", "SKIP"]:
