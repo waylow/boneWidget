@@ -503,13 +503,20 @@ class BONEWIDGET_OT_import_widgets_summary_popup(bpy.types.Operator):
 
         layout.separator()
         row = layout.row()
-        row.label(text=f"Imported Widgets: {context.window_manager.custom_data.imported()}")
 
-        row = layout.row()
-        row.label(text=f"Skipped Widgets: {context.window_manager.custom_data.skipped()}")
-        
-        row = layout.row()
-        row.label(text=f"Failed Widgets: {context.window_manager.custom_data.failed()}")
+        if context.window_manager.custom_data.json_import_error:
+            row.alert = True
+            row.label(text=f"Error: Unsupported or damaged import file!")
+            row.alert = False
+            layout.separator()
+        else:
+            row.label(text=f"Imported Widgets: {context.window_manager.custom_data.imported()}")
+
+            row = layout.row()
+            row.label(text=f"Skipped Widgets: {context.window_manager.custom_data.skipped()}")
+            
+            row = layout.row()
+            row.label(text=f"Failed Widgets: {context.window_manager.custom_data.failed()}")
 
 
     def invoke(self, context, event):
@@ -752,7 +759,7 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
             bpy.types.WindowManager.custom_data = import_library_data
 
             # if the number of failed widgets are equal to total imported widgets - call summary popup
-            if import_library_data.failed() == import_library_data.total():
+            if import_library_data.failed() == import_library_data.total() or import_library_data.failed() == -1:
                 import_library_data.reset_imports()
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
 
