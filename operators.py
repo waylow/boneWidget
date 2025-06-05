@@ -920,8 +920,7 @@ class BONEWIDGET_OT_clear_bone_color(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'])
 
     def execute(self, context):
-        props = context.scene.bonewidget_settings
-        set_bone_color(context, "DEFAULT", props.clear_both_modes)
+        set_bone_color(context, "DEFAULT", get_preferences(context).clear_both_modes)
         return {'FINISHED'}
 
 
@@ -1391,14 +1390,6 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
         
         return {'FINISHED'}
 
-class BONEWIDGET_PG_settings(bpy.types.PropertyGroup):
-    
-    clear_both_modes: bpy.props.BoolProperty(
-        name="Clear All color",
-        description='When enabled will clear bone colors from Edit mode and Pose mode.  When disabled it will only clear the color from the current mode',
-        default=True
-    )
-
 
 classes = (
     BONEWIDGET_OT_remove_widgets,
@@ -1435,7 +1426,6 @@ classes = (
     BONEWIDGET_OT_import_color_presets,
     BONEWIDGET_OT_export_color_presets,
     BONEWIDGET_OT_render_widget_thumbnail,
-    BONEWIDGET_PG_settings,
 )
 
 
@@ -1447,12 +1437,10 @@ def register():
         register_class(cls)
 
     bpy.types.WindowManager.prop_grp = bpy.props.PointerProperty(type=BONEWIDGET_OT_shared_property_group)
-    bpy.types.Scene.bonewidget_settings = bpy.props.PointerProperty(type=BONEWIDGET_PG_settings)
-    
+
 
 def unregister():
     del bpy.types.WindowManager.prop_grp
-    del bpy.types.Scene.bonewidget_settings
     
     from bpy.utils import unregister_class
     for cls in classes:

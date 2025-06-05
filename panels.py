@@ -102,7 +102,6 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 
         # BONE COLORS
         if bpy.app.version >= (4,0,0):
-            props = context.scene.bonewidget_settings
             layout.separator()
             row = layout.row(align=True)
             row.operator("bonewidget.set_bone_color", text="Set Bone Color", icon="BRUSHES_ALL")
@@ -133,7 +132,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
             row = layout.row()
             op = row.operator("bonewidget.clear_bone_color", text="Clear Bone Color", icon="PANEL_CLOSE")
             row = layout.row()
-            layout.prop(props, "clear_both_modes")
+            layout.prop(get_preferences(context), "clear_both_modes")
 
 
 
