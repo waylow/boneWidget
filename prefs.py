@@ -90,7 +90,7 @@ class BoneWidget_preferences(AddonPreferences):
     )
     
     clear_both_modes: bpy.props.BoolProperty(
-        name="Clear All color",
+        name="Clear All Color",
         description='When enabled will clear bone colors from Edit mode and Pose mode.  When disabled it will only clear the color from the current mode',
         default=True
     )
@@ -126,7 +126,7 @@ class BoneWidget_preferences(AddonPreferences):
         row = box.row()
         row.prop(self, "edit_bone_colors")
         row = box.row()
-        row.label(text="Clearing Color")
+        row.label(text="Clearing Colors")
         row.prop(self, "clear_both_modes")
 
 
