@@ -181,7 +181,8 @@ class BONEWIDGET_OT_create_widget(bpy.types.Operator):
 class BONEWIDGET_OT_edit_widget(bpy.types.Operator):
     """Edit the widget for selected bone"""
     bl_idname = "bonewidget.edit_widget"
-    bl_label = "Edit"
+    bl_label = "Edit Widget"
+    bl_options = {'REGISTER'}
 
     @classmethod
     def poll(cls, context):
@@ -201,6 +202,7 @@ class BONEWIDGET_OT_return_to_armature(bpy.types.Operator):
     """Switch back to the armature"""
     bl_idname = "bonewidget.return_to_armature"
     bl_label = "Return to armature"
+    bl_options = {'REGISTER'}
 
     @classmethod
     def poll(cls, context):
@@ -220,6 +222,7 @@ class BONEWIDGET_OT_match_bone_transforms(bpy.types.Operator):
     """Match the widget to the bone transforms"""
     bl_idname = "bonewidget.match_bone_transforms"
     bl_label = "Match bone transforms"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         if bpy.context.mode == "POSE":
@@ -471,6 +474,7 @@ class BONEWIDGET_OT_remove_widgets(bpy.types.Operator):
     """Remove selected widget object from the Bone Widget Library"""
     bl_idname = "bonewidget.remove_widgets"
     bl_label = "Remove Widgets"
+    bl_options = {'INTERNAL'}
 
     def execute(self, context):
         objects = bpy.context.window_manager.widget_list
@@ -706,6 +710,7 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
     """Import User Defined Widgets"""
     bl_idname = "bonewidget.import_library"
     bl_label = "Import Library"
+    bl_options = {'REGISTER'}
 
 
     filter_glob: StringProperty(
@@ -756,7 +761,7 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
 
             elif self.import_option in ["OVERWRITE", "SKIP"]:
                 widget_images = set()
-
+ 
                 # extract image names if any
                 for _, value in import_library_data.widgets.items():
                     widget_images.add(value['image'])
@@ -779,6 +784,7 @@ class BONEWIDGET_OT_export_library(bpy.types.Operator):
     """Export User Defined Widgets"""
     bl_idname = "bonewidget.export_library"
     bl_label = "Export Library"
+    bl_options = {'REGISTER'}
 
 
     filter_glob: StringProperty(
@@ -815,6 +821,7 @@ class BONEWIDGET_OT_toggle_collection_visibility(bpy.types.Operator):
     """Show/hide the bone widget collection"""
     bl_idname = "bonewidget.toggle_collection_visibilty"
     bl_label = "Collection Visibilty"
+    bl_options = {'INTERNAL'}
 
     @classmethod
     def poll(cls, context):
@@ -837,6 +844,7 @@ class BONEWIDGET_OT_delete_unused_widgets(bpy.types.Operator):
     """Delete unused objects in the WGT collection"""
     bl_idname = "bonewidget.delete_unused_widgets"
     bl_label = "Delete Unused Widgets"
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
@@ -854,6 +862,7 @@ class BONEWIDGET_OT_clear_bone_widgets(bpy.types.Operator):
     """Clears widgets from selected pose bones but doesn't remove them from the scene"""
     bl_idname = "bonewidget.clear_widgets"
     bl_label = "Clear Widgets"
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
@@ -868,6 +877,7 @@ class BONEWIDGET_OT_resync_widget_names(bpy.types.Operator):
     """Clear widgets from selected pose bones"""
     bl_idname = "bonewidget.resync_widget_names"
     bl_label = "Resync Widget Names"
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
@@ -882,6 +892,7 @@ class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
     """Add selected object as widget for active bone"""
     bl_idname = "bonewidget.add_as_widget"
     bl_label = "Confirm selected Object as widget shape"
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
@@ -896,6 +907,7 @@ class BONEWIDGET_OT_reset_default_images(bpy.types.Operator):
     """Resets the thumbnails for all default widgets"""
     bl_idname = "bonewidget.reset_default_images"
     bl_label = "Reset"
+    bl_options = {'INTERNAL'}
 
     def execute(self, context):
         reset_default_images()
@@ -936,6 +948,7 @@ class BONEWIDGET_OT_copy_bone_color(bpy.types.Operator):
     """Copy the colors of the active bone to the custom colors above (ignores default colors)"""
     bl_idname = "bonewidget.copy_bone_color"
     bl_label = "Copy Bone Color"
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
@@ -955,6 +968,7 @@ class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
     """Adds a color set to presets from selected Theme or from custom palette"""
     bl_idname = "bonewidget.add_color_set_from"
     bl_label = "Add color set to presets"
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
@@ -1015,6 +1029,7 @@ class BONEWIDGET_OT_add_default_colorset(bpy.types.Operator):
     """Adds a default color set to presets"""
     bl_idname = "bonewidget.add_default_custom_colorset"
     bl_label = "Add a default color set"
+    bl_options = {'INTERNAL'}
 
     def execute(self, context):
         add_color_set(context)
@@ -1065,6 +1080,7 @@ class BONEWIDGET_OT_remove_item(bpy.types.Operator):
     """Removes selected color set from the preset list"""
     bl_idname = "bonewidget.remove_custom_item"
     bl_label = "Remove Selected Color Set"
+    bl_options = {'INTERNAL'}
 
     @classmethod
     def poll(cls, context):
@@ -1185,6 +1201,7 @@ class BONEWIDGET_OT_import_color_presets(bpy.types.Operator):
     """Import User Defined Color Presets"""
     bl_idname = "bonewidget.import_color_presets"
     bl_label = "Import Color Presets"
+    bl_options = {'REGISTER'}
 
 
     filter_glob: StringProperty(
@@ -1258,6 +1275,7 @@ class BONEWIDGET_OT_export_color_presets(bpy.types.Operator):
     """Export User Defined Color Presets"""
     bl_idname = "bonewidget.export_color_presets"
     bl_label = "Export Color Presets"
+    bl_options = {'REGISTER'}
 
 
     filter_glob: StringProperty(
