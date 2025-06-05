@@ -280,6 +280,7 @@ class BONEWIDGET_OT_image_select(bpy.types.Operator):
     
     filename: StringProperty(
         name='Filename',
+        subtype='FILE_NAME',
         description='Name of custom image',
     )
 
@@ -314,6 +315,7 @@ class BONEWIDGET_OT_add_custom_image(bpy.types.Operator):
 
     filename: StringProperty(
         name='Filename',
+        subtype='FILE_NAME',
         description='Name of custom image',
     )
 
@@ -713,6 +715,7 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
 
     filename: StringProperty(
         name='Filename',
+        subtype='FILE_NAME',
         description='Name of file to be imported',
     )
 
@@ -781,6 +784,7 @@ class BONEWIDGET_OT_export_library(bpy.types.Operator):
     
     filename: StringProperty(
         name='Filename',
+        subtype='FILE_NAME',
         description='Name of file to be exported',
     )
 
@@ -1186,6 +1190,7 @@ class BONEWIDGET_OT_import_color_presets(bpy.types.Operator):
 
     filename: StringProperty(
         name='Filename',
+        subtype='FILE_NAME',
         description='Name of file to be imported',
     )
 
@@ -1254,6 +1259,7 @@ class BONEWIDGET_OT_export_color_presets(bpy.types.Operator):
     
     filename: StringProperty(
         name='Filename',
+        subtype='FILE_NAME',
         description='Name of file to be exported',
     )
 
