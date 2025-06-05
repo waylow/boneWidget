@@ -452,8 +452,16 @@ def add_object_as_widget(context, collection):
         widget_object.select_set(False)
 
 
-def set_bone_color(context, color):
+def set_bone_color(context, color, clear_both_modes=None):
     if context.object.mode == "POSE":
+        if color == 'DEFAULT' and clear_both_modes != None:
+            for bone in context.selected_pose_bones:
+                bone.color.palette = 'DEFAULT'
+
+                if clear_both_modes:
+                    bone.bone.color.palette = 'DEFAULT'
+            return
+
         for bone in context.selected_pose_bones:
             bone.color.palette = color #this will get the selected bone color
 
@@ -475,6 +483,16 @@ def set_bone_color(context, color):
                     bone.bone.color.custom.active = context.scene.custom_pose_color_set.active
 
     elif context.object.mode == "EDIT":
+        if color == 'DEFAULT' and clear_both_modes != None:
+            for edit_bone in context.selected_bones:
+                edit_bone.color.palette = 'DEFAULT'
+
+                if clear_both_modes:
+                    pose_bone = context.object.pose.bones.get(edit_bone.name)
+                    pose_bone.color.palette = 'DEFAULT'
+
+            return
+
         for edit_bone in context.selected_bones:
             if get_preferences(context).edit_bone_colors == 'DEFAULT':
                 edit_bone.color.palette = 'DEFAULT' #this will get the edit bone color back to default
@@ -504,6 +522,8 @@ def set_bone_color(context, color):
                     edit_bone.color.custom.normal = context.scene.custom_edit_color_set.normal
                     edit_bone.color.custom.select = context.scene.custom_edit_color_set.select
                     edit_bone.color.custom.active = context.scene.custom_edit_color_set.active
+
+
 
 
 def copy_bone_color(context, bone):
