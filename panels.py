@@ -50,7 +50,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 
         row = layout.row(align=True)
         row.menu("BONEWIDGET_MT_bw_specials", icon='DOWNARROW_HLT', text="")
-        row.operator("bonewidget.create_widget", icon="OBJECT_DATAMODE")
+        row.operator("bonewidget.create_widget", icon="OBJECT_DATAMODE", text="Create")
 
         if bpy.context.mode == "POSE":
             row.operator("bonewidget.edit_widget", icon="OUTLINER_DATA_MESH")
