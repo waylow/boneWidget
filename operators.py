@@ -940,6 +940,11 @@ class BONEWIDGET_OT_clear_bone_color(bpy.types.Operator):
     """Add bone color to selected widgets"""
     bl_idname = "bonewidget.clear_bone_color"
     bl_label = "Clear Bone Color"
+    bl_description = (
+        "Clear Bone Color from selected bones.\n"
+        "(Note: Blender will show Edit Bone color in Pose Mode if Pose Bone color is default)"
+    )
+
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
