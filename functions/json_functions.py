@@ -22,6 +22,23 @@ def get_custom_image_dir(image_folder):
     return os.path.abspath(os.path.join(get_addon_dir(), '..', image_folder))
 
 
+def validate_json_data(data: dict, required_keys: tuple, can_be_empty: bool = True) -> bool:
+    required_keys = set(required_keys)
+
+    if not isinstance(data, dict):
+        return False
+
+    # Check if all required keys are present
+    if not required_keys.issubset(data.keys()):
+        return False
+
+    if not can_be_empty:
+        # Check if values are not empty
+        if any(not data[key] for key in required_keys):
+            return False
+    return True
+
+
 def objectDataToDico(object, custom_image):
     verts = []
     depsgraph = bpy.context.evaluated_depsgraph_get()
@@ -182,14 +199,16 @@ def export_widget_library(filepath):
 class BoneWidgetImportStats:
     def __init__(self):
         self.new_widgets = 0
+        self.total_num_imports = 0
         self.failed_imports = {}
         self.skipped_imports = [] # to make sure the data won't change order
         self.widgets = {}
         self.duplicate_imports = {} # store duplicated import items
         self.import_type = None
+        self.json_import_error = False
 
     def imported(self):
-        return self.new_widgets
+        return self.new_widgets or len(self.widgets)
     
     def skipped(self):
         return len(self.skipped_imports)
@@ -197,8 +216,17 @@ class BoneWidgetImportStats:
     def failed(self):
         return len(self.failed_imports)
     
+    def total(self):
+        return self.total_num_imports
+    
+    def reset_imports(self):
+        self.skipped_imports = []
+        self.widgets = {}
+        self.duplicate_imports = {}
+    
 
 def import_widget_library(filepath, action=""):
+    required_data_keys = ("vertices", "faces", "edges", "image") # json data
     wgts = {}
 
     from zipfile import ZipFile
@@ -210,6 +238,7 @@ def import_widget_library(filepath, action=""):
 
     if os.path.exists(filepath) and action:
         try:
+            
             with ZipFile(filepath, 'r') as zip_file:
                 # extract images
                 for file in zip_file.namelist():
@@ -220,10 +249,21 @@ def import_widget_library(filepath, action=""):
                         json_data = f.decode('utf8').replace("'", '"')
                         wgts = json.loads(json_data)
 
+            # validate wgts data type
+            if not isinstance(wgts, dict):
+                raise TypeError(f"Expected a dictionary, but got {type(wgts).__name__}")
+            
             current_wgts = read_widgets(JSON_USER_WIDGETS)
 
             # check for duplicate names
             for name, data in sorted(wgts.items()): # sorting by keys
+                widget_import.total_num_imports += 1
+                
+                # validate json data
+                if not validate_json_data(data, required_data_keys):
+                    widget_import.failed_imports.update({name : data})
+                    continue
+
                 if action == "ASK":
                     widget_import.skipped_imports.append({name : data})
                 elif action == "OVERWRITE":
@@ -241,8 +281,14 @@ def import_widget_library(filepath, action=""):
                 else:
                     widget_import.failed_imports.update({name : data})
 
+        except TypeError as e:  # Handle data type errors specifically
+            print(f"Error while importing widget library: {e}")
+            widget_import.json_import_error = True
         except Exception as e:
             print(f"Error while importing widget library: {e}")
+            for name, data in wgts.items():
+                widget_import.failed_imports.update({name : data})
+                widget_import.total_num_imports = widget_import.failed()
     return widget_import
 
 
@@ -353,6 +399,7 @@ def update_color_presets(new_presets, new_images, zip_filepath):
 
 
 def import_color_presets(filepath, action=""):
+    required_data_keys = ("name", "normal", "select", "active") # json data
     presets = None
 
     from zipfile import ZipFile
@@ -374,10 +421,21 @@ def import_color_presets(filepath, action=""):
                         json_data = f.decode('utf8').replace("'", '"')
                         presets = json.loads(json_data)
 
+            # validate presets data type
+            if not isinstance(presets, list):
+                raise TypeError(f"Expected a list, but got {type(presets).__name__}")
+            
             current_presets = read_color_presets()
 
             # check for duplicate presets
             for preset in presets:
+                presets_import.total_num_imports += 1
+
+                # validate json data
+                if not validate_json_data(preset, required_data_keys, False):
+                    presets_import.failed_imports.update(preset)
+                    continue
+
                 name = preset['name']
                 if action == "ASK":
                     presets_import.skipped_imports.append({name: preset})
@@ -395,8 +453,15 @@ def import_color_presets(filepath, action=""):
                 else:
                     presets_import.failed_imports.update({name: preset})
 
+
+        except TypeError as e:  # Handle data type errors specifically
+                print(f"Error while importing color presets: {e}")
+                presets_import.json_import_error = True
         except Exception as e:
             print(f"Error while importing color presets: {e}")
+            for preset in presets:
+                presets_import.failed_imports.update({preset['name'] : preset})
+                presets_import.total_num_imports = presets_import.failed()              
     return presets_import
 
 
