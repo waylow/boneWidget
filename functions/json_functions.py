@@ -423,7 +423,6 @@ def import_color_presets(filepath, action=""):
 
             # validate presets data type
             if not isinstance(presets, list):
-                print("INSTANCE")
                 raise TypeError(f"Expected a list, but got {type(presets).__name__}")
             
             current_presets = read_color_presets()
@@ -434,7 +433,6 @@ def import_color_presets(filepath, action=""):
 
                 # validate json data
                 if not validate_json_data(preset, required_data_keys, False):
-                    print("NOT WORKING")
                     presets_import.failed_imports.update(preset)
                     continue
 
