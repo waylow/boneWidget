@@ -129,10 +129,15 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 
                 row = layout.row()
                 row.operator("bonewidget.copy_bone_color", text="Copy Bone Color", icon="COPYDOWN")
-            row = layout.row()
-            op = row.operator("bonewidget.clear_bone_color", text="Clear Bone Color", icon="PANEL_CLOSE")
-            row = layout.row()
-            layout.prop(get_preferences(context), "clear_both_modes")
+            
+
+            row = layout.row(align=True)
+            row.operator("bonewidget.clear_bone_color", text="Clear Bone Color", icon="PANEL_CLOSE")
+            
+            icon='BONE_DATA'
+            if get_preferences(context).clear_both_modes:
+                icon='GROUP_BONE'                
+            row.prop(get_preferences(context), "clear_both_modes", icon=icon, text='', toggle=True)
 
 
 
