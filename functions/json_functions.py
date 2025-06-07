@@ -230,7 +230,8 @@ def import_widget_library(filepath, action=""):
     wgts = {}
 
     from zipfile import ZipFile
-    dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
+    #dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
+    dest_dir = bpy.app.tempdir
 
     widget_import = BoneWidgetImportStats()
 
@@ -310,8 +311,10 @@ def update_widget_library(new_widgets, new_images, zip_filepath):
                     for file in zip_file.namelist():
                         if file.startswith('custom_thumbnails/') and file.split("/")[1] in new_images:
                             zip_file.extract(file, dest_dir)
-            except:
-                pass
+            except Exception as e:
+                print("Failed to extract custom images: ", e)
+        else:
+            print("zip file path doesn't exist!! - ", zip_filepath)
 
     # update the preview panel
     from .functions import create_preview_collection
