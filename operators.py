@@ -627,7 +627,7 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
 
             # widget preview images
             if import_type == "widget":
-                image_path = os.path.join(get_custom_image_dir("custom_thumbnails"), widget_data['image'])
+                image_path = os.path.join(bpy.app.tempdir, "custom_thumbnails", widget_data['image'])
                 context.window_manager.prop_grp.image_collection.load(widget_name, image_path, 'IMAGE')
         
         return context.window_manager.invoke_props_dialog(self, width=350)
@@ -642,8 +642,7 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
             action = getattr(bpy.context.window_manager.prop_grp, f"ImportOptions{i}")
             widget_name, widget_data = next(iter(widget.items()))
 
-            if action == self.import_options[1][0]: # SKIP
-                # TODO: how to handle unzipped widget images but the user decided to skip?
+            if action == self.import_options[1][0]:
                 continue
 
             new_widget_name = getattr(bpy.context.window_manager.prop_grp, f"EditName{i}")
@@ -754,7 +753,7 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
     def execute(self, context):
         if self.filepath and self.import_option:
             import_library_data = import_widget_library(self.filepath, self.import_option)
-            bpy.context.window_manager.prop_grp.import_library_filepath = self.filepath
+            setattr(BONEWIDGET_OT_shared_property_group, "import_library_filepath", self.filepath)
 
             bpy.types.WindowManager.custom_data = import_library_data
 
@@ -766,16 +765,9 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
             elif self.import_option == "ASK":
                 bpy.ops.bonewidget.widget_ask_popup('INVOKE_DEFAULT')
 
-            elif self.import_option in ["OVERWRITE", "SKIP"]:
-                widget_images = set()
- 
-                # extract image names if any
-                for _, value in import_library_data.widgets.items():
-                    widget_images.add(value['image'])
-
-                update_widget_library(import_library_data.widgets, widget_images, self.filepath)
-
+            elif self.import_option in ["OVERWRITE", "SKIP"]:               
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
+
             else:
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
             
