@@ -34,6 +34,7 @@ from .functions import (
     save_color_sets,
     load_color_presets,
     add_color_set,
+    scan_armature_color_presets,
     import_color_presets,
     export_color_presets,
     update_color_presets,
@@ -42,8 +43,7 @@ from .functions import (
     restore_viewport_position,
     render_widget_thumbnail,
     add_camera_from_view,
-    frame_object_with_padding,
-    get_custom_image_dir
+    frame_object_with_padding
 )
 
 from .props import ImportColorSet
@@ -1201,6 +1201,33 @@ class BONEWIDGET_OT_add_preset_from_bone(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_add_presets_from_armature(bpy.types.Operator):
+    """Adds new presets from the active bone's color palette"""
+    bl_idname = "bonewidget.add_presets_from_armature"
+    bl_label = "Add Preset from selected Armature"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.object and 
+            context.object.type == 'ARMATURE' and 
+            (
+                (context.object.mode == 'POSE' and context.selected_pose_bones) or 
+                (context.object.mode == 'EDIT' and context.selected_editable_bones and get_preferences(context).edit_bone_colors != 'DEFAULT')
+            )
+        )
+    
+    def execute(self, context):
+        armature = context.object.data
+
+        result = scan_armature_color_presets(context, armature)
+
+        self.report({'INFO'}, f"{result} custom color sets added.")
+
+        return {'FINISHED'}
+
+
 class BONEWIDGET_OT_import_color_presets(bpy.types.Operator):
     """Import User Defined Color Presets"""
     bl_idname = "bonewidget.import_color_presets"
@@ -1459,6 +1486,7 @@ classes = (
     BONEWIDGET_OT_move_custom_item_up,
     BONEWIDGET_OT_move_custom_item_down,
     BONEWIDGET_OT_add_preset_from_bone,
+    BONEWIDGET_OT_add_presets_from_armature,
     BONEWIDGET_OT_import_color_presets,
     BONEWIDGET_OT_export_color_presets,
     BONEWIDGET_OT_render_widget_thumbnail,

@@ -469,9 +469,46 @@ def import_color_presets(filepath, action=""):
 
 
 def colors_match(set1, set2):
-    return set1['normal'] == set2['normal'] \
-            and set1['select'] == set2['select'] \
-            and set1['active'] == set2['active']
+    if isinstance(set1, dict):
+        return set1['normal'] == set2['normal'] \
+                and set1['select'] == set2['select'] \
+                and set1['active'] == set2['active']
+    elif isinstance(set1, bpy.types.ThemeBoneColorSet):
+        return set1.normal == set2.normal \
+                and set1.select == set2.select \
+                and set1.active == set2.active
+
+
+def scan_armature_color_presets(context, armature):
+    unique_color_sets = 0
+
+    current_color_sets = context.window_manager.custom_color_presets
+
+    # edit bones
+    for bone in armature.bones:
+        if bone.color.is_custom:
+            is_unique_colorset = True
+            for color_set in current_color_sets:
+                if colors_match(bone.color.custom, color_set):
+                    is_unique_colorset = False  # not unique
+                    break
+            if is_unique_colorset:
+                unique_color_sets += 1
+                add_color_set_from_bone(context, bone, " - Edit Color")
+
+        # pose bones
+        pose_bone = context.object.pose.bones.get(bone.name)
+        if pose_bone.color.is_custom:
+            is_unique_colorset = True
+            for color_set in current_color_sets:
+                if colors_match(pose_bone.color.custom, color_set):
+                    is_unique_colorset = False # not unique
+                    break
+            if is_unique_colorset:
+                unique_color_sets += 1
+                add_color_set_from_bone(context, pose_bone, " - Pose Color")
+
+    return unique_color_sets
 
 
 def export_color_presets(filepath, context):
@@ -502,6 +539,34 @@ def export_color_presets(filepath, context):
     return color_presets
 
 
+def add_color_set_from_bone(context, bone, suffix_name):
+    new_item = context.window_manager.custom_color_presets.add()
+
+    color_set = bone.color.custom
+
+    new_name = bone.name + suffix_name  # CHANGE LATER
+
+    # check if the name already ends with an incremented number
+    match = re.match(r"^(.*)\.(\d{3})$", new_name)
+    count = int(match.group(2)) if match else 1
+    base_name = match.group(1) if match else new_name
+
+    while any(item.name == new_name for item in context.window_manager.custom_color_presets):
+        new_name = f"{base_name}.{count:03d}"
+        count += 1
+
+    new_item.name = new_name
+
+    if not color_set: # new default color set
+        new_item.normal = (1.0, 0.0, 0.0)
+        new_item.select = (0.0, 1.0, 0.0)
+        new_item.active = (0.0, 0.0, 1.0)
+    else:
+        new_item.normal = color_set.normal
+        new_item.select = color_set.select
+        new_item.active = color_set.active
+
+
 def add_color_set(context, color_set = None):
     new_item = context.window_manager.custom_color_presets.add()
 
@@ -509,8 +574,9 @@ def add_color_set(context, color_set = None):
     new_name = base_name
 
     # check if the name already ends with an incremented number
-    match = re.search(r"\.(\d{3})$", base_name)
-    count = match.group(1) if match else 1
+    match = re.match(r"^(.*)\.(\d{3})$", base_name)
+    count = int(match.group(2)) if match else 1
+    base_name = match.group(1) if match else new_name
 
     while any(item.name == new_name for item in context.window_manager.custom_color_presets):
         new_name = f"{base_name}.{count:03d}"
