@@ -490,7 +490,7 @@ class BONEWIDGET_OT_remove_widgets(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_import_widgets_summary_popup(bpy.types.Operator):
+class BONEWIDGET_OT_import_items_summary_popup(bpy.types.Operator):
     """Display summary of imported Items"""
     bl_idname = "bonewidget.import_summary_popup"
     bl_label = "Imported Item Summary"
@@ -528,14 +528,14 @@ class BONEWIDGET_OT_import_widgets_summary_popup(bpy.types.Operator):
 
 class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
     """Ask user how to handle name collisions from the imported items"""
-    bl_idname = "bonewidget.widget_ask_popup"
+    bl_idname = "bonewidget.import_items_ask_popup"
     bl_label = "Imported Items"
     bl_options = {'INTERNAL'}
 
     custom_import_data = None
 
     import_options = [
-        ("OVERWRITE", "Overwrite", "Overwrite existing item"),
+        ("OVERWRITE", "Add/Overwrite", "Add or Overwrite existing item"),
         ("SKIP", "Skip", "Skip item"),
         ("RENAME", "Rename", "Rename item"),
     ]
@@ -686,7 +686,7 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
                     add_color_set(context, widget_data)
 
             # update the stats
-            self.custom_import_data.new_widgets += 1
+            self.custom_import_data.new_imported_items += 1
             self.custom_import_data.skipped_imports.remove(widget)
 
         if import_type == "widget":
@@ -711,9 +711,9 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_import_library(bpy.types.Operator):
+class BONEWIDGET_OT_import_widget_library(bpy.types.Operator):
     """Import User Defined Widgets"""
-    bl_idname = "bonewidget.import_library"
+    bl_idname = "bonewidget.import_widget_library"
     bl_label = "Import Library"
     bl_options = {'REGISTER'}
 
@@ -762,7 +762,7 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
 
             elif self.import_option == "ASK":
-                bpy.ops.bonewidget.widget_ask_popup('INVOKE_DEFAULT')
+                bpy.ops.bonewidget.import_items_ask_popup('INVOKE_DEFAULT')
 
             elif self.import_option in ["OVERWRITE", "SKIP"]:               
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
@@ -778,9 +778,9 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 
-class BONEWIDGET_OT_export_library(bpy.types.Operator):
+class BONEWIDGET_OT_export_widget_library(bpy.types.Operator):
     """Export User Defined Widgets"""
-    bl_idname = "bonewidget.export_library"
+    bl_idname = "bonewidget.export_widget_library"
     bl_label = "Export Library"
     bl_options = {'REGISTER'}
 
@@ -1225,7 +1225,7 @@ class BONEWIDGET_OT_add_presets_from_armature(bpy.types.Operator):
         if colorset_imports:
             bpy.types.WindowManager.custom_data = colorset_imports
 
-            bpy.ops.bonewidget.widget_ask_popup('INVOKE_DEFAULT')
+            bpy.ops.bonewidget.import_items_ask_popup('INVOKE_DEFAULT')
         else:
             self.report({'INFO'}, f"No new custom color sets found!")
 
@@ -1283,16 +1283,16 @@ class BONEWIDGET_OT_import_color_presets(bpy.types.Operator):
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
 
             elif self.import_option == "ASK":
-                bpy.ops.bonewidget.widget_ask_popup('INVOKE_DEFAULT')
+                bpy.ops.bonewidget.import_items_ask_popup('INVOKE_DEFAULT')
 
             elif self.import_option in ["OVERWRITE", "SKIP"]:
                 preset_images = set()
 
                 # extract image names if any
-                #for _, value in import_preset_data.widgets.items():
+                #for _, value in import_preset_data.imported_items.items():
                     #preset_images.add(value['image'])
 
-                update_color_presets(import_preset_data.widgets, preset_images, self.filepath)
+                update_color_presets(import_preset_data.imported_items, preset_images, self.filepath)
 
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
             else:
@@ -1461,8 +1461,8 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
 classes = (
     BONEWIDGET_OT_remove_widgets,
     BONEWIDGET_OT_add_widgets,
-    BONEWIDGET_OT_import_library,
-    BONEWIDGET_OT_export_library,
+    BONEWIDGET_OT_import_widget_library,
+    BONEWIDGET_OT_export_widget_library,
     BONEWIDGET_OT_match_symmetrize_shape,
     BONEWIDGET_OT_match_bone_transforms,
     BONEWIDGET_OT_return_to_armature,
@@ -1473,7 +1473,7 @@ classes = (
     BONEWIDGET_OT_clear_bone_widgets,
     BONEWIDGET_OT_resync_widget_names,
     BONEWIDGET_OT_add_object_as_widget,
-    BONEWIDGET_OT_import_widgets_summary_popup,
+    BONEWIDGET_OT_import_items_summary_popup,
     BONEWIDGET_OT_import_items_ask_popup,
     BONEWIDGET_OT_shared_property_group,
     BONEWIDGET_OT_image_select,

@@ -196,19 +196,19 @@ def export_widget_library(filepath):
     return len(wgts)
 
 
-class BoneWidgetImportStats:
+class BoneWidgetImportData:
     def __init__(self):
-        self.new_widgets = 0
+        self.new_imported_items = 0
         self.total_num_imports = 0
         self.failed_imports = {}
         self.skipped_imports = [] # to make sure the data won't change order
-        self.widgets = {}
+        self.imported_items = {}
         self.duplicate_imports = {} # store duplicated import items
         self.import_type = None
         self.json_import_error = False
 
     def imported(self):
-        return self.new_widgets or len(self.widgets)
+        return self.new_imported_items or len(self.imported_items)
     
     def skipped(self):
         return len(self.skipped_imports)
@@ -221,7 +221,7 @@ class BoneWidgetImportStats:
     
     def reset_imports(self):
         self.skipped_imports = []
-        self.widgets = {}
+        self.imported_items = {}
         self.duplicate_imports = {}
     
 
@@ -233,7 +233,7 @@ def import_widget_library(filepath, action=""):
     #dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
     dest_dir = bpy.app.tempdir
 
-    widget_import = BoneWidgetImportStats()
+    widget_import = BoneWidgetImportData()
 
     widget_import.import_type = "widget"
 
@@ -268,15 +268,15 @@ def import_widget_library(filepath, action=""):
                 if action == "ASK":
                     widget_import.skipped_imports.append({name : data})
                 elif action == "OVERWRITE":
-                    widget_import.widgets.update({name : data})
+                    widget_import.imported_items.update({name : data})
                 elif action == "SKIP":
                     # check for duplicates
                     data_match = data == current_wgts[name]
-                    if name in current_wgts and data_match or data_match:
+                    if data_match:
                         widget_import.skipped_imports.append({name : data})
                         #widget_import.duplicate_imports.update({name : data})
                     elif name not in current_wgts:
-                        widget_import.widgets.update({name : data})
+                        widget_import.imported_items.update({name : data})
                     else:
                         widget_import.skipped_imports.append({name : data})
                 else:
@@ -408,7 +408,7 @@ def import_color_presets(filepath, action=""):
     from zipfile import ZipFile
     dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
 
-    presets_import = BoneWidgetImportStats()
+    presets_import = BoneWidgetImportData()
 
     presets_import.import_type = "colorset"
 
@@ -443,14 +443,13 @@ def import_color_presets(filepath, action=""):
                 if action == "ASK":
                     presets_import.skipped_imports.append({name: preset})
                 elif action == "OVERWRITE":
-                    presets_import.widgets.update({name: preset})
+                    presets_import.imported_items.update({name: preset})
                 elif action == "SKIP":
                     # name and colors match or just colors match
-                    if name in current_presets and colors_match(preset, current_presets[name]) or \
-                                colors_match(preset, current_presets[name]):
+                    if colors_match(preset, current_presets[name]):
                         presets_import.skipped_imports.append({name: preset})
                     elif not name in current_presets:
-                        presets_import.widgets.update({name: preset})
+                        presets_import.imported_items.update({name: preset})
                     else:
                         presets_import.skipped_imports.append({name: preset})
                 else:
@@ -482,7 +481,7 @@ def colors_match(set1, set2):
 def scan_armature_color_presets(context, armature):
     found_color_sets = []
 
-    colorsets_import = BoneWidgetImportStats()
+    colorsets_import = BoneWidgetImportData()
     colorsets_import.import_type = "colorset"
 
     current_color_sets = context.window_manager.custom_color_presets

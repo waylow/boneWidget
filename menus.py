@@ -14,8 +14,8 @@ class BONEWIDGET_MT_bw_specials(Menu):
         layout.operator("bonewidget.render_widget_thumbnail", icon="RESTRICT_RENDER_OFF",
                         text="Render object as thumbnail")
         layout.separator()
-        layout.operator("bonewidget.import_library", icon="IMPORT", text="Import Widget Library")
-        layout.operator("bonewidget.export_library", icon="EXPORT", text="Export Widget Library")
+        layout.operator("bonewidget.import_widget_library", icon="IMPORT", text="Import Widget Library")
+        layout.operator("bonewidget.export_widget_library", icon="EXPORT", text="Export Widget Library")
 
 
 class BONEWIDGET_MT_bw_color_presets_specials(Menu):

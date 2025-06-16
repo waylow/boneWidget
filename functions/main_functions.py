@@ -524,8 +524,6 @@ def set_bone_color(context, color, clear_both_modes=None):
                     edit_bone.color.custom.active = context.scene.custom_edit_color_set.active
 
 
-
-
 def copy_bone_color(context, bone):
     live_update_current_state = context.scene.live_update_on
     context.scene.live_update_on = False
