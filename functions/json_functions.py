@@ -480,7 +480,10 @@ def colors_match(set1, set2):
 
 
 def scan_armature_color_presets(context, armature):
-    unique_color_sets = 0
+    found_color_sets = []
+
+    colorsets_import = BoneWidgetImportStats()
+    colorsets_import.import_type = "colorset"
 
     current_color_sets = context.window_manager.custom_color_presets
 
@@ -492,9 +495,11 @@ def scan_armature_color_presets(context, armature):
                 if colors_match(bone.color.custom, color_set):
                     is_unique_colorset = False  # not unique
                     break
-            if is_unique_colorset:
-                unique_color_sets += 1
-                add_color_set_from_bone(context, bone, " - Edit Color")
+            if is_unique_colorset and not bone.color.custom in found_color_sets:
+                color_set = {attr: list(getattr(bone.color.custom, attr)[:3]) for attr in ["normal", "active", "select"]}
+                color_set['name'] = bone.name
+                colorsets_import.skipped_imports.append({bone.name: color_set})
+                found_color_sets.append(bone.color.custom)
 
         # pose bones
         pose_bone = context.object.pose.bones.get(bone.name)
@@ -504,11 +509,13 @@ def scan_armature_color_presets(context, armature):
                 if colors_match(pose_bone.color.custom, color_set):
                     is_unique_colorset = False # not unique
                     break
-            if is_unique_colorset:
-                unique_color_sets += 1
-                add_color_set_from_bone(context, pose_bone, " - Pose Color")
+            if is_unique_colorset and not pose_bone.color.custom in found_color_sets:
+                color_set = {attr: list(getattr(pose_bone.color.custom, attr)[:3]) for attr in ["normal", "active", "select"]}
+                color_set['name'] = bone.name
+                colorsets_import.skipped_imports.append({bone.name: color_set})
+                found_color_sets.append(bone.color.custom)
 
-    return unique_color_sets
+    return colorsets_import
 
 
 def export_color_presets(filepath, context):
