@@ -5,6 +5,7 @@ import numpy
 import re
 from bpy.app.handlers import persistent
 from .main_functions import get_preferences
+from ..classes import BoneWidgetImportData, Widget, ColorSet
 from .. import __package__
 
 JSON_DEFAULT_WIDGETS = "widgets.json"
@@ -194,36 +195,7 @@ def export_widget_library(filepath):
             return 0
 
     return len(wgts)
-
-
-class BoneWidgetImportData:
-    def __init__(self):
-        self.new_imported_items = 0
-        self.total_num_imports = 0
-        self.failed_imports = {}
-        self.skipped_imports = [] # to make sure the data won't change order
-        self.imported_items = {}
-        self.duplicate_imports = {} # store duplicated import items
-        self.import_type = None
-        self.json_import_error = False
-
-    def imported(self):
-        return self.new_imported_items or len(self.imported_items)
-    
-    def skipped(self):
-        return len(self.skipped_imports)
-    
-    def failed(self):
-        return len(self.failed_imports)
-    
-    def total(self):
-        return self.total_num_imports
-    
-    def reset_imports(self):
-        self.skipped_imports = []
-        self.imported_items = {}
-        self.duplicate_imports = {}
-    
+   
 
 def import_widget_library(filepath, action=""):
     required_data_keys = ("vertices", "faces", "edges", "image") # json data
@@ -262,25 +234,25 @@ def import_widget_library(filepath, action=""):
                 
                 # validate json data
                 if not validate_json_data(data, required_data_keys):
-                    widget_import.failed_imports.update({name : data})
+                    widget_import.failed_imports.update(Widget(name, data))
                     continue
 
                 if action == "ASK":
-                    widget_import.skipped_imports.append({name : data})
+                    widget_import.skipped_imports.append(Widget(name, data))
                 elif action == "OVERWRITE":
-                    widget_import.imported_items.update({name : data})
+                    widget_import.imported_items.update(Widget(name, data))
                 elif action == "SKIP":
                     # check for duplicates
                     data_match = data == current_wgts[name]
                     if data_match:
-                        widget_import.skipped_imports.append({name : data})
+                        widget_import.skipped_imports.append(Widget(name, data))
                         #widget_import.duplicate_imports.update({name : data})
                     elif name not in current_wgts:
-                        widget_import.imported_items.update({name : data})
+                        widget_import.imported_items.update(Widget(name, data))
                     else:
-                        widget_import.skipped_imports.append({name : data})
+                        widget_import.skipped_imports.append(Widget(name, data))
                 else:
-                    widget_import.failed_imports.update({name : data})
+                    widget_import.failed_imports.update(Widget(name, data))
 
         except TypeError as e:  # Handle data type errors specifically
             print(f"Error while importing widget library: {e}")
@@ -288,7 +260,7 @@ def import_widget_library(filepath, action=""):
         except Exception as e:
             print(f"Error while importing widget library: {e}")
             for name, data in wgts.items():
-                widget_import.failed_imports.update({name : data})
+                widget_import.failed_imports.update(Widget(name, data))
                 widget_import.total_num_imports = widget_import.failed()
     return widget_import
 
@@ -436,24 +408,24 @@ def import_color_presets(filepath, action=""):
 
                 # validate json data
                 if not validate_json_data(preset, required_data_keys, False):
-                    presets_import.failed_imports.update(preset)
+                    presets_import.failed_imports.update(ColorSet(preset))
                     continue
 
                 name = preset['name']
                 if action == "ASK":
-                    presets_import.skipped_imports.append({name: preset})
+                    presets_import.skipped_imports.append(ColorSet(preset))
                 elif action == "OVERWRITE":
-                    presets_import.imported_items.update({name: preset})
+                    presets_import.imported_items.update(ColorSet(preset))
                 elif action == "SKIP":
                     # name and colors match or just colors match
                     if colors_match(preset, current_presets[name]):
-                        presets_import.skipped_imports.append({name: preset})
+                        presets_import.skipped_imports.append(ColorSet(preset))
                     elif not name in current_presets:
-                        presets_import.imported_items.update({name: preset})
+                        presets_import.imported_items.update(ColorSet(preset))
                     else:
-                        presets_import.skipped_imports.append({name: preset})
+                        presets_import.skipped_imports.append(ColorSet(preset))
                 else:
-                    presets_import.failed_imports.update({name: preset})
+                    presets_import.failed_imports.update(ColorSet(preset))
 
 
         except TypeError as e:  # Handle data type errors specifically
@@ -462,7 +434,7 @@ def import_color_presets(filepath, action=""):
         except Exception as e:
             print(f"Error while importing color presets: {e}")
             for preset in presets:
-                presets_import.failed_imports.update({preset['name'] : preset})
+                presets_import.failed_imports.update(ColorSet(preset))
                 presets_import.total_num_imports = presets_import.failed()              
     return presets_import
 
@@ -497,7 +469,7 @@ def scan_armature_color_presets(context, armature):
             if is_unique_colorset and not bone.color.custom in found_color_sets:
                 color_set = {attr: list(getattr(bone.color.custom, attr)[:3]) for attr in ["normal", "active", "select"]}
                 color_set['name'] = bone.name
-                colorsets_import.skipped_imports.append({bone.name: color_set})
+                colorsets_import.skipped_imports.append(ColorSet(color_set))
                 found_color_sets.append(bone.color.custom)
 
         # pose bones
@@ -511,7 +483,7 @@ def scan_armature_color_presets(context, armature):
             if is_unique_colorset and not pose_bone.color.custom in found_color_sets:
                 color_set = {attr: list(getattr(pose_bone.color.custom, attr)[:3]) for attr in ["normal", "active", "select"]}
                 color_set['name'] = bone.name
-                colorsets_import.skipped_imports.append({bone.name: color_set})
+                colorsets_import.skipped_imports.append(ColorSet(color_set))
                 found_color_sets.append(bone.color.custom)
 
     return colorsets_import
@@ -576,7 +548,7 @@ def add_color_set_from_bone(context, bone, suffix_name):
 def add_color_set(context, color_set = None):
     new_item = context.window_manager.custom_color_presets.add()
 
-    base_name = "Color Set" if not color_set else color_set['name']
+    base_name = "Color Set" if not color_set else color_set.name
     new_name = base_name
 
     # check if the name already ends with an incremented number
@@ -595,9 +567,9 @@ def add_color_set(context, color_set = None):
         new_item.select = (0.0, 1.0, 0.0)
         new_item.active = (0.0, 0.0, 1.0)
     else:
-        new_item.normal = color_set['normal']
-        new_item.select = color_set['select']
-        new_item.active = color_set['active']
+        new_item.normal = color_set.normal
+        new_item.select = color_set.select
+        new_item.active = color_set.active
 
 
 def save_color_sets(context):

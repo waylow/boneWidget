@@ -1,10 +1,11 @@
 import bpy
 import threading
-from .functions import save_color_sets, update_bone_color
+from .functions import update_bone_color
 
 save_timer = None
 
 def debounce_save(context):
+    from .functions import save_color_sets  # moved here to avoid circular dependencies
     global save_timer
     if save_timer is not None:
         save_timer.cancel()
