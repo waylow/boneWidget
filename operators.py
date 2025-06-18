@@ -1172,6 +1172,12 @@ class BONEWIDGET_OT_add_preset_from_bone(bpy.types.Operator):
 
         bone = context.active_pose_bone if context.object.mode == 'POSE' else context.active_bone
 
+        # do some validation checking
+        if bone.color.palette == 'DEFAULT':
+            mode = "pose mode" if context.object.mode == 'POSE' else "edit mode"
+            self.report({'WARNING'}, f"No available color set found in {mode}!")
+            return {'CANCELLED'}
+
         existing_names = {item.name for item in context.window_manager.custom_color_presets}
         while new_name in existing_names:
             new_name = f"{base_name}.{count:03d}"
