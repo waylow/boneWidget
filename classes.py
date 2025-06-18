@@ -9,10 +9,10 @@ class BoneWidgetImportData:
     def __init__(self):
         self.new_imported_items: int = 0  # Count of new successfully imported items
         self.total_num_imports: int = 0  # Total number of attempted imports
-        self.failed_imports: dict[str, str] = {}  # Failed imports (key: item name, value: error message)
-        self.skipped_imports: list[dict[str, str]] = []  # List of skipped imports with metadata
-        self.imported_items: dict[str, dict] = {}  # Successfully imported items (key: name, value: item details)
-        self.duplicate_imports: dict[str, dict] = {}  # Duplicate import items (key: name, value: item details)
+        self.failed_imports: list[Widget | ColorSet] = []
+        self.skipped_imports: list[Widget | ColorSet] = []
+        self.imported_items: list[Widget | ColorSet] = []
+        self.duplicate_imports: list[Widget | ColorSet] = []
         self.import_type: str | None = None  # Type of import operation (None if undefined)
         self.json_import_error: bool = False  # Flag for JSON parsing errors
 

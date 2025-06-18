@@ -765,7 +765,17 @@ class BONEWIDGET_OT_import_widget_library(bpy.types.Operator):
             elif self.import_option == "ASK":
                 bpy.ops.bonewidget.import_items_ask_popup('INVOKE_DEFAULT')
 
-            elif self.import_option in ["OVERWRITE", "SKIP"]:               
+            elif self.import_option in ["OVERWRITE", "SKIP"]:
+                widget_images = set()
+                widgets = {}
+
+                # convert Widget objects to dict items and extract image names if any
+                for widget in import_library_data.imported_items:
+                    widgets.update(widget.to_dict())
+                    widget_images.add(widget.image)
+
+                update_widget_library(widgets, widget_images, self.filepath)
+
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
 
             else:
@@ -1293,13 +1303,7 @@ class BONEWIDGET_OT_import_color_presets(bpy.types.Operator):
                 bpy.ops.bonewidget.import_items_ask_popup('INVOKE_DEFAULT')
 
             elif self.import_option in ["OVERWRITE", "SKIP"]:
-                preset_images = set()
-
-                # extract image names if any
-                #for _, value in import_preset_data.imported_items.items():
-                    #preset_images.add(value['image'])
-
-                update_color_presets(import_preset_data.imported_items, preset_images, self.filepath)
+                update_color_presets(import_preset_data.imported_items, self.filepath)
 
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
             else:

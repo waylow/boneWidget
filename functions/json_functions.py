@@ -229,18 +229,21 @@ def import_widget_library(filepath, action=""):
             current_wgts = read_widgets(JSON_USER_WIDGETS)
 
             # check for duplicate names
+            print("\n\n\nPREPARING TO LOOP")
             for name, data in sorted(wgts.items()): # sorting by keys
                 widget_import.total_num_imports += 1
-                
+                print("\n\n\nIN THE LOOP\n\n\n")
                 # validate json data
                 if not validate_json_data(data, required_data_keys):
-                    widget_import.failed_imports.update(Widget(name, data))
+                    widget_import.failed_imports.append(Widget(name, data))
+                    print("\n\n\nERROR 1\n\n\n\n")
                     continue
 
                 if action == "ASK":
                     widget_import.skipped_imports.append(Widget(name, data))
                 elif action == "OVERWRITE":
-                    widget_import.imported_items.update(Widget(name, data))
+                    print("\n\n\nERROR 2\n\n\n\n")
+                    widget_import.imported_items.append(Widget(name, data))
                 elif action == "SKIP":
                     # check for duplicates
                     data_match = data == current_wgts[name]
@@ -248,11 +251,11 @@ def import_widget_library(filepath, action=""):
                         widget_import.skipped_imports.append(Widget(name, data))
                         #widget_import.duplicate_imports.update({name : data})
                     elif name not in current_wgts:
-                        widget_import.imported_items.update(Widget(name, data))
+                        widget_import.imported_items.append(Widget(name, data))
                     else:
                         widget_import.skipped_imports.append(Widget(name, data))
                 else:
-                    widget_import.failed_imports.update(Widget(name, data))
+                    widget_import.failed_imports.append(Widget(name, data))
 
         except TypeError as e:  # Handle data type errors specifically
             print(f"Error while importing widget library: {e}")
@@ -260,7 +263,7 @@ def import_widget_library(filepath, action=""):
         except Exception as e:
             print(f"Error while importing widget library: {e}")
             for name, data in wgts.items():
-                widget_import.failed_imports.update(Widget(name, data))
+                widget_import.failed_imports.append(Widget(name, data))
                 widget_import.total_num_imports = widget_import.failed()
     return widget_import
 
@@ -355,8 +358,8 @@ def read_color_presets():
     return presets
 
 
-def update_color_presets(new_presets, new_images, zip_filepath):
-    for preset in new_presets.values():
+def update_color_presets(new_presets, zip_filepath):
+    for preset in new_presets:
         add_color_set(bpy.context, preset)
 
     # extract any images needed from zip library
@@ -408,24 +411,24 @@ def import_color_presets(filepath, action=""):
 
                 # validate json data
                 if not validate_json_data(preset, required_data_keys, False):
-                    presets_import.failed_imports.update(ColorSet(preset))
+                    presets_import.failed_imports.append(ColorSet(preset))
                     continue
 
                 name = preset['name']
                 if action == "ASK":
                     presets_import.skipped_imports.append(ColorSet(preset))
                 elif action == "OVERWRITE":
-                    presets_import.imported_items.update(ColorSet(preset))
+                    presets_import.imported_items.append(ColorSet(preset))
                 elif action == "SKIP":
                     # name and colors match or just colors match
                     if colors_match(preset, current_presets[name]):
                         presets_import.skipped_imports.append(ColorSet(preset))
                     elif not name in current_presets:
-                        presets_import.imported_items.update(ColorSet(preset))
+                        presets_import.imported_items.append(ColorSet(preset))
                     else:
                         presets_import.skipped_imports.append(ColorSet(preset))
                 else:
-                    presets_import.failed_imports.update(ColorSet(preset))
+                    presets_import.failed_imports.append(ColorSet(preset))
 
 
         except TypeError as e:  # Handle data type errors specifically
@@ -434,7 +437,7 @@ def import_color_presets(filepath, action=""):
         except Exception as e:
             print(f"Error while importing color presets: {e}")
             for preset in presets:
-                presets_import.failed_imports.update(ColorSet(preset))
+                presets_import.failed_imports.append(ColorSet(preset))
                 presets_import.total_num_imports = presets_import.failed()              
     return presets_import
 
