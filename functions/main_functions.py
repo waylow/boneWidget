@@ -529,9 +529,14 @@ def copy_bone_color(context, bone):
     context.scene.live_update_on = False
     
     if bone.color.is_custom:
-        context.scene.custom_pose_color_set.normal = bone.color.custom.normal
-        context.scene.custom_pose_color_set.select = bone.color.custom.select
-        context.scene.custom_pose_color_set.active = bone.color.custom.active
+        if context.object.mode == 'POSE':
+            context.scene.custom_pose_color_set.normal = bone.color.custom.normal
+            context.scene.custom_pose_color_set.select = bone.color.custom.select
+            context.scene.custom_pose_color_set.active = bone.color.custom.active
+        else:
+            context.scene.custom_edit_color_set.normal = bone.color.custom.normal
+            context.scene.custom_edit_color_set.select = bone.color.custom.select
+            context.scene.custom_edit_color_set.active = bone.color.custom.active
     elif bone.color.palette != "DEFAULT": # bone has a theme assigned
         theme = bone.color.palette
         theme_id = int(theme[-2:]) - 1

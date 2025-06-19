@@ -972,7 +972,10 @@ class BONEWIDGET_OT_copy_bone_color(bpy.types.Operator):
 
     def execute(self, context):
         if context.object.mode == 'POSE':
-            copy_bone_color(context, context.selected_pose_bones[0])
+            selected_bone = context.selected_pose_bones[0]
+            if not selected_bone.color.is_custom and not 'THEME' in selected_bone.color.palette:
+                selected_bone = context.active_bone
+            copy_bone_color(context, selected_bone)
         elif context.object.mode == 'EDIT':
             copy_bone_color(context, context.selected_bones[0])
         return {'FINISHED'}
