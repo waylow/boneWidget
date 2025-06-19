@@ -229,20 +229,16 @@ def import_widget_library(filepath, action=""):
             current_wgts = read_widgets(JSON_USER_WIDGETS)
 
             # check for duplicate names
-            print("\n\n\nPREPARING TO LOOP")
             for name, data in sorted(wgts.items()): # sorting by keys
                 widget_import.total_num_imports += 1
-                print("\n\n\nIN THE LOOP\n\n\n")
                 # validate json data
                 if not validate_json_data(data, required_data_keys):
                     widget_import.failed_imports.append(Widget(name, data))
-                    print("\n\n\nERROR 1\n\n\n\n")
                     continue
 
                 if action == "ASK":
                     widget_import.skipped_imports.append(Widget(name, data))
                 elif action == "OVERWRITE":
-                    print("\n\n\nERROR 2\n\n\n\n")
                     widget_import.imported_items.append(Widget(name, data))
                 elif action == "SKIP":
                     # check for duplicates
@@ -268,7 +264,8 @@ def import_widget_library(filepath, action=""):
     return widget_import
 
 
-def update_widget_library(new_widgets, new_images, zip_filepath):
+def update_widget_library(new_widgets: dict[str, dict[str, list | str]],
+                          new_images: set[str], zip_filepath: str) -> None:
     current_widget = bpy.context.window_manager.widget_list  # store the currently selected widget
 
     wgts = read_widgets(JSON_USER_WIDGETS)
@@ -454,7 +451,7 @@ def colors_match(set1, set2):
 
 
 def scan_armature_color_presets(context, armature):
-    found_color_sets = []
+    found_color_sets = set()
 
     colorsets_import = BoneWidgetImportData()
     colorsets_import.import_type = "colorset"
@@ -469,11 +466,13 @@ def scan_armature_color_presets(context, armature):
                 if colors_match(bone.color.custom, color_set):
                     is_unique_colorset = False  # not unique
                     break
-            if is_unique_colorset and not bone.color.custom in found_color_sets:
+
+            color_data = (tuple(bone.color.custom.normal), tuple(bone.color.custom.select), tuple(bone.color.custom.active))
+            if is_unique_colorset and not color_data in found_color_sets:
                 color_set = {attr: list(getattr(bone.color.custom, attr)[:3]) for attr in ["normal", "active", "select"]}
                 color_set['name'] = bone.name
                 colorsets_import.skipped_imports.append(ColorSet(color_set))
-                found_color_sets.append(bone.color.custom)
+                found_color_sets.add(color_data)
 
         # pose bones
         pose_bone = context.object.pose.bones.get(bone.name)
@@ -483,11 +482,13 @@ def scan_armature_color_presets(context, armature):
                 if colors_match(pose_bone.color.custom, color_set):
                     is_unique_colorset = False # not unique
                     break
-            if is_unique_colorset and not pose_bone.color.custom in found_color_sets:
+            
+            color_data = (tuple(pose_bone.color.custom.normal), tuple(pose_bone.color.custom.select), tuple(pose_bone.color.custom.active))
+            if is_unique_colorset and not color_data in found_color_sets:
                 color_set = {attr: list(getattr(pose_bone.color.custom, attr)[:3]) for attr in ["normal", "active", "select"]}
                 color_set['name'] = bone.name
                 colorsets_import.skipped_imports.append(ColorSet(color_set))
-                found_color_sets.append(bone.color.custom)
+                found_color_sets.add(color_data)
 
     return colorsets_import
 
