@@ -34,6 +34,7 @@ from .functions import (
     save_color_sets,
     load_color_presets,
     add_color_set,
+    scan_armature_color_presets,
     import_color_presets,
     export_color_presets,
     update_color_presets,
@@ -42,11 +43,11 @@ from .functions import (
     restore_viewport_position,
     render_widget_thumbnail,
     add_camera_from_view,
-    frame_object_with_padding,
-    get_custom_image_dir
+    frame_object_with_padding
 )
 
 from .props import ImportColorSet
+from .classes import ColorSet
 
 from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, IntVectorProperty, StringProperty, EnumProperty
 
@@ -490,10 +491,10 @@ class BONEWIDGET_OT_remove_widgets(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_import_widgets_summary_popup(bpy.types.Operator):
-    """Display summary of imported Widget Library"""
+class BONEWIDGET_OT_import_items_summary_popup(bpy.types.Operator):
+    """Display summary of imported Items"""
     bl_idname = "bonewidget.import_summary_popup"
-    bl_label = "Imported Widget Summary"
+    bl_label = "Imported Item Summary"
     bl_options = {'INTERNAL'}
 
  
@@ -510,13 +511,13 @@ class BONEWIDGET_OT_import_widgets_summary_popup(bpy.types.Operator):
             row.alert = False
             layout.separator()
         else:
-            row.label(text=f"Imported Widgets: {context.window_manager.custom_data.imported()}")
+            row.label(text=f"Imported Items: {context.window_manager.custom_data.imported()}")
 
             row = layout.row()
-            row.label(text=f"Skipped Widgets: {context.window_manager.custom_data.skipped()}")
+            row.label(text=f"Skipped Items: {context.window_manager.custom_data.skipped()}")
             
             row = layout.row()
-            row.label(text=f"Failed Widgets: {context.window_manager.custom_data.failed()}")
+            row.label(text=f"Failed Items: {context.window_manager.custom_data.failed()}")
 
 
     def invoke(self, context, event):
@@ -528,14 +529,14 @@ class BONEWIDGET_OT_import_widgets_summary_popup(bpy.types.Operator):
 
 class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
     """Ask user how to handle name collisions from the imported items"""
-    bl_idname = "bonewidget.widget_ask_popup"
-    bl_label = "Imported Items Choice Popup"
+    bl_idname = "bonewidget.import_items_ask_popup"
+    bl_label = "Imported Items"
     bl_options = {'INTERNAL'}
 
-    widget_import_data = None
+    custom_import_data = None
 
     import_options = [
-        ("OVERWRITE", "Overwrite", "Overwrite existing item"),
+        ("OVERWRITE", "Add/Overwrite", "Add or Overwrite existing item"),
         ("SKIP", "Skip", "Skip item"),
         ("RENAME", "Rename", "Rename item"),
     ]
@@ -546,11 +547,10 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
 
         #layout.separator()
         row = layout.row()
-
         row.label(text="Choose an action:")
 
-        for i, w in enumerate(self.widget_import_data.skipped_imports):
-            if self.widget_import_data.import_type == "widget":
+        for i, _ in enumerate(self.custom_import_data.skipped_imports):
+            if self.custom_import_data.import_type == "widget":
                 row = layout.row(align=True)
                 row.scale_x = 2.0
 
@@ -559,7 +559,7 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
                 else:
                     row.label(text=str(getattr(context.window_manager.prop_grp, f"EditName{i}")))
 
-                widget_name = list(self.widget_import_data.skipped_imports[i])[0]
+                widget_name = self.custom_import_data.skipped_imports[i].name
                 icon_id = context.window_manager.prop_grp.image_collection[widget_name].icon_id
                 icon_row = row.row(align=True)
                 icon_row.scale_x = 6
@@ -568,7 +568,7 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
                 row.separator(factor=0.4)
                 row.prop(context.window_manager.prop_grp, f"ImportOptions{i}", text="")
 
-            elif self.widget_import_data.import_type == "colorset":
+            elif self.custom_import_data.import_type == "colorset":
                 row = layout.row(align=True)
                 row.scale_x = 3.0
 
@@ -594,15 +594,14 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
         layout.separator()
 
     def invoke(self, context, event):
-        self.widget_import_data = bpy.context.window_manager.custom_data
-        import_type = self.widget_import_data.import_type
+        self.custom_import_data = bpy.context.window_manager.custom_data
+        import_type = self.custom_import_data.import_type
         
         # generate the x number of drop down lists and widget names needed
-        for n, widget in enumerate(self.widget_import_data.skipped_imports):
-            widget_name, widget_data = next(iter(widget.items()))
+        for n, widget in enumerate(self.custom_import_data.skipped_imports):
 
             setattr(BONEWIDGET_OT_shared_property_group, f"ImportOptions{n}", EnumProperty(
-                    name=widget_name,
+                    name=widget.name,
                     description="Choose an option",
                     items=self.import_options,
                     default="SKIP"
@@ -613,55 +612,56 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
             if import_type == "colorset":
                 setattr(BONEWIDGET_OT_shared_property_group, f"ColorSets{n}", bpy.props.PointerProperty(type=ImportColorSet))
                 color_instance = getattr(bpy.context.window_manager.prop_grp, f"ColorSets{n}", None)
-                color_instance.name = widget_name
-                color_instance.normal = widget_data['normal']
-                color_instance.select = widget_data['select']
-                color_instance.active = widget_data['active']
+                color_instance.name = widget.name
+                color_instance.normal = widget.normal
+                color_instance.select = widget.select
+                color_instance.active = widget.active
                 
             setattr(BONEWIDGET_OT_shared_property_group, f"EditName{n}", StringProperty(
-                    name=widget_name,
-                    default=widget_name,
+                    name=widget.name,
+                    default=widget.name,
                     description="The name of the imported item",
             ))
-            setattr(bpy.context.window_manager.prop_grp, f"EditName{n}", widget_name)
+            setattr(bpy.context.window_manager.prop_grp, f"EditName{n}", widget.name)
 
             # widget preview images
             if import_type == "widget":
-                image_path = os.path.join(bpy.app.tempdir, "custom_thumbnails", widget_data['image'])
-                context.window_manager.prop_grp.image_collection.load(widget_name, image_path, 'IMAGE')
+                image_path = os.path.join(bpy.app.tempdir, "custom_thumbnails", widget.image)
+                context.window_manager.prop_grp.image_collection.load(widget.name, image_path, 'IMAGE')
         
         return context.window_manager.invoke_props_dialog(self, width=350)
     
     def execute(self, context):
         widget_results = {}
         widget_images = set()
-        import_type = self.widget_import_data.import_type
-        total_imports = len(self.widget_import_data.skipped_imports)
+        import_type = self.custom_import_data.import_type
+        total_imports = len(self.custom_import_data.skipped_imports)
 
-        for i, widget in enumerate(self.widget_import_data.skipped_imports[:]):
+        for i, widget in enumerate(self.custom_import_data.skipped_imports[:]):
             action = getattr(bpy.context.window_manager.prop_grp, f"ImportOptions{i}")
-            widget_name, widget_data = next(iter(widget.items()))
 
-            if action == self.import_options[1][0]:
+            if action == self.import_options[1][0]: # skip
                 continue
 
             new_widget_name = getattr(bpy.context.window_manager.prop_grp, f"EditName{i}")
             
             # error check before proceeding - widget renamed to empty string
-            if widget_name != new_widget_name and new_widget_name.strip() == "":
-                self.widget_import_data.failed_imports.update(widget)
+            if widget.name != new_widget_name and new_widget_name.strip() == "":
+                self.custom_import_data.failed_imports.update(widget)
                 continue
 
             if import_type == "widget":
-                widget_image = widget_data.get('image')
+                widget_data = widget
+                widget_image = widget.image
                 widget_image = widget_image if widget_image != "user_defined.png" else ""  # only append custom images
 
             elif import_type == "colorset":
                 widget_data = getattr(bpy.context.window_manager.prop_grp, f"ColorSets{i}", None)
+                widget_data = ColorSet.from_pg(widget_data)  # convert to ColorSet class
 
             if action == self.import_options[0][0]: # overwrite
                 if import_type == "widget":
-                    widget_results.update(widget)
+                    widget_results.update(widget_data.to_dict())
                     if widget_image: widget_images.add(widget_image)
 
                 elif import_type == "colorset":
@@ -670,25 +670,25 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
                     for index, item in enumerate(color_set_list):
                         if item.name == new_widget_name:
                             # Update the existing entry
-                            item.normal = widget_data['normal']
-                            item.select = widget_data['select']
-                            item.active = widget_data['active']
+                            item.normal = widget_data.normal
+                            item.select = widget_data.select
+                            item.active = widget_data.active
                             break
                     else:
-                        widget_data['name'] = new_widget_name
+                        widget_data.name = new_widget_name
                         add_color_set(context, widget_data)
 
             elif action == self.import_options[2][0]: # Rename
+                widget_data.name = new_widget_name
                 if import_type == "widget":
-                    widget_results.update({new_widget_name: widget_data})
+                    widget_results.update(widget_data.to_dict())  # we need the dict version
                     if widget_image: widget_images.add(widget_image)
                 elif import_type == "colorset":
-                    widget_data['name'] = new_widget_name
                     add_color_set(context, widget_data)
 
             # update the stats
-            self.widget_import_data.new_widgets += 1
-            self.widget_import_data.skipped_imports.remove(widget)
+            self.custom_import_data.new_imported_items += 1
+            self.custom_import_data.skipped_imports.remove(widget)
 
         if import_type == "widget":
             update_widget_library(widget_results, widget_images, bpy.context.window_manager.prop_grp.import_library_filepath)
@@ -704,7 +704,7 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
                 context.window_manager.prop_grp.image_collection.clear()
 
         #del bpy.types.WindowManager.custom_data
-        self.widget_import_data = None
+        self.custom_import_data = None
 
         # display summary of imported widgets
         bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
@@ -712,9 +712,9 @@ class BONEWIDGET_OT_import_items_ask_popup(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_import_library(bpy.types.Operator):
+class BONEWIDGET_OT_import_widget_library(bpy.types.Operator):
     """Import User Defined Widgets"""
-    bl_idname = "bonewidget.import_library"
+    bl_idname = "bonewidget.import_widget_library"
     bl_label = "Import Library"
     bl_options = {'REGISTER'}
 
@@ -763,9 +763,19 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
 
             elif self.import_option == "ASK":
-                bpy.ops.bonewidget.widget_ask_popup('INVOKE_DEFAULT')
+                bpy.ops.bonewidget.import_items_ask_popup('INVOKE_DEFAULT')
 
-            elif self.import_option in ["OVERWRITE", "SKIP"]:               
+            elif self.import_option in ["OVERWRITE", "SKIP"]:
+                widget_images = set()
+                widgets = {}
+
+                # convert Widget objects to dict items and extract image names if any
+                for widget in import_library_data.imported_items:
+                    widgets.update(widget.to_dict())
+                    widget_images.add(widget.image)
+
+                update_widget_library(widgets, widget_images, self.filepath)
+
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
 
             else:
@@ -779,9 +789,9 @@ class BONEWIDGET_OT_import_library(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 
-class BONEWIDGET_OT_export_library(bpy.types.Operator):
+class BONEWIDGET_OT_export_widget_library(bpy.types.Operator):
     """Export User Defined Widgets"""
-    bl_idname = "bonewidget.export_library"
+    bl_idname = "bonewidget.export_widget_library"
     bl_label = "Export Library"
     bl_options = {'REGISTER'}
 
@@ -962,7 +972,10 @@ class BONEWIDGET_OT_copy_bone_color(bpy.types.Operator):
 
     def execute(self, context):
         if context.object.mode == 'POSE':
-            copy_bone_color(context, context.selected_pose_bones[0])
+            selected_bone = context.selected_pose_bones[0]
+            if not selected_bone.color.is_custom and not 'THEME' in selected_bone.color.palette:
+                selected_bone = context.active_bone
+            copy_bone_color(context, selected_bone)
         elif context.object.mode == 'EDIT':
             copy_bone_color(context, context.selected_bones[0])
         return {'FINISHED'}
@@ -1025,7 +1038,7 @@ class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
             new_item.select = theme_color_set.select
             new_item.active = theme_color_set.active
 
-        save_color_sets(context)
+        #save_color_sets(context)
         return {'FINISHED'}
     
 
@@ -1152,7 +1165,7 @@ class BONEWIDGET_OT_add_preset_from_bone(bpy.types.Operator):
     """Adds new preset from the active bone's color palette"""
     bl_idname = "bonewidget.add_preset_from_bone"
     bl_label = "Add Preset from active Bone"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     @classmethod
     def poll(cls, context):
@@ -1171,6 +1184,12 @@ class BONEWIDGET_OT_add_preset_from_bone(bpy.types.Operator):
         count = 1
 
         bone = context.active_pose_bone if context.object.mode == 'POSE' else context.active_bone
+
+        # do some validation checking
+        if bone.color.palette == 'DEFAULT':
+            mode = "pose mode" if context.object.mode == 'POSE' else "edit mode"
+            self.report({'WARNING'}, f"No available color set found in {mode}!")
+            return {'CANCELLED'}
 
         existing_names = {item.name for item in context.window_manager.custom_color_presets}
         while new_name in existing_names:
@@ -1197,7 +1216,39 @@ class BONEWIDGET_OT_add_preset_from_bone(bpy.types.Operator):
             new_item.select = theme_color_set.select
             new_item.active = theme_color_set.active
 
-        save_color_sets(context)
+        #save_color_sets(context)
+        return {'FINISHED'}
+
+
+class BONEWIDGET_OT_add_presets_from_armature(bpy.types.Operator):
+    """Adds new presets from the active bone's color palette"""
+    bl_idname = "bonewidget.add_presets_from_armature"
+    bl_label = "Add Preset from selected Armature"
+    bl_options = {'REGISTER'}
+
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.object and 
+            context.object.type == 'ARMATURE' and 
+            (
+                (context.object.mode == 'POSE' and context.selected_pose_bones) or 
+                (context.object.mode == 'EDIT' and context.selected_editable_bones and get_preferences(context).edit_bone_colors != 'DEFAULT')
+            )
+        )
+    
+    def execute(self, context):
+        armature = context.object.data
+
+        colorset_imports = scan_armature_color_presets(context, armature)
+
+        if colorset_imports:
+            bpy.types.WindowManager.custom_data = colorset_imports
+
+            bpy.ops.bonewidget.import_items_ask_popup('INVOKE_DEFAULT')
+        else:
+            self.report({'INFO'}, f"No new custom color sets found!")
+
         return {'FINISHED'}
 
 
@@ -1252,16 +1303,10 @@ class BONEWIDGET_OT_import_color_presets(bpy.types.Operator):
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
 
             elif self.import_option == "ASK":
-                bpy.ops.bonewidget.widget_ask_popup('INVOKE_DEFAULT')
+                bpy.ops.bonewidget.import_items_ask_popup('INVOKE_DEFAULT')
 
             elif self.import_option in ["OVERWRITE", "SKIP"]:
-                preset_images = set()
-
-                # extract image names if any
-                #for _, value in import_preset_data.widgets.items():
-                    #preset_images.add(value['image'])
-
-                update_color_presets(import_preset_data.widgets, preset_images, self.filepath)
+                update_color_presets(import_preset_data.imported_items, self.filepath)
 
                 bpy.ops.bonewidget.import_summary_popup('INVOKE_DEFAULT')
             else:
@@ -1430,8 +1475,8 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
 classes = (
     BONEWIDGET_OT_remove_widgets,
     BONEWIDGET_OT_add_widgets,
-    BONEWIDGET_OT_import_library,
-    BONEWIDGET_OT_export_library,
+    BONEWIDGET_OT_import_widget_library,
+    BONEWIDGET_OT_export_widget_library,
     BONEWIDGET_OT_match_symmetrize_shape,
     BONEWIDGET_OT_match_bone_transforms,
     BONEWIDGET_OT_return_to_armature,
@@ -1442,7 +1487,7 @@ classes = (
     BONEWIDGET_OT_clear_bone_widgets,
     BONEWIDGET_OT_resync_widget_names,
     BONEWIDGET_OT_add_object_as_widget,
-    BONEWIDGET_OT_import_widgets_summary_popup,
+    BONEWIDGET_OT_import_items_summary_popup,
     BONEWIDGET_OT_import_items_ask_popup,
     BONEWIDGET_OT_shared_property_group,
     BONEWIDGET_OT_image_select,
@@ -1459,6 +1504,7 @@ classes = (
     BONEWIDGET_OT_move_custom_item_up,
     BONEWIDGET_OT_move_custom_item_down,
     BONEWIDGET_OT_add_preset_from_bone,
+    BONEWIDGET_OT_add_presets_from_armature,
     BONEWIDGET_OT_import_color_presets,
     BONEWIDGET_OT_export_color_presets,
     BONEWIDGET_OT_render_widget_thumbnail,
