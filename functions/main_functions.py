@@ -166,57 +166,57 @@ def symmetrize_widget(bone, collection):
         rigify_object_name = bpy.context.active_object.name + "_"
 
     mirror_bone = find_mirror_object(bone)
-    if mirror_bone:
-        widget = bone.custom_shape
-        mirror_widget = mirror_bone.custom_shape
+    if not mirror_bone:
+        return
 
-        if mirror_widget is not None:
-            if mirror_widget != widget:
-                if bpy.context.scene.objects.get(mirror_widget.name):
-                    bpy.data.objects.remove(mirror_widget)
+    widget = bone.custom_shape
+    if not widget or not widget.data:
+        return
 
-        new_data = widget.data.copy()
-        for vert in new_data.vertices:
-            vert.co = numpy.array(vert.co) * (-1, 1, 1)
+    # clean up existing mirrored widget if it's different
+    mirror_widget = mirror_bone.custom_shape
+    if mirror_widget and mirror_widget != widget:
+        existing = bpy.context.scene.objects.get(mirror_widget.name)
+        if existing:
+            bpy.data.objects.remove(existing)
 
-        new_object = widget.copy()
-        new_object.data = new_data
-        new_data.update()
-        new_object.name = bw_widget_prefix + rigify_object_name + find_mirror_object(bone).name
-        bpy.data.collections[collection.name].objects.link(new_object)
+    # create mirrored mesh data
+    new_data = widget.data.copy()
+    for vert in new_data.vertices:
+        vert.co.x *= -1  # mirror along X-axis
 
-        #if there is a override transform, use that bone matrix in the next step
-        if find_mirror_object(bone).custom_shape_transform:
-             mirror_bone = find_mirror_object(bone).custom_shape_transform
+    new_object = widget.copy()
+    new_object.data = new_data
+    new_object.name = bw_widget_prefix + rigify_object_name + mirror_bone.name
+    bpy.data.collections[collection.name].objects.link(new_object)
 
-        new_object.matrix_local = mirror_bone.bone.matrix_local
-        new_object.scale = [mirror_bone.bone.length, mirror_bone.bone.length, mirror_bone.bone.length]
-        new_object.data.flip_normals()
-        
-        layer = bpy.context.view_layer
-        layer.update()
+    # use custom shape transform if available
+    transform_bone = mirror_bone.custom_shape_transform or mirror_bone
+    new_object.matrix_local = transform_bone.bone.matrix_local
+    new_object.scale = [transform_bone.bone.length] * 3
+    new_object.data.flip_normals()
 
-        find_mirror_object(bone).custom_shape = new_object
-        mirror_bone.bone.show_wire = bone.bone.show_wire
+    bpy.context.view_layer.update()
 
-        if bpy.app.version >= (4,0,0):
-            # pose bone colors
-            mirror_bone.bone.color.custom.normal = bone.bone.color.custom.normal
-            mirror_bone.bone.color.custom.select = bone.bone.color.custom.select
-            mirror_bone.bone.color.custom.active = bone.bone.color.custom.active
-            mirror_bone.bone.color.palette = bone.bone.color.palette
+    mirror_bone.custom_shape = new_object
+    mirror_bone.bone.show_wire = bone.bone.show_wire
 
-            # edit bone colors
-            mirror_bone.color.custom.normal = bone.color.custom.normal
-            mirror_bone.color.custom.select = bone.color.custom.select
-            mirror_bone.color.custom.active = bone.color.custom.active
-            mirror_bone.color.palette = bone.color.palette
+    symmetrize_color = get_preferences(bpy.context).symmetrize_color
+    if bpy.app.version >= (4, 0, 0) and symmetrize_color:
+        # pose bone colors
+        mirror_bone.bone.color.custom.normal = bone.bone.color.custom.normal
+        mirror_bone.bone.color.custom.select = bone.bone.color.custom.select
+        mirror_bone.bone.color.custom.active = bone.bone.color.custom.active
+        mirror_bone.bone.color.palette = bone.bone.color.palette
 
-        if bpy.app.version >= (4,2,0):
-            mirror_bone.custom_shape_wire_width = bone.custom_shape_wire_width
+        # edit bone colors
+        mirror_bone.color.custom.normal = bone.color.custom.normal
+        mirror_bone.color.custom.select = bone.color.custom.select
+        mirror_bone.color.custom.active = bone.color.custom.active
+        mirror_bone.color.palette = bone.color.palette
 
-    else:
-        pass
+    if bpy.app.version >= (4, 2, 0):
+        mirror_bone.custom_shape_wire_width = bone.custom_shape_wire_width
 
 
 def symmetrize_widget_helper(bone, collection, active_object, widgets_and_bones):

@@ -95,6 +95,12 @@ class BoneWidget_preferences(AddonPreferences):
         default=True
     )
 
+    symmetrize_color: bpy.props.BoolProperty(
+        name="Symmetrize Bone Colors",
+        description='When enabled, bone colors will be copied when you symmetrize a widget. When disabled, only the shape will be symmetrized',
+        default=True
+    )
+
 
     def draw(self, context):
         layout = self.layout
@@ -128,6 +134,9 @@ class BoneWidget_preferences(AddonPreferences):
         row = box.row()
         row.label(text="Clearing Colors:")
         row.prop(self, "clear_both_modes")
+        row = box.row()
+        row.label(text="Symmetrize Colors:")
+        row.prop(self, "symmetrize_color")
 
 
         # preview area

@@ -59,11 +59,23 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 
         layout = self.layout
         layout.separator()
-        layout.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR', text="Symmetrize Shape")
-        layout.operator("bonewidget.match_bone_transforms",
+
+        # Symmetry buttons etc
+        row = layout.row(align=True)
+        row.operator("bonewidget.symmetrize_shape", icon='MOD_MIRROR', text="Symmetrize Shape")
+        icon='RESTRICT_COLOR_OFF'
+        if get_preferences(context).symmetrize_color:
+                icon='RESTRICT_COLOR_ON'                
+        row.prop(get_preferences(context), "symmetrize_color", icon=icon, text='', toggle=True)
+        row = layout.row()
+        row.operator("bonewidget.match_bone_transforms",
                         icon='GROUP_BONE', text="Match Bone Transforms")
-        layout.operator("bonewidget.resync_widget_names",
+        row = layout.row()
+        row.operator("bonewidget.resync_widget_names",
                         icon='FILE_REFRESH', text="Resync Widget Names")
+        
+        # Clear Bone Widget buttons etc
+        layout = self.layout
         layout.separator()
         layout.operator("bonewidget.clear_widgets",
                         icon='X', text="Clear Bone Widget")
