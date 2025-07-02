@@ -165,11 +165,9 @@ def symmetrize_widget(bone, collection):
         bw_widget_prefix = "WGT-"
         rigify_object_name = bpy.context.active_object.name + "_"
 
-    widget = bone.custom_shape
-
-    if find_mirror_object(bone):
-        mirror_bone = find_mirror_object(bone)
-
+    mirror_bone = find_mirror_object(bone)
+    if mirror_bone:
+        widget = bone.custom_shape
         mirror_widget = mirror_bone.custom_shape
 
         if mirror_widget is not None:
@@ -202,8 +200,17 @@ def symmetrize_widget(bone, collection):
         mirror_bone.bone.show_wire = bone.bone.show_wire
 
         if bpy.app.version >= (4,0,0):
-            mirror_bone.bone.color.palette = bone.bone.color.palette # pose bone color
-            mirror_bone.color.palette = bone.color.palette # edit bone color
+            # pose bone colors
+            mirror_bone.bone.color.custom.normal = bone.bone.color.custom.normal
+            mirror_bone.bone.color.custom.select = bone.bone.color.custom.select
+            mirror_bone.bone.color.custom.active = bone.bone.color.custom.active
+            mirror_bone.bone.color.palette = bone.bone.color.palette
+
+            # edit bone colors
+            mirror_bone.color.custom.normal = bone.color.custom.normal
+            mirror_bone.color.custom.select = bone.color.custom.select
+            mirror_bone.color.custom.active = bone.color.custom.active
+            mirror_bone.color.palette = bone.color.palette
 
         if bpy.app.version >= (4,2,0):
             mirror_bone.custom_shape_wire_width = bone.custom_shape_wire_width
