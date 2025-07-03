@@ -65,7 +65,7 @@ def match_bone_matrix(widget, match_bone):
     widget.matrix_local = match_bone.bone.matrix_local
     widget.matrix_world = match_bone.id_data.matrix_world @ match_bone.bone.matrix_local
     if match_bone.custom_shape_transform:
-        #if it has a tranform override, apply this to the widget loc and rot
+        #if it has a transform override, apply this to the widget loc and rot
         org_scale = widget.matrix_world.to_scale()
         org_scale_mat = Matrix.Scale(1, 4, org_scale)
         target_matrix = match_bone.custom_shape_transform.id_data.matrix_world @ match_bone.custom_shape_transform.bone.matrix_local
@@ -98,7 +98,7 @@ def from_widget_find_bone(widget):
     return match_bone
 
 
-def create_widget(bone, widget, relative, size, slide, rotation, collection, use_face_data, wireframe_width, bone_color):
+def create_widget(bone, widget, relative, size, slide, rotation, collection, use_face_data, wireframe_width):
     if not get_preferences(bpy.context).use_rigify_defaults:
         bw_widget_prefix = get_preferences(bpy.context).widget_prefix
     else:
@@ -121,7 +121,7 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
     # add the verts
     new_data.from_pydata(numpy.array(widget['vertices']) * size, widget['edges'], faces)
 
-    # Create tranform matrices (slide vector and rotation)
+    # Create transform matrices (slide vector and rotation)
     widget_matrix = Matrix()
     trans = Matrix.Translation(slide)
     rot = rotation.to_matrix().to_4x4()
@@ -148,13 +148,9 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
 
     bone.custom_shape = new_object
     bone.bone.show_wire = not use_face_data # show faces if use face data is enabled
-
-    if bpy.app.version >= (4,0,0):    
-        bone.bone.color.palette = bone_color #this will copy the selected pose bone color
-    
+   
     if bpy.app.version >= (4,2,0):
         bone.custom_shape_wire_width = wireframe_width
-        bone.bone.color.palette = bone_color
 
 
 def symmetrize_widget(bone, collection):

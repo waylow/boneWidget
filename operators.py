@@ -137,12 +137,6 @@ class BONEWIDGET_OT_create_widget(bpy.types.Operator):
         description="Set the thickness of a wireframe widget"
     )
 
-    bone_color: EnumProperty(
-        name="Bone Color",
-        description="Color of bone widget",
-        items=bone_color_items,
-        default=0,
-    )
 
     def draw(self, context):
         layout = self.layout
@@ -163,19 +157,15 @@ class BONEWIDGET_OT_create_widget(bpy.types.Operator):
         if bpy.app.version >= (4,2,0):
             row.prop(self, "wireframe_width", text="Wire Width")
             row = col.row(align=True)
-            if self.advanced_options:
-                row.prop(self, "bone_color")
-                row = col.row(align=True)
         row.prop(self, "advanced_options")
 
     def execute(self, context):
         widget_data = get_widget_data(context.window_manager.widget_list)
         slide = self.slide_advanced if self.advanced_options else (0.0, self.slide_simple, 0.0)
         global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
-        bone_color = self.bone_color if self.advanced_options else "DEFAULT"
         for bone in bpy.context.selected_pose_bones:
             create_widget(bone, widget_data, self.relative_size, global_size, slide, self.rotation,
-                         get_collection(context), self.use_face_data, self.wireframe_width, bone_color)
+                         get_collection(context), self.use_face_data, self.wireframe_width)
         return {'FINISHED'}
 
 
