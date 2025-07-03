@@ -12,7 +12,7 @@ class BONEWIDGET_MT_bw_specials(Menu):
         layout.operator("bonewidget.add_custom_image", icon="FILE_IMAGE",
                         text="Add Custom Image to Widget")
         layout.operator("bonewidget.render_widget_thumbnail", icon="RESTRICT_RENDER_OFF",
-                        text="Render object as thumbnail")
+                        text="Render Object as Thumbnail")
         layout.separator()
         layout.operator("bonewidget.import_widget_library", icon="IMPORT", text="Import Widget Library")
         layout.operator("bonewidget.export_widget_library", icon="EXPORT", text="Export Widget Library")
