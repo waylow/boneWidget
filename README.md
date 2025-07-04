@@ -31,7 +31,7 @@ This is the active shape from Bone Widget Library. This is an alternate way to a
 ## BW Specials Menu:
 <img src="images/bone_widget_specials_menu.png" alt="Bone Widget Specials Menu" width="500"/> 
 
-## Add New Widget Widget library
+## Add New Widget to library
 <img src="images/add_widget_to_library.png" alt="add widget to library" width="500"/>  <br>
 
 To add a mesh object to the library, select a mesh object and click this button.
@@ -122,9 +122,10 @@ This checkbox will switch the slide value into 3 axes rather than just the defau
 
 ### Edit/To Bone:
 When in pose mode, this will jump into edit mode for the custom bone shape and allow you to edit it.
-When you have the shape selected (object or edit mode), this button will display as "To Bone".  That will take you back to pose mode, if that mesh object is in face a custom shape.
+When you have the shape selected (object or edit mode), this button will display as "To Bone".  That will take you back to pose mode, if that mesh object is in fact a custom shape.
 
->[!NOTE]  <b>Creating and Editing Shapes:</b><br>
+> [!NOTE]
+> <b>Creating and Editing Shapes:</b><br>
 >When you 'Create' a shape, it will always be placed in the collection set in the user preferences.<br>
 >If you 'Edit' a shape, it will stay in whatever collection that widget was already located.
 
@@ -134,13 +135,13 @@ When you have the shape selected (object or edit mode), this button will display
 
 If a bone has a .L or .R, you can copy the shape over to the other side.  This will create a duplicate widget object rather than using changing any of the display transforms to mirror the same shape.  (The add-on is designed to have 1 shape per bone)
 
-**Symmetrize Bone Colors**
+### Symmetrize Bone Colors:
 When enabled and you symmetrize a bone widget, it will also copy the bone colors.  When disabled, it will not edit any colors at all when you symmetrize a widget.
 
 ### Match Bone Transforms:
 If the widgets get out of alignment with the location of the bone itself, this operator will snap the selected widget to the matrix of the bone.  It works if you have the bone(s) selected or if you have the widget object(s) selected.
 
-#### Resync Widget Names:
+### Resync Widget Names:
 Sometimes you might rename a bone/or a widget.  This operator will loop through all the custom bone shapes and make sure they match the name of the bone they are assigned to.  
 Currently the add-on is designed to have one widget per bone, if you have multiple users of the same widget, it will be renamed to the last user it finds.
 
@@ -165,7 +166,7 @@ This will only toggle the visibility of the designated widget collection (set in
 # Bone Colors
 
 As of version 2.2, Bone Widget will let you manage the colors for bones in Pose Mode (and Edit Mode if you change the user preferences).
-The normal way Blender handles bone colors is with 15 predefined Bone Color Sets (and 5 blank ones), the 'default' colors, or but using a custom color set.  
+The normal way Blender handles bone colors is with 15 predefined Bone Color Sets (and 5 blank ones), the 'default' colors, or by using a custom color set.  
 It is also possible to display different colors for both Edit Mode and Pose Mode, however, if the Pose bone colors are set to 'default' and there is any color on the Edit bone, the Edit bone color will override the Pose bone color.
 
 The add-on will always add the colors to Pose bones but you can decide how you want it to handle Edit bone colors in the user preferences.
@@ -175,24 +176,24 @@ You can choose Default, Linked, or Separate.
 **Separate** will let you set different colors for Edit Mode and Pose Mode.
 
 
-You can easily use any of Blender's Bone Color Sets (including 'Custom') with the "Set Bone Color" button and color pallette.
+You can easily use any of Blender's Bone Color Sets (including 'Custom') with the "Set Bone Color" button and color palette.
 But the add-on can also store your own preferred color sets which you can reuse over and over. 
 
 
 ## Set Bone Color
-This will set the color of the selected bones to colors in the adjoining color pallette. It will add color to the Edit Bones and/or Pose bones depending on your user preference (out of the box this will just be the Pose bones). 
+This will set the color of the selected bones to colors in the adjoining color palette. It will add color to the Edit Bones and/or Pose bones depending on your user preference (out of the box this will just be the Pose bones). 
 
 <img src="images/color_sets.png" alt="color sets" width=400px>
 
-**Color Palette**
-Click on this to choose from Blender's predefined Bone Color Sets.  The last one in the menu is the custom color set.  Choosing this will display a color pallette for 3 colors.
+## Color Palette
+Click on this to choose from Blender's predefined Bone Color Sets.  The last one in the menu is the custom color set.  Choosing this will display a color palette for 3 colors.
 
 From left to right, they are for **normal**, **selected**, and **active**.
 **Normal** is the color when the bone is not selected (or active).
 **Selected** is the color when the bone is selected (but not active).
 **Active** is the color when the bone is active.
 
-<img src="images/color_pallette.png" alt="color pallette" width=400px>
+<img src="images/color_pallette.png" alt="color palette" width=400px>
 
 ## Clear Bone Color
 Clicking this will reset the color of the selected bones back to 'default'.  If the adjoining bone icon is active (called "Clear All Bone Color"), it will remove the color from both Edit mode and Pose mode.  Or if it is disabled, it will only remove the color from the active mode (Edit mode or Pose Mode).
@@ -235,16 +236,16 @@ It is possible to import and  export all the color preset that you have added to
 ## User Preferences:
 <img src="images/bone_widget_user_prefs.png" alt="bone widget user preferneces" width=700px>
 
-### Use Rifigy Defaults
+### Use Rigify Defaults:
 
 With this enabled the add-on will use the same naming convention for the widget prefix and collection name as Rifigy.  If this setting is disabled you can set them to your preference.
 
 
-### Widget Prefix
-If the "Use Rigify Deafaults" is disabled, the add-on will append this text to the start of every new widget created.
+### Widget Prefix:
+If the "Use Rigify Defaults" is disabled, the add-on will append this text to the start of every new widget created.
 
 ### Collection Name:
-If the "Use Rigify Deafaults" is disabled, the add-on will use this as the collection to place all the newly created widgets.  If a widget already exists when you edit it, it will stay in the collection it already belongs to.  The add-on will not move existing widgets.
+If the "Use Rigify Defaults" is disabled, the add-on will use this as the collection to place all the newly created widgets.  If a widget already exists when you edit it, it will stay in the collection it already belongs to.  The add-on will not move existing widgets.
 
 ### Symmetry Suffix:
 This will let you set the suffix that is appended to the end of the symmetrical widgets.
@@ -312,7 +313,7 @@ You can chose to render out a thumbnail of the active object to the current work
 - [change] remove the "_old" functionality of the code (just delete the old widget)
 - [fix] the match bone transforms now takes the custom shape transforms into account
 - [fix] if the collection didn't exist when you tried to delete unused widgets it would throw an error.  You now get a message that hints at the problem.
- - [fixed] If there is no active object the panel.py would throw an error
+- [fixed] If there is no active object the panel.py would throw an error
 - [fixed] If you Symmetrized the Shape in pose mode with no widget added, it will throw an error.
 
 ## v2.0 Release Notes:
