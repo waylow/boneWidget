@@ -196,6 +196,7 @@ def symmetrize_widget(bone, collection):
 
     mirror_bone.custom_shape = new_object
     mirror_bone.bone.show_wire = bone.bone.show_wire
+    mirror_bone.use_custom_shape_bone_size = bone.use_custom_shape_bone_size
 
     symmetrize_color = get_preferences(bpy.context).symmetrize_color
     if bpy.app.version >= (4, 0, 0) and symmetrize_color:
