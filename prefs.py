@@ -168,4 +168,4 @@ def register():
     bpy.utils.register_class(BoneWidget_preferences)
 
 def unregister():
-    bpy.utils.register_class(BoneWidget_preferences)
+    bpy.utils.unregister_class(BoneWidget_preferences)

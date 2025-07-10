@@ -247,7 +247,9 @@ def register():
 
 
 def unregister():
-    del bpy.types.WindowManager.widget_list
+    if hasattr(bpy.types.WindowManager, "widget_list"):
+        del bpy.types.WindowManager.widget_list
+
     del bpy.types.WindowManager.toggle_preview
     del bpy.types.Scene.bone_widget_colors
     del bpy.types.Scene.live_update_on
