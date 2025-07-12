@@ -302,6 +302,8 @@ When adding a widget to the library you can use a custom image, the place holder
 - [Added] **Render a thumbnail** of the active object
 You can chose to render out a thumbnail of the active object to the current working (mesh object type only).  This will give you more options to change the thickness of the wireframe or even edit the output with an external editor before adding it as a custom image for any widget.  Or perhaps printing it and sticking it on your fridge.  The choice is yours.
 
+- [Adjusted] ** Widget tweaks**.  The face data on several widgets was repaired, and some widgets where reoriented to better suit the most logical starting orientation.
+
 
 ## v2.1 Release Notes:
 - [Added] Markus Berg added functionality to display images of the widgets. What a flippin' legend.
