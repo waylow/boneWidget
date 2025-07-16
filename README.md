@@ -1,7 +1,9 @@
 # Bone Widget
 
-Video explanation:
-https://www.youtube.com/watch?v=PDNVeDOzjzw
+Video Trailer:  
+[![Latest Bone Widget Trailer](https://img.youtube.com/vi/QiCw-7Ok3jY/0.jpg)](https://www.youtube.com/watch?v=QiCw-7Ok3jY)
+
+https://www.youtube.com/watch?v=QiCw-7Ok3jY
 
 ## Description:
 Bone Widget is a blender add-on to assist with making custom bone shapes. It has an editable library of shapes that make it easy to apply to any rig.
@@ -302,7 +304,9 @@ When adding a widget to the library you can use a custom image, the place holder
 - [Added] **Render a thumbnail** of the active object
 You can chose to render out a thumbnail of the active object to the current working (mesh object type only).  This will give you more options to change the thickness of the wireframe or even edit the output with an external editor before adding it as a custom image for any widget.  Or perhaps printing it and sticking it on your fridge.  The choice is yours.
 
-- [Adjusted] ** Widget tweaks**.  The face data on several widgets was repaired, and some widgets where reoriented to better suit the most logical starting orientation.
+- [Adjusted] **Widget tweaks**.  The face data on several widgets was repaired, and some widgets where reoriented to better suit the most logical starting orientation.  
+
+-  [Adjusted] The **slide** value(s) will always work relative to the bone length rather than world scale (when global scale is enabled).  This makes it easier to set consistent size widgets on different length bones.
 
 
 ## v2.1 Release Notes:
