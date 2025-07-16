@@ -1,6 +1,6 @@
 import bpy
 import numpy
-from mathutils import Matrix
+from mathutils import Matrix, Vector
 from .. import __package__
 
 
@@ -123,7 +123,13 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
 
     # Create transform matrices (slide vector and rotation)
     widget_matrix = Matrix()
+
+    # make the slide value always relative to the bone length 
+    if not relative: #TODO: shift this to user preference?
+        slide = Vector(slide) # turn slide into a vector
+        slide *= bone.length
     trans = Matrix.Translation(slide)
+    
     rot = rotation.to_matrix().to_4x4()
 
     # Translate then rotate the matrix
