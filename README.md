@@ -1,8 +1,9 @@
 # Bone Widget
 
 Video Trailer:  
-[![Latest Bone Widget Trailer](https://img.youtube.com/vi/QiCw-7Ok3jY/0.jpg)](https://www.youtube.com/watch?v=QiCw-7Ok3jY)
-
+<a href="https://www.youtube.com/watch?v=QiCw-7Ok3jY" target="_blank">
+  <img src="images/youtube_thumbnail.png" alt="Bone Widget Trailer" width="600">
+</a>  
 https://www.youtube.com/watch?v=QiCw-7Ok3jY
 
 ## Description:
@@ -13,7 +14,7 @@ It also has many features that make managing bone colors a breeze.
 
 ## Installation:
 
-1. Download the zipped code here from Github. (Check in the release tab for the latest stable release)
+1. Download the zipped code here from Github. **(Check in the release tab for the latest stable release)**
 2. In Blender, open Preferences->Addons->Install. Navigate to where you saved the zip file and click install.
 3. Enable the Addon with the checkbox.
 4. The UI will appear in the properties panel (n panel) in the 3d viewport.
