@@ -1,14 +1,12 @@
 import bpy
 from bpy.types import AddonPreferences
-from bpy.props import StringProperty, BoolProperty, FloatProperty
+from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 
-from .bl_class_registry import BlClassRegistry
 from .panels import BONEWIDGET_PT_bw_panel_main
-from .operators import BONEWIDGET_OT_resetDefaultImages
+from .operators import BONEWIDGET_OT_reset_default_images
 
 
-@BlClassRegistry()
-class BoneWidgetPreferences(AddonPreferences):
+class BoneWidget_preferences(AddonPreferences):
     bl_idname = __package__
 
     #Use Rigify Defaults
@@ -80,50 +78,94 @@ class BoneWidgetPreferences(AddonPreferences):
         default=True,
     )
 
+    edit_bone_colors: EnumProperty(
+        name="Edit Bone Colors",
+        description="Behavior of Edit Bone colors",
+        items=[
+            ('DEFAULT', "Default", "Set the Edit Bone color to the default colors"),
+            ('LINKED', "Linked", "Use the same colors for both the Edit bones and Pose bones"),
+            ('SEPARATE', "Separate", "Edit bones and Pose bones will have their own colors"),
+        ],
+        default='DEFAULT'
+    )
+    
+    clear_both_modes: bpy.props.BoolProperty(
+        name="Clear All Bone Color",
+        description='When enabled, bone colors from Edit mode and Pose mode will be cleared.  When disabled, only the color from the current mode will be cleared',
+        default=True
+    )
+
+    symmetrize_color: bpy.props.BoolProperty(
+        name="Symmetrize Bone Colors",
+        description='When enabled, bone colors will be copied when you symmetrize a widget. When disabled, only the shape will be symmetrized',
+        default=True
+    )
+
+
     def draw(self, context):
         layout = self.layout
 
-        row = layout.row()
-        row.prop(self, "use_rigify_defaults", text="Use Rigify Defaults")
+        box = layout.box()
+        box.prop(self, "use_rigify_defaults", text="Use Rigify Defaults")
+
+        box_row = box.row()
+        box_col = box_row.column()
+        box_col.prop(self, "widget_prefix", text="Widget Prefix")
+        box_col.prop(self, "bonewidget_collection_name", text="Collection name")
+        box_row.enabled = not self.use_rigify_defaults
+
+        box_row = box.row()
+        box_row = box.row()
+        box_row.prop(self, "symmetry_suffix", text="Symmetry suffix")
 
         row = layout.row()
-        col = row.column()
-        col.prop(self, "widget_prefix", text="Widget Prefix")
-        col.prop(self, "bonewidget_collection_name", text="Collection name")
-        row.enabled = not self.use_rigify_defaults
 
-        row = layout.row()
-        row = layout.row()
-        row.prop(self, "symmetry_suffix", text="Symmetry suffix")
+        box = layout.box()
+        box_col = box.column()
+        box_col.label(text="Set the category to show Bone-Widgets panel:")
+        box_col.prop(self, "panel_category")
 
+        # edit bone colors
         row = layout.row()
+        box = layout.box()
+        box.label(text="Bone Color Behavior:")
+        row = box.row()
+        row.prop(self, "edit_bone_colors")
+        row = box.row()
+        row.label(text="Clearing Colors:")
+        row.prop(self, "clear_both_modes")
+        row = box.row()
+        row.label(text="Symmetrize Colors:")
+        row.prop(self, "symmetrize_color")
 
-        row = layout.row()
-        col = row.column()
-        col.label(text="Set the name of the tab where the Bone-Widget addon will show:")
-        col.prop(self, "panel_category")
 
         # preview area
         row = layout.row()
-        row = layout.row()
+        box = layout.box()
         
-        row.label(text="Thumbnail Previews:")
-        row = layout.row()
-        row.prop(self, "preview_default", text="Display Previews by Default")
+        box.label(text="Thumbnail Previews:")
+        box_row = box.row()
+        box_row.prop(self, "preview_default", text="Display Previews by Default")
 
-        row = layout.row()
-        col = row.column()
-        col.label(text="Preview Panel Size:")
-        row.prop(self, "preview_panel_size", text="")
+        box_row = box.row()
+        box_col = box_row.column()
+        box_col.label(text="Preview Panel Size:")
+        box_row.prop(self, "preview_panel_size", text="")
         
-        row = layout.row()
-        col = row.column()
-        col.label(text="Preview Popup Size:")
-        row.prop(self, "preview_popup_size", text="")
-        row = layout.row()
+        box_row = box.row()
+        box_col = box_row.column()
+        box_col.label(text="Preview Popup Size:")
+        box_row.prop(self, "preview_popup_size", text="")
 
         layout.separator()
         row = layout.row()
         row = row.split(factor=.75)
         row.label(text="Reset Default Widget Thumbnails")
         row.operator("bonewidget.reset_default_images", icon="ERROR")
+
+
+def register():
+    bpy.utils.register_class(BoneWidget_preferences)
+
+def unregister():
+    bpy.utils.unregister_class(BoneWidget_preferences)

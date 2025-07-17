@@ -21,7 +21,7 @@ Created by Manuel Rais and Christophe Seux
 bl_info = {
     "name": "Bone Widget",
     "author": "Manuel Rais, Christophe Seux, Bassam Kurdali, Wayne Dixon, Blender Defender, Max Nadolny, Markus Berg",
-    "version": (2, 1),
+    "version": (2, 2),
     "blender": (4, 1, 0),
     "location": "UI > Properties Panel",
     "description": "Easily Create Bone Widgets",
@@ -32,14 +32,12 @@ bl_info = {
 
 if "bpy" in locals():
     import importlib
-    bl_class_registry.BlClassRegistry.cleanup()
     importlib.reload(prefs)
     importlib.reload(panels)
     importlib.reload(menus)
 
 else:
     import bpy
-    from . import bl_class_registry
     from . import operators
     from . import panels
     from . import prefs
@@ -55,44 +53,20 @@ def get_user_preferences(context):
     return context.preferences
 
 
-def check_version(major, minor, _):
-    """
-    Check blender version
-    """
-
-    if bpy.app.version[0] == major and bpy.app.version[1] == minor:
-        return 0
-    if bpy.app.version[0] > major:
-        return 1
-    if bpy.app.version[1] > minor:
-        return 1
-    return -1
-
-
 def register():
     operators.register()
     menus.register()
-
-    bl_class_registry.BlClassRegistry.register()
+    prefs.register()
 
     # Apply preferences of the panel location.
     context = bpy.context
     pref = get_user_preferences(context).addons[__package__].preferences
-    # Only default panel location is available in < 2.80
-    if check_version(2, 80, 0) < 0:
-        pref.panel_category = "Rigging"
-    prefs.BoneWidgetPreferences.panel_category_update_fn(pref, context)
+    prefs.BoneWidget_preferences.panel_category_update_fn(pref, context)
     panels.register()
 
 def unregister():
     operators.unregister()
     menus.unregister()
-
-    # TODO: Unregister by BlClassRegistry
-    bl_class_registry.BlClassRegistry.unregister()
+    prefs.unregister()
 
     panels.unregister()
-
-
-if __name__ == "__main__":
-    register()
