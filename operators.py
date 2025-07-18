@@ -163,9 +163,10 @@ class BONEWIDGET_OT_create_widget(bpy.types.Operator):
         widget_data = get_widget_data(context.window_manager.widget_list)
         slide = self.slide_advanced if self.advanced_options else (0.0, self.slide_simple, 0.0)
         global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
+        use_face_data = self.use_face_data if self.advanced_options else False
         for bone in bpy.context.selected_pose_bones:
             create_widget(bone, widget_data, self.relative_size, global_size, slide, self.rotation,
-                         get_collection(context), self.use_face_data, self.wireframe_width)
+                         get_collection(context), use_face_data, self.wireframe_width)
         return {'FINISHED'}
 
 
