@@ -1267,7 +1267,7 @@ class BONEWIDGET_OT_add_presets_from_armature(bpy.types.Operator):
 
         colorset_imports = scan_armature_color_presets(context, armature)
 
-        if colorset_imports:
+        if colorset_imports.skipped_imports:
             bpy.types.WindowManager.custom_data = colorset_imports
 
             bpy.ops.bonewidget.import_items_ask_popup('INVOKE_DEFAULT')
