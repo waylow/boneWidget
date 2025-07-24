@@ -112,3 +112,26 @@ class ImportColorSet(bpy.types.PropertyGroup):
         min=0.0, max=1.0,
         description="Color used for active bones",
     )
+
+
+def get_import_options():
+    return [
+        ("OVERWRITE", "Add/Overwrite", "Add or Overwrite existing item"),
+        ("SKIP", "Skip", "Skip item"),
+        ("RENAME", "Rename", "Rename item"),
+    ]
+
+
+class ImportItemData(bpy.types.PropertyGroup):
+
+    name: bpy.props.StringProperty(
+        name="Unnamed",
+        description="The name of the imported item"
+    )
+
+    import_option: bpy.props.EnumProperty(
+        name="Options",
+        description="Choose an option",
+        items=get_import_options(),
+        default="SKIP"
+    )
