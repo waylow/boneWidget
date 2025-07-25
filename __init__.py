@@ -18,18 +18,6 @@ Created by Manuel Rais and Christophe Seux
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-bl_info = {
-    "name": "Bone Widget",
-    "author": "Manuel Rais, Christophe Seux, Bassam Kurdali, Wayne Dixon, Blender Defender, Max Nadolny, Markus Berg",
-    "version": (2, 2),
-    "blender": (4, 1, 0),
-    "location": "UI > Properties Panel",
-    "description": "Easily Create Bone Widgets",
-    "warning": "",
-    "wiki_url": "",
-    "tracker_url": "",
-    "category": "Rigging"}
-
 if "bpy" in locals():
     import importlib
     importlib.reload(prefs)
