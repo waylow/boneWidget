@@ -948,6 +948,28 @@ class BONEWIDGET_OT_reset_default_images(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_user_data_filebrowser(bpy.types.Operator):
+    """Select Location for Custom User Data"""
+    bl_idname = "bonewidget.user_data_filebrowser"
+    bl_label = "Select Location"
+    bl_options = {'INTERNAL'}
+
+    directory: StringProperty(
+        name="User Data Directory",
+        description="Choose a directory to store user data",
+        subtype='DIR_PATH'
+    )
+
+    def execute(self, context):
+        get_preferences(context).user_data_location = self.directory
+        #self.report({'INFO'}, f"User data path set to: {self.directory}")
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+
 class BONEWIDGET_OT_set_bone_color(bpy.types.Operator):
     """Add bone color to selected widgets"""
     bl_idname = "bonewidget.set_bone_color"
@@ -1518,6 +1540,7 @@ classes = (
     BONEWIDGET_OT_image_select,
     BONEWIDGET_OT_add_custom_image,
     BONEWIDGET_OT_reset_default_images,
+    BONEWIDGET_OT_user_data_filebrowser,
     BONEWIDGET_OT_set_bone_color,
     BONEWIDGET_OT_clear_bone_color,
     BONEWIDGET_OT_copy_bone_color,
