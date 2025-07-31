@@ -118,6 +118,7 @@ class BoneWidget_preferences(AddonPreferences):
         layout = self.layout
 
         box = layout.box()
+        box.label(text="Widget Naming Convention:")
         box.prop(self, "use_rigify_defaults", text="Use Rigify Defaults")
 
         box_row = box.row()
