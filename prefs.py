@@ -3,7 +3,7 @@ from bpy.types import AddonPreferences
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 
 from .panels import BONEWIDGET_PT_bw_panel_main
-from .operators import BONEWIDGET_OT_reset_default_images
+from .operators import BONEWIDGET_OT_reset_default_images, BONEWIDGET_OT_user_data_filebrowser
 
 
 class BoneWidget_preferences(AddonPreferences):
@@ -101,6 +101,18 @@ class BoneWidget_preferences(AddonPreferences):
         default=True
     )
 
+    use_default_location: bpy.props.BoolProperty(
+        name="Use default location",
+        description='When enabled, user widgets and color sets will be saved to datafiles/bone_widget_custom_data',
+        default=True
+    )
+
+    user_data_location: StringProperty(
+        name="User Data Location",
+        description="Choose a location where you want to save custom data",
+        default="",
+    )
+
 
     def draw(self, context):
         layout = self.layout
@@ -157,6 +169,21 @@ class BoneWidget_preferences(AddonPreferences):
         box_col.label(text="Preview Popup Size:")
         box_row.prop(self, "preview_popup_size", text="")
 
+        # custom data
+        row = layout.row()
+        box = layout.box()
+
+        box.label(text="Custom Data:")
+        box_row = box.row()
+        box_row.prop(self, "use_default_location", text="Use Default Location")
+
+        box_row = box.row()
+        box_col = box_row.column()
+        box_col.prop(self, "user_data_location", text="Custom Path")
+        box_row.operator("bonewidget.user_data_filebrowser", icon="FILEBROWSER", text="")
+        box_row.enabled = not self.use_default_location
+
+        # reset button
         layout.separator()
         row = layout.row()
         row = row.split(factor=.75)

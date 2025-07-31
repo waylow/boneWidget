@@ -16,11 +16,34 @@ widget_data = {}
 
 
 def get_addon_dir():
-    return os.path.dirname(__file__)
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+
+def get_custom_dir():
+    pref = get_preferences(bpy.context)
+    if pref.use_default_location:
+        return bpy.utils.user_resource('DATAFILES', path="bone_widget_custom_data", create=True)
+    else:
+        return pref.user_data_location
+
+
+def get_default_image_dir(image_folder):
+    return os.path.abspath(os.path.join(get_addon_dir(), image_folder))
 
 
 def get_custom_image_dir(image_folder):
-    return os.path.abspath(os.path.join(get_addon_dir(), '..', image_folder))
+    return os.path.abspath(os.path.join(get_custom_dir(), image_folder))
+
+
+def get_custom_color_preset_dir():
+    return os.path.abspath(os.path.join(get_custom_dir(), JSON_COLOR_PRESETS))
+    
+
+def get_widget_directory(file):
+    if file == JSON_DEFAULT_WIDGETS:
+        return os.path.join(get_addon_dir(), file)
+    elif file == JSON_USER_WIDGETS:
+        return os.path.join(get_custom_dir(), file)
 
 
 def validate_json_data(data: dict, required_keys: tuple, can_be_empty: bool = True) -> bool:
@@ -74,7 +97,7 @@ def read_widgets(filename = ""):
         files = [filename]
 
     for file in files:
-        jsonFile = os.path.join(os.path.dirname(get_addon_dir()), file)
+        jsonFile = get_widget_directory(file)
         if os.path.exists(jsonFile):
             f = open(jsonFile, 'r')
             wgts.update(json.load(f))
@@ -91,7 +114,7 @@ def get_widget_data(widget):
 
 
 def write_widgets(wgts, file):
-    jsonFile = os.path.join(os.path.dirname(get_addon_dir()), file)
+    jsonFile = get_widget_directory(file)
     #if os.path.exists(jsonFile):
     f = open(jsonFile, 'w')
     f.write(json.dumps(wgts))
@@ -167,7 +190,7 @@ def export_widget_library(filepath):
     if wgts:
         # variables needed for exporting widgets
         dest_dir = os.path.dirname(filepath)
-        json_dir = os.path.dirname(get_addon_dir())
+        json_dir = get_custom_dir()
         image_folder = 'custom_thumbnails'
         custom_image_dir = get_custom_image_dir(image_folder)
         
@@ -276,7 +299,7 @@ def update_widget_library(new_widgets: dict[str, dict[str, list | str]],
     # extract any images needed from zip library
     if new_images:
         from zipfile import ZipFile
-        dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
+        dest_dir = get_custom_dir()
         if os.path.exists(zip_filepath):
             try:
                 with ZipFile(zip_filepath, 'r') as zip_file:
@@ -345,7 +368,7 @@ def read_color_presets():
     presets = {}
 
     # Read the JSON file
-    json_file = os.path.join(os.path.dirname(get_addon_dir()), JSON_COLOR_PRESETS)
+    json_file = get_custom_color_preset_dir()
     if os.path.exists(json_file):
         with open(json_file, "r") as file:
             presets = json.load(file)
@@ -378,7 +401,7 @@ def import_color_presets(filepath, action=""):
     presets = None
 
     from zipfile import ZipFile
-    dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
+    dest_dir = get_custom_dir()
 
     presets_import = BoneWidgetImportData()
 
@@ -498,7 +521,7 @@ def export_color_presets(filepath, context):
 
     if color_presets:
         dest_dir = os.path.dirname(filepath)
-        json_dir = os.path.dirname(get_addon_dir())
+        json_dir = get_custom_dir()
         #image_folder = 'preset_thumbnails'
         #custom_image_dir = get_custom_image_dir(image_folder)
         
@@ -586,7 +609,7 @@ def save_color_sets(context):
             "active": list(item.active)
         } for item in context.window_manager.custom_color_presets]
 
-        filepath = os.path.join(get_addon_dir(), '..', JSON_COLOR_PRESETS)
+        filepath = get_custom_color_preset_dir()
         with open(filepath, 'w') as f:
             json.dump(color_sets, f, indent=4)
         bpy.context.scene.turn_off_colorset_save = False
@@ -594,11 +617,11 @@ def save_color_sets(context):
 
 @persistent
 def load_color_presets(_):
-    filepath = os.path.join(get_addon_dir(), '..', JSON_COLOR_PRESETS)
+    filepath = get_custom_color_preset_dir()
     if os.path.exists(filepath):
         with open(filepath, 'r') as f:
             color_sets = json.load(f)
-            bpy.context.window_manager.custom_color_presets.clear() # TEST
+            bpy.context.window_manager.custom_color_presets.clear()
             bpy.context.scene.turn_off_colorset_save = True
             for item in color_sets:
                 new_item = bpy.context.window_manager.custom_color_presets.add()
