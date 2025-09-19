@@ -37,6 +37,15 @@ jobs:
         run: |
           # Copy all files except .git directory and the boneWidget directory itself
           rsync -av --exclude='.git' --exclude='boneWidget' . boneWidget/
+      - name: Update __init__.py with new version
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          VERSION: ${{ steps.release.outputs.tag_name }}
+          MAJOR: $(echo "$VERSION" | cut -d'.' -f1)
+          MINOR: $(echo "$VERSION" | cut -d'.' -f2)
+          PATCH: $(echo "$VERSION" | cut -d'.' -f3)
+        run: |
+          sed -i "s/^    \"version\":.*/    \"version\": (${MAJOR}, ${MINOR}, ${PATCH})/" boneWidget/__init__.py
       - name: Create zip archive
         if: ${{ steps.release.outputs.release_created }}
         env:
