@@ -27,8 +27,6 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_label = "Bone Widget"
 
 
-    create_preview_collection()
-
     def draw(self, context):
         layout = self.layout
         
@@ -236,6 +234,7 @@ def register():
     bpy.types.Scene.turn_off_colorset_save = bpy.props.BoolProperty(default=False)
     bpy.types.Scene.lock_colorset_color_changes = bpy.props.BoolProperty(default=False)
 
+    bpy.app.handlers.load_post.append(create_preview_collection)
     bpy.app.handlers.load_post.append(load_color_presets)
     
     from bpy.utils import register_class

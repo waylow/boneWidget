@@ -5,13 +5,15 @@ from .. import __package__
 
 
 def get_collection(context):
-    #check user preferences for the name of the collection
+    # check user preferences for the name of the collection
     if not get_preferences(context).use_rigify_defaults:
-        bw_collection_name = get_preferences(context).bonewidget_collection_name
+        bw_collection_name = get_preferences(
+            context).bonewidget_collection_name
     else:
         bw_collection_name = "WGTS_" + context.active_object.name
 
-    collection = recursive_layer_collection(context.scene.collection, bw_collection_name)
+    collection = recursive_layer_collection(
+        context.scene.collection, bw_collection_name)
     if collection:  # if it already exists
         return collection
 
@@ -40,12 +42,13 @@ def recursive_layer_collection(layer_collection, collection_name):
             return found
 
 
-def get_view_layer_collection(context, widget = None):
+def get_view_layer_collection(context, widget=None):
     widget_collection = bpy.data.collections[bpy.data.objects[widget.name].users_collection[0].name]
-    #save current active layer_collection
+    # save current active layer_collection
     saved_layer_collection = bpy.context.view_layer.layer_collection
     # actually find the view_layer we want
-    layer_collection = recursive_layer_collection(saved_layer_collection, widget_collection.name)
+    layer_collection = recursive_layer_collection(
+        saved_layer_collection, widget_collection.name)
     # make sure the collection (data level) is not hidden
     widget_collection.hide_viewport = False
 
@@ -53,7 +56,7 @@ def get_view_layer_collection(context, widget = None):
     bpy.context.view_layer.active_layer_collection = layer_collection
     # make sure it isn't excluded so it can be edited
     layer_collection.exclude = False
-    #return the active view layer to what it was
+    # return the active view layer to what it was
     bpy.context.view_layer.active_layer_collection = saved_layer_collection
 
     return layer_collection
@@ -65,25 +68,27 @@ def match_bone_matrix(widget, match_bone):
     widget.matrix_local = match_bone.bone.matrix_local
     widget.matrix_world = match_bone.id_data.matrix_world @ match_bone.bone.matrix_local
     if match_bone.custom_shape_transform:
-        #if it has a transform override, apply this to the widget loc and rot
+        # if it has a transform override, apply this to the widget loc and rot
         org_scale = widget.matrix_world.to_scale()
         org_scale_mat = Matrix.Scale(1, 4, org_scale)
         target_matrix = match_bone.custom_shape_transform.id_data.matrix_world @ match_bone.custom_shape_transform.bone.matrix_local
         loc = target_matrix.to_translation()
-        loc_mat  = Matrix.Translation(loc)
+        loc_mat = Matrix.Translation(loc)
         rot = target_matrix.to_euler().to_matrix()
         widget.matrix_world = loc_mat @ rot.to_4x4() @ org_scale_mat
 
     if match_bone.use_custom_shape_bone_size:
         ob_scale = bpy.context.scene.objects[match_bone.id_data.name].scale
-        widget.scale = [match_bone.bone.length * ob_scale[0], match_bone.bone.length * ob_scale[1], match_bone.bone.length * ob_scale[2]]
+        widget.scale = [match_bone.bone.length * ob_scale[0],
+                        match_bone.bone.length * ob_scale[1], match_bone.bone.length * ob_scale[2]]
 
     # if the user has added any custom transforms to the bone widget display - calculate this too
     loc = match_bone.custom_shape_translation
     rot = match_bone.custom_shape_rotation_euler
-    scale =  match_bone.custom_shape_scale_xyz
+    scale = match_bone.custom_shape_scale_xyz
     widget.scale *= scale
-    widget.matrix_world = widget.matrix_world @ Matrix.LocRotScale(loc , rot, widget.scale)
+    widget.matrix_world = widget.matrix_world @ Matrix.LocRotScale(
+        loc, rot, widget.scale)
 
     widget.data.update()
 
@@ -108,7 +113,8 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
 
     # delete the existing shape
     if bone.custom_shape:
-        bpy.data.objects.remove(bpy.data.objects[bone.custom_shape.name], do_unlink=True)
+        bpy.data.objects.remove(
+            bpy.data.objects[bone.custom_shape.name], do_unlink=True)
 
     # make the data name include the prefix
     new_data = bpy.data.meshes.new(bw_widget_prefix + bone.name)
@@ -119,17 +125,18 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
     faces = widget['faces'] if use_face_data else []
 
     # add the verts
-    new_data.from_pydata(numpy.array(widget['vertices']) * size, widget['edges'], faces)
+    new_data.from_pydata(numpy.array(
+        widget['vertices']) * size, widget['edges'], faces)
 
     # Create transform matrices (slide vector and rotation)
     widget_matrix = Matrix()
 
-    # make the slide value always relative to the bone length 
-    if not relative: #TODO: shift this to user preference?
-        slide = Vector(slide) # turn slide into a vector
+    # make the slide value always relative to the bone length
+    if not relative:  # TODO: shift this to user preference?
+        slide = Vector(slide)  # turn slide into a vector
         slide *= bone.length
     trans = Matrix.Translation(slide)
-    
+
     rot = rotation.to_matrix().to_4x4()
 
     # Translate then rotate the matrix
@@ -148,14 +155,16 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
     collection.objects.link(new_object)
 
     new_object.matrix_world = bpy.context.active_object.matrix_world @ matrix_bone.bone.matrix_local
-    new_object.scale = [matrix_bone.bone.length, matrix_bone.bone.length, matrix_bone.bone.length]
+    new_object.scale = [matrix_bone.bone.length,
+                        matrix_bone.bone.length, matrix_bone.bone.length]
     layer = bpy.context.view_layer
     layer.update()
 
     bone.custom_shape = new_object
-    bone.bone.show_wire = not use_face_data # show faces if use face data is enabled
-   
-    if bpy.app.version >= (4,2,0):
+    # show faces if use face data is enabled
+    bone.bone.show_wire = not use_face_data
+
+    if bpy.app.version >= (4, 2, 0):
         bone.custom_shape_wire_width = wireframe_width
 
 
@@ -239,11 +248,13 @@ def symmetrize_widget_helper(bone, collection, active_object, widgets_and_bones)
 
 def delete_unused_widgets():
     if not get_preferences(bpy.context).use_rigify_defaults:
-        bw_collection_name = get_preferences(bpy.context).bonewidget_collection_name
+        bw_collection_name = get_preferences(
+            bpy.context).bonewidget_collection_name
     else:
         bw_collection_name = 'WGTS_' + bpy.context.active_object.name
 
-    collection = recursive_layer_collection(bpy.context.scene.collection, bw_collection_name)
+    collection = recursive_layer_collection(
+        bpy.context.scene.collection, bw_collection_name)
     widget_list = []
 
     for ob in bpy.data.objects:
@@ -277,7 +288,7 @@ def edit_widget(active_bone):
         if obj.name != widget.name:
             obj.hide_set(True)
         else:
-            obj.hide_set(False) # in case user manually hid it
+            obj.hide_set(False)  # in case user manually hid it
 
     armature = active_bone.id_data
     bpy.ops.object.mode_set(mode='OBJECT')
@@ -290,7 +301,8 @@ def edit_widget(active_bone):
     widget.select_set(True)
     bpy.context.view_layer.objects.active = widget
     bpy.ops.object.mode_set(mode='EDIT')
-    bpy.context.tool_settings.mesh_select_mode = (True, False, False) # enter vertex mode
+    bpy.context.tool_settings.mesh_select_mode = (
+        True, False, False)  # enter vertex mode
 
 
 def return_to_armature(widget):
@@ -308,14 +320,15 @@ def return_to_armature(widget):
     # unhide all objects in the collection
     for obj in collection.collection.all_objects:
         obj.hide_set(False)
-    
+
     if bpy.context.space_data.local_view:
         bpy.ops.view3d.localview()
-    
+
     bpy.context.view_layer.objects.active = armature
     armature.select_set(True)
     bpy.ops.object.mode_set(mode='POSE')
-    armature.data.bones[bone.name].select = True
+    if bpy.app.version < (5, 0, 0):
+        armature.data.bones[bone.name].select = True
     armature.data.bones.active = armature.data.bones[bone.name]
 
 
@@ -376,7 +389,7 @@ def find_match_bones():
     else:
         for shape in bpy.context.selected_objects:
             bone = from_widget_find_bone(shape)
-            if bone.name.endswith(("L","R")):
+            if bone.name.endswith(("L", "R")):
                 widgets_and_bones[from_widget_find_bone(shape)] = shape
 
                 mirrorShape = find_mirror_object(shape)
@@ -390,7 +403,8 @@ def find_match_bones():
 
 def resync_widget_names():
     if not get_preferences(bpy.context).use_rigify_defaults:
-        bw_collection_name = get_preferences(bpy.context).bonewidget_collection_name
+        bw_collection_name = get_preferences(
+            bpy.context).bonewidget_collection_name
         bw_widget_prefix = get_preferences(bpy.context).widget_prefix
     else:
         bw_collection_name = 'WGTS_' + bpy.context.active_object.name
@@ -421,9 +435,9 @@ def add_object_as_widget(context, collection):
 
     if len(selected_objects) != 2:
         print('Only a widget object and the pose bone(s)')
-        return{'FINISHED'}
+        return {'FINISHED'}
 
-    allowed_object_types = ['MESH','CURVE']
+    allowed_object_types = ['MESH', 'CURVE']
 
     widget_object = None
 
@@ -436,9 +450,10 @@ def add_object_as_widget(context, collection):
 
         # deal with any existing shape
         if active_bone.custom_shape:
-            bpy.data.objects.remove(bpy.data.objects[active_bone.custom_shape.name], do_unlink=True)
+            bpy.data.objects.remove(
+                bpy.data.objects[active_bone.custom_shape.name], do_unlink=True)
 
-        #duplicate shape
+        # duplicate shape
         widget = widget_object.copy()
         widget.data = widget.data.copy()
         # reamame it
@@ -451,14 +466,15 @@ def add_object_as_widget(context, collection):
 
         # match transforms
         widget.matrix_world = bpy.context.active_object.matrix_world @ active_bone.bone.matrix_local
-        widget.scale = [active_bone.bone.length, active_bone.bone.length, active_bone.bone.length]
+        widget.scale = [active_bone.bone.length,
+                        active_bone.bone.length, active_bone.bone.length]
         layer = bpy.context.view_layer
         layer.update()
 
         active_bone.custom_shape = widget
         active_bone.bone.show_wire = True
 
-        #deselect original object
+        # deselect original object
         widget_object.select_set(False)
 
 
@@ -473,21 +489,22 @@ def set_bone_color(context, color, clear_both_modes=None):
             return
 
         for bone in context.selected_pose_bones:
-            bone.color.palette = color #this will get the selected bone color
+            bone.color.palette = color  # this will get the selected bone color
 
             if color == "CUSTOM":
                 bone.color.custom.normal = context.scene.custom_pose_color_set.normal
                 bone.color.custom.select = context.scene.custom_pose_color_set.select
                 bone.color.custom.active = context.scene.custom_pose_color_set.active
-            
-            # set the edit bone colors if applicable (while in pose mode) 
+
+            # set the edit bone colors if applicable (while in pose mode)
             if get_preferences(context).edit_bone_colors == 'DEFAULT':
-                bone.bone.color.palette = 'DEFAULT' # this will reset the edit bone color
+                bone.bone.color.palette = 'DEFAULT'  # this will reset the edit bone color
 
             elif get_preferences(context).edit_bone_colors == 'LINKED':
-                bone.bone.color.palette = color # set the edit bone colors
+                bone.bone.color.palette = color  # set the edit bone colors
 
-                if color == "CUSTOM": # Set the custom color to edit bones (if applicable)
+                # Set the custom color to edit bones (if applicable)
+                if color == "CUSTOM":
                     bone.bone.color.custom.normal = context.scene.custom_pose_color_set.normal
                     bone.bone.color.custom.select = context.scene.custom_pose_color_set.select
                     bone.bone.color.custom.active = context.scene.custom_pose_color_set.active
@@ -505,15 +522,16 @@ def set_bone_color(context, color, clear_both_modes=None):
 
         for edit_bone in context.selected_bones:
             if get_preferences(context).edit_bone_colors == 'DEFAULT':
-                edit_bone.color.palette = 'DEFAULT' #this will get the edit bone color back to default
+                # this will get the edit bone color back to default
+                edit_bone.color.palette = 'DEFAULT'
 
             elif get_preferences(context).edit_bone_colors == 'LINKED':
-                edit_bone.color.palette = color # set the edit mode color
+                edit_bone.color.palette = color  # set the edit mode color
 
                 # get the pose bone
                 pose_bone = context.object.pose.bones.get(edit_bone.name)
-                pose_bone.color.palette = color # set the pose mode color
-                
+                pose_bone.color.palette = color  # set the pose mode color
+
                 if color == "CUSTOM":
                     # set edit bone custom colors
                     edit_bone.color.custom.normal = context.scene.custom_edit_color_set.normal
@@ -525,8 +543,8 @@ def set_bone_color(context, color, clear_both_modes=None):
                     pose_bone.color.custom.active = context.scene.custom_edit_color_set.active
 
             elif get_preferences(context).edit_bone_colors == 'SEPARATE':
-                edit_bone.color.palette = color # set the edit mode color
-                
+                edit_bone.color.palette = color  # set the edit mode color
+
                 if color == "CUSTOM":
                     # set edit bone custom colors
                     edit_bone.color.custom.normal = context.scene.custom_edit_color_set.normal
@@ -537,7 +555,7 @@ def set_bone_color(context, color, clear_both_modes=None):
 def copy_bone_color(context, bone):
     live_update_current_state = context.scene.live_update_on
     context.scene.live_update_on = False
-    
+
     if bone.color.is_custom:
         if context.object.mode == 'POSE':
             context.scene.custom_pose_color_set.normal = bone.color.custom.normal
@@ -547,18 +565,18 @@ def copy_bone_color(context, bone):
             context.scene.custom_edit_color_set.normal = bone.color.custom.normal
             context.scene.custom_edit_color_set.select = bone.color.custom.select
             context.scene.custom_edit_color_set.active = bone.color.custom.active
-    elif bone.color.palette != "DEFAULT": # bone has a theme assigned
+    elif bone.color.palette != "DEFAULT":  # bone has a theme assigned
         theme = bone.color.palette
         theme_id = int(theme[-2:]) - 1
         theme_color_set = bpy.context.preferences.themes[0].bone_color_sets[theme_id]
 
         palette = context.scene.custom_pose_color_set if context.object.mode == 'POSE' \
-                    else context.scene.custom_edit_color_set
+            else context.scene.custom_edit_color_set
 
         palette.normal = theme_color_set.normal
         palette.select = theme_color_set.select
         palette.active = theme_color_set.active
-        
+
     context.scene.live_update_on = live_update_current_state
 
 
@@ -579,14 +597,16 @@ def advanced_options_toggled(self, context):
 def bone_color_items(self, context):
     items = [("DEFAULT", "Default Colors", "", "", 0)]
     for i in range(1, 16):
-        items.append((f"THEME{i:02}", f"Theme {i:02}", "", f"COLORSET_{i:02}_VEC", i))
+        items.append((f"THEME{i:02}", f"Theme {i:02}",
+                     "", f"COLORSET_{i:02}_VEC", i))
     return items
 
 
 def bone_color_items_short(self, context):
     items = []
     for i in range(1, 16):
-        items.append((f"THEME{i:02}", f"Theme {i:02}", "", f"COLORSET_{i:02}_VEC", i))
+        items.append((f"THEME{i:02}", f"Theme {i:02}",
+                     "", f"COLORSET_{i:02}_VEC", i))
     items.append(("CUSTOM", "Custom", "", "COLOR", 16))
     return items
 

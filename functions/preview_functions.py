@@ -1,6 +1,6 @@
 import bpy
 import bpy.utils.previews
-from .json_functions import read_widgets, get_widget_data, get_addon_dir, JSON_USER_WIDGETS
+from .json_functions import read_widgets, get_widget_data, get_default_image_dir, get_custom_image_dir, JSON_USER_WIDGETS
 import os
 from .. import __package__
 from mathutils import Vector
@@ -8,7 +8,7 @@ from mathutils import Vector
 preview_collections = {}
 
 
-def create_preview_collection():
+def create_preview_collection(_ = None):
     if preview_collections:
         del bpy.types.WindowManager.widget_list
         for pcoll in preview_collections.values():
@@ -31,8 +31,8 @@ def generate_previews():
     if pcoll.widget_list:
         return pcoll.widget_list
     
-    directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'thumbnails'))
-    custom_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
+    directory = get_default_image_dir('thumbnails')
+    custom_directory = get_custom_image_dir("custom_thumbnails")
 
     if directory and os.path.exists(directory):
         widget_data = {item[0]: item[1].get("image", "missing_image.png") for item in read_widgets().items()}
@@ -74,7 +74,7 @@ def get_preview_default():
 
 def copy_custom_image(filepath, filename):
     if os.path.exists(filepath):
-        image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
+        image_directory = get_custom_image_dir('custom_thumbnails')
         destination_path = os.path.join(image_directory, filename)
 
         try:
@@ -91,7 +91,7 @@ def copy_custom_image(filepath, filename):
 
 
 def remove_custom_image(filename):
-    image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
+    image_directory = get_custom_image_dir('custom_thumbnails')
     destination_path = os.path.join(image_directory, filename)
     
     if os.path.isfile(destination_path):
@@ -209,7 +209,7 @@ def render_widget_thumbnail(image_name, widget_object, image_directory):
         image_name = image_name + '.png'
         
     else: # if False use the add-on location
-        image_directory = os.path.abspath(os.path.join(get_addon_dir(), '..', 'custom_thumbnails'))
+        image_directory = get_custom_image_dir('custom_thumbnails')
 
     destination_path = os.path.join(image_directory, image_name)
 
