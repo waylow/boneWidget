@@ -265,15 +265,10 @@ def delete_unused_widgets():
 
     unwanted_list = [
         ob for ob in collection.all_objects if ob not in widget_list]
-    # save the current context mode
-    mode = bpy.context.mode
-    # jump into object mode
-    bpy.ops.object.mode_set(mode='OBJECT')
-    # delete unwanted widgets
+
     for ob in unwanted_list:
         bpy.data.objects.remove(bpy.data.objects[ob.name], do_unlink=True)
-    # jump back to current mode
-    bpy.ops.object.mode_set(mode=mode)
+
     return
 
 
