@@ -37,7 +37,7 @@ def get_custom_image_dir(image_folder):
 
 def get_custom_color_preset_dir():
     return os.path.abspath(os.path.join(get_custom_dir(), JSON_COLOR_PRESETS))
-    
+
 
 def get_widget_directory(file):
     if file == JSON_DEFAULT_WIDGETS:
@@ -67,7 +67,7 @@ def objectDataToDico(object, custom_image):
     verts = []
     depsgraph = bpy.context.evaluated_depsgraph_get()
     mesh = object.evaluated_get(depsgraph).to_mesh()
-    
+
     for v in mesh.vertices:
         verts.append(tuple(numpy.array(tuple(v.co)) *
                            (object.scale[0], object.scale[1], object.scale[2])))
@@ -82,12 +82,13 @@ def objectDataToDico(object, custom_image):
 
     custom_image = custom_image if custom_image != "" else "user_defined.png"
 
-    wgts = {"vertices": verts, "edges": edges, "faces": polygons, "image": custom_image}
+    wgts = {"vertices": verts, "edges": edges,
+            "faces": polygons, "image": custom_image}
 
-    return(wgts)
+    return (wgts)
 
 
-def read_widgets(filename = ""):
+def read_widgets(filename=""):
     global widget_data
     wgts = {}
 
@@ -102,8 +103,8 @@ def read_widgets(filename = ""):
             f = open(jsonFile, 'r')
             wgts.update(json.load(f))
             f.close()
-            
-    if not filename: # if both files have been read
+
+    if not filename:  # if both files have been read
         widget_data = wgts.copy()
 
     return (wgts)
@@ -115,7 +116,7 @@ def get_widget_data(widget):
 
 def write_widgets(wgts, file):
     jsonFile = get_widget_directory(file)
-    #if os.path.exists(jsonFile):
+    # if os.path.exists(jsonFile):
     f = open(jsonFile, 'w')
     f.write(json.dumps(wgts))
     f.close()
@@ -159,11 +160,12 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
         else:
             file = JSON_DEFAULT_WIDGETS
             wgts = read_widgets(file)
-        
+
         del wgts[widgets]
         if widgets in widget_items:
             widget_index = widget_items.index(widgets)
-            activeShape = widget_items[widget_index + 1] if widget_index == 0 else widget_items[widget_index - 1]
+            activeShape = widget_items[widget_index +
+                                       1] if widget_index == 0 else widget_items[widget_index - 1]
             widget_items.remove(widgets)
         return_message = "Widget - " + widgets + " has been removed!"
 
@@ -172,10 +174,10 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
         write_widgets(wgts, file)
 
         # to handle circular import error
-        from .functions import create_preview_collection
+        from . import create_preview_collection
 
         create_preview_collection()
-    
+
         # trigger an update and display widget
         bpy.context.window_manager.widget_list = activeShape
 
@@ -193,10 +195,12 @@ def export_widget_library(filepath):
         json_dir = get_custom_dir()
         image_folder = 'custom_thumbnails'
         custom_image_dir = get_custom_image_dir(image_folder)
-        
+
         filename = os.path.basename(filepath)
-        if not filename: filename = "widget_library.zip"
-        elif not filename.endswith('.zip'): filename += ".zip"
+        if not filename:
+            filename = "widget_library.zip"
+        elif not filename.endswith('.zip'):
+            filename += ".zip"
 
         # start the zipping process
         try:
@@ -211,21 +215,22 @@ def export_widget_library(filepath):
                 if os.path.exists(custom_image_dir):
                     from pathlib import Path
                     for filepath in Path(custom_image_dir).iterdir():
-                        arcname = os.path.join(image_folder, os.path.basename(filepath))
+                        arcname = os.path.join(
+                            image_folder, os.path.basename(filepath))
                         zip.write(filepath, arcname=arcname)
         except Exception as e:
             print("Error exporting widget library: ", e)
             return 0
 
     return len(wgts)
-   
+
 
 def import_widget_library(filepath, action=""):
-    required_data_keys = ("vertices", "faces", "edges", "image") # json data
+    required_data_keys = ("vertices", "faces", "edges", "image")  # json data
     wgts = {}
 
     from zipfile import ZipFile
-    #dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
+    # dest_dir = os.path.abspath(os.path.join(get_addon_dir(), '..'))
     dest_dir = bpy.app.tempdir
 
     widget_import = BoneWidgetImportData()
@@ -234,25 +239,26 @@ def import_widget_library(filepath, action=""):
 
     if os.path.exists(filepath) and action:
         try:
-            
+
             with ZipFile(filepath, 'r') as zip_file:
                 # extract images
                 for file in zip_file.namelist():
                     if file.startswith('custom_thumbnails/'):
                         zip_file.extract(file, dest_dir)
-                    elif file.endswith('.json'): # extract data from the .json file
+                    elif file.endswith('.json'):  # extract data from the .json file
                         f = zip_file.read(file)
                         json_data = f.decode('utf8').replace("'", '"')
                         wgts = json.loads(json_data)
 
             # validate wgts data type
             if not isinstance(wgts, dict):
-                raise TypeError(f"Expected a dictionary, but got {type(wgts).__name__}")
-            
+                raise TypeError(
+                    f"Expected a dictionary, but got {type(wgts).__name__}")
+
             current_wgts = read_widgets(JSON_USER_WIDGETS)
 
             # check for duplicate names
-            for name, data in sorted(wgts.items()): # sorting by keys
+            for name, data in sorted(wgts.items()):  # sorting by keys
                 widget_import.total_num_imports += 1
                 # validate json data
                 if not validate_json_data(data, required_data_keys):
@@ -267,12 +273,14 @@ def import_widget_library(filepath, action=""):
                     # check for duplicates
                     data_match = data == current_wgts[name]
                     if data_match:
-                        widget_import.skipped_imports.append(Widget(name, data))
-                        #widget_import.duplicate_imports.update({name : data})
+                        widget_import.skipped_imports.append(
+                            Widget(name, data))
+                        # widget_import.duplicate_imports.update({name : data})
                     elif name not in current_wgts:
                         widget_import.imported_items.append(Widget(name, data))
                     else:
-                        widget_import.skipped_imports.append(Widget(name, data))
+                        widget_import.skipped_imports.append(
+                            Widget(name, data))
                 else:
                     widget_import.failed_imports.append(Widget(name, data))
 
@@ -289,11 +297,12 @@ def import_widget_library(filepath, action=""):
 
 def update_widget_library(new_widgets: dict[str, dict[str, list | str]],
                           new_images: set[str], zip_filepath: str) -> None:
-    current_widget = bpy.context.window_manager.widget_list  # store the currently selected widget
+    # store the currently selected widget
+    current_widget = bpy.context.window_manager.widget_list
 
     wgts = read_widgets(JSON_USER_WIDGETS)
     wgts.update(new_widgets)
-    
+
     write_widgets(wgts, JSON_USER_WIDGETS)
 
     # extract any images needed from zip library
@@ -314,7 +323,7 @@ def update_widget_library(new_widgets: dict[str, dict[str, list | str]],
     # update the preview panel
     from .functions import create_preview_collection
     create_preview_collection()
-    
+
     # trigger an update and display original but updated widget
     bpy.context.window_manager.widget_list = current_widget
 
@@ -326,7 +335,7 @@ def update_custom_image(image_name):
     # swap out the image
     current_widget_data['image'] = image_name
 
-     # update and write the new data
+    # update and write the new data
     wgts = read_widgets(JSON_USER_WIDGETS)
     if current_widget in wgts:
         wgts[current_widget] = current_widget_data
@@ -339,7 +348,7 @@ def update_custom_image(image_name):
     # update the preview panel
     from .functions import create_preview_collection
     create_preview_collection()
-    
+
     # trigger an update and display original but updated widget
     bpy.context.window_manager.widget_list = current_widget
 
@@ -351,13 +360,13 @@ def reset_default_images():
     for name, data in wgts.items():
         image = f"{name}.png"
         data["image"] = image
-    
+
     write_widgets(wgts, JSON_DEFAULT_WIDGETS)
 
     # update the preview panel
     from .functions import create_preview_collection
     create_preview_collection()
-    
+
     # trigger an update and display original but updated widget
     bpy.context.window_manager.widget_list = current_widget
 
@@ -372,8 +381,8 @@ def read_color_presets():
     if os.path.exists(json_file):
         with open(json_file, "r") as file:
             presets = json.load(file)
-    
-    presets = {item["name"]: item for item in presets} # convert to dictionary
+
+    presets = {item["name"]: item for item in presets}  # convert to dictionary
 
     return presets
 
@@ -397,7 +406,7 @@ def update_color_presets(new_presets, zip_filepath):
 
 
 def import_color_presets(filepath, action=""):
-    required_data_keys = ("name", "normal", "select", "active") # json data
+    required_data_keys = ("name", "normal", "select", "active")  # json data
     presets = None
 
     from zipfile import ZipFile
@@ -412,17 +421,18 @@ def import_color_presets(filepath, action=""):
             with ZipFile(filepath, 'r') as zip_file:
                 # extract images
                 for file in zip_file.namelist():
-                    #if file.startswith('preset_thumbnails/'):
-                        #zip_file.extract(file, dest_dir)
-                    if file.endswith('.json'): # extract data from the .json file
+                    # if file.startswith('preset_thumbnails/'):
+                    # zip_file.extract(file, dest_dir)
+                    if file.endswith('.json'):  # extract data from the .json file
                         f = zip_file.read(file)
                         json_data = f.decode('utf8').replace("'", '"')
                         presets = json.loads(json_data)
 
             # validate presets data type
             if not isinstance(presets, list):
-                raise TypeError(f"Expected a list, but got {type(presets).__name__}")
-            
+                raise TypeError(
+                    f"Expected a list, but got {type(presets).__name__}")
+
             current_presets = read_color_presets()
 
             # check for duplicate presets
@@ -450,27 +460,26 @@ def import_color_presets(filepath, action=""):
                 else:
                     presets_import.failed_imports.append(ColorSet(preset))
 
-
         except TypeError as e:  # Handle data type errors specifically
-                print(f"Error while importing color presets: {e}")
-                presets_import.json_import_error = True
+            print(f"Error while importing color presets: {e}")
+            presets_import.json_import_error = True
         except Exception as e:
             print(f"Error while importing color presets: {e}")
             for preset in presets:
                 presets_import.failed_imports.append(ColorSet(preset))
-                presets_import.total_num_imports = presets_import.failed()              
+                presets_import.total_num_imports = presets_import.failed()
     return presets_import
 
 
 def colors_match(set1, set2):
     if isinstance(set1, dict):
         return set1['normal'] == set2['normal'] \
-                and set1['select'] == set2['select'] \
-                and set1['active'] == set2['active']
+            and set1['select'] == set2['select'] \
+            and set1['active'] == set2['active']
     elif isinstance(set1, bpy.types.ThemeBoneColorSet):
         return set1.normal == set2.normal \
-                and set1.select == set2.select \
-                and set1.active == set2.active
+            and set1.select == set2.select \
+            and set1.active == set2.active
 
 
 def scan_armature_color_presets(context, armature):
@@ -490,9 +499,11 @@ def scan_armature_color_presets(context, armature):
                     is_unique_colorset = False  # not unique
                     break
 
-            color_data = (tuple(bone.color.custom.normal), tuple(bone.color.custom.select), tuple(bone.color.custom.active))
+            color_data = (tuple(bone.color.custom.normal), tuple(
+                bone.color.custom.select), tuple(bone.color.custom.active))
             if is_unique_colorset and not color_data in found_color_sets:
-                color_set = {attr: list(getattr(bone.color.custom, attr)[:3]) for attr in ["normal", "active", "select"]}
+                color_set = {attr: list(getattr(bone.color.custom, attr)[:3]) for attr in [
+                    "normal", "active", "select"]}
                 color_set['name'] = bone.name
                 colorsets_import.skipped_imports.append(ColorSet(color_set))
                 found_color_sets.add(color_data)
@@ -503,12 +514,14 @@ def scan_armature_color_presets(context, armature):
             is_unique_colorset = True
             for color_set in current_color_sets:
                 if colors_match(pose_bone.color.custom, color_set):
-                    is_unique_colorset = False # not unique
+                    is_unique_colorset = False  # not unique
                     break
-            
-            color_data = (tuple(pose_bone.color.custom.normal), tuple(pose_bone.color.custom.select), tuple(pose_bone.color.custom.active))
+
+            color_data = (tuple(pose_bone.color.custom.normal), tuple(
+                pose_bone.color.custom.select), tuple(pose_bone.color.custom.active))
             if is_unique_colorset and not color_data in found_color_sets:
-                color_set = {attr: list(getattr(pose_bone.color.custom, attr)[:3]) for attr in ["normal", "active", "select"]}
+                color_set = {attr: list(getattr(pose_bone.color.custom, attr)[
+                                        :3]) for attr in ["normal", "active", "select"]}
                 color_set['name'] = bone.name
                 colorsets_import.skipped_imports.append(ColorSet(color_set))
                 found_color_sets.add(color_data)
@@ -522,12 +535,14 @@ def export_color_presets(filepath, context):
     if color_presets:
         dest_dir = os.path.dirname(filepath)
         json_dir = get_custom_dir()
-        #image_folder = 'preset_thumbnails'
-        #custom_image_dir = get_custom_image_dir(image_folder)
-        
+        # image_folder = 'preset_thumbnails'
+        # custom_image_dir = get_custom_image_dir(image_folder)
+
         filename = os.path.basename(filepath)
-        if not filename: filename = "color_presets.zip"
-        elif not filename.endswith('.zip'): filename += ".zip"
+        if not filename:
+            filename = "color_presets.zip"
+        elif not filename.endswith('.zip'):
+            filename += ".zip"
 
         # start the zipping process
         try:
@@ -562,7 +577,7 @@ def add_color_set_from_bone(context, bone, suffix_name):
 
     new_item.name = new_name
 
-    if not color_set: # new default color set
+    if not color_set:  # new default color set
         new_item.normal = (1.0, 0.0, 0.0)
         new_item.select = (0.0, 1.0, 0.0)
         new_item.active = (0.0, 0.0, 1.0)
@@ -572,7 +587,7 @@ def add_color_set_from_bone(context, bone, suffix_name):
         new_item.active = color_set.active
 
 
-def add_color_set(context, color_set = None):
+def add_color_set(context, color_set=None):
     new_item = context.window_manager.custom_color_presets.add()
 
     base_name = "Color Set" if not color_set else color_set.name
@@ -589,7 +604,7 @@ def add_color_set(context, color_set = None):
 
     new_item.name = new_name
 
-    if not color_set: # new default color set
+    if not color_set:  # new default color set
         new_item.normal = (1.0, 0.0, 0.0)
         new_item.select = (0.0, 1.0, 0.0)
         new_item.active = (0.0, 0.0, 1.0)
