@@ -43,6 +43,7 @@ def get_user_preferences(context):
 
 def register():
     operators.register()
+    props.register()
     menus.register()
     prefs.register()
 
@@ -52,8 +53,10 @@ def register():
     prefs.BoneWidget_preferences.panel_category_update_fn(pref, context)
     panels.register()
 
+
 def unregister():
     operators.unregister()
+    props.unregister()
     menus.unregister()
     prefs.unregister()
 

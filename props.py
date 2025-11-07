@@ -1,11 +1,39 @@
 import bpy
 import threading
 from .functions import update_bone_color
+from bpy.types import PropertyGroup
+from bpy.props import BoolProperty
+
+
+class BW_Settings(PropertyGroup):
+    live_update_on: BoolProperty(
+        name="Live Update On",
+        description="Enable live widget updates",
+        default=True
+    )
+    live_update_toggle: BoolProperty(
+        name="Live Update Toggle",
+        description="Toggle live updates in the UI",
+        default=False
+    )
+    turn_off_colorset_save: BoolProperty(
+        name="Turn Off ColorSet Save",
+        description="Disable automatic saving of color sets",
+        default=False
+    )
+    lock_colorset_color_changes: BoolProperty(
+        name="Lock ColorSet Color Changes",
+        description="Prevent modifying the current color set",
+        default=False
+    )
+
 
 save_timer = None
 
+
 def debounce_save(context):
-    from .functions import save_color_sets  # moved here to avoid circular dependencies
+    # moved here to avoid circular dependencies
+    from .functions import save_color_sets
     global save_timer
     if save_timer is not None:
         save_timer.cancel()
@@ -16,10 +44,11 @@ def debounce_save(context):
 class PresetColorSetItem(bpy.types.PropertyGroup):
 
     def update_colorset_list(self, context):
-        if not context.scene.turn_off_colorset_save and not context.scene.lock_colorset_color_changes:
+        if not context.scene.bw_settings.turn_off_colorset_save and not context.scene.bw_settings.lock_colorset_color_changes:
             debounce_save(context)
 
-    name: bpy.props.StringProperty(name="Name", default="Untitled", update=update_colorset_list)
+    name: bpy.props.StringProperty(
+        name="Name", default="Untitled", update=update_colorset_list)
     normal: bpy.props.FloatVectorProperty(
         name="Normal",
         subtype='COLOR_GAMMA',
@@ -135,3 +164,13 @@ class ImportItemData(bpy.types.PropertyGroup):
         items=get_import_options(),
         default="SKIP"
     )
+
+
+def register():
+    bpy.utils.register_class(BW_Settings)
+    bpy.types.Scene.bw_settings = bpy.props.PointerProperty(type=BW_Settings)
+
+
+def unregister():
+    del bpy.types.Scene.bw_settings
+    bpy.utils.unregister_class(BW_Settings)
