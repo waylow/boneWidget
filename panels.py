@@ -6,7 +6,6 @@ from .functions import (
     preview_collections,
     create_preview_collection,
     get_preview_default,
-    bone_color_items_short,
     live_update_toggle,
     load_color_presets,
     get_preferences,
@@ -124,8 +123,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                          text="Set Bone Color", icon="BRUSHES_ALL")
             row.scale_x = 3.0
             row.template_icon_view(
-                context.scene, "bone_widget_colors", show_labels=False, scale=1, scale_popup=1.8)
-            if context.scene.bone_widget_colors == "CUSTOM":
+                context.scene.bw_settings, "bone_widget_colors", show_labels=False, scale=1, scale_popup=1.8)
+            if context.scene.bw_settings.bone_widget_colors == "CUSTOM":
 
                 custom_pose_color = context.scene.custom_pose_color_set
                 custom_edit_color = context.scene.custom_edit_color_set
@@ -222,26 +221,6 @@ def register():
         description="Show thumbnail previews"
     )
 
-    bpy.types.Scene.bone_widget_colors = bpy.props.EnumProperty(
-        name="Colors",
-        description="Select a Bone Color",
-        items=bone_color_items_short,
-        default=1,  # THEME01
-    )
-    '''
-    bpy.types.Scene.live_update_on = bpy.props.BoolProperty(
-        name="Live Update",
-        description="Live Update on or off",
-        default=False,
-    )
-
-    bpy.types.Scene.live_update_toggle = bpy.props.BoolProperty(
-        name="Live Update Toggle",
-        description="Toggles Live Update on/off for custom colors",
-        default=bpy.types.Scene.live_update_on.keywords['default'],
-        update=live_update_toggle,
-    )
-    '''
     bpy.utils.register_class(PresetColorSetItem)
     bpy.utils.register_class(CustomColorSet)
     bpy.types.WindowManager.custom_color_presets = bpy.props.CollectionProperty(
@@ -252,8 +231,6 @@ def register():
         type=CustomColorSet)
     bpy.types.WindowManager.colorset_list_index = bpy.props.IntProperty(
         name="Index", default=0)
-    # bpy.types.Scene.turn_off_colorset_save = bpy.props.BoolProperty(default=False)
-    # bpy.types.Scene.lock_colorset_color_changes = bpy.props.BoolProperty(default=False)
 
     bpy.app.handlers.load_post.append(create_preview_collection)
     bpy.app.handlers.load_post.append(load_color_presets)
@@ -271,7 +248,7 @@ def unregister():
         del bpy.types.WindowManager.widget_list
 
     del bpy.types.WindowManager.toggle_preview
-    del bpy.types.Scene.bone_widget_colors
+    # del bpy.types.Scene.bone_widget_colors
     del bpy.types.WindowManager.custom_color_presets
     del bpy.types.Scene.custom_pose_color_set
     del bpy.types.Scene.custom_edit_color_set

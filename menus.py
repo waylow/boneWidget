@@ -1,11 +1,13 @@
 from bpy.types import Menu
 
+
 class BONEWIDGET_MT_bw_specials(Menu):
     bl_label = "Bone Widget Specials"
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("bonewidget.add_widgets", icon="ADD", text="Add Widget to Library")
+        layout.operator("bonewidget.add_widgets", icon="ADD",
+                        text="Add Widget to Library")
         layout.operator("bonewidget.remove_widgets", icon="REMOVE",
                         text="Remove Widget from Library")
         layout.separator()
@@ -14,8 +16,10 @@ class BONEWIDGET_MT_bw_specials(Menu):
         layout.operator("bonewidget.render_widget_thumbnail", icon="RESTRICT_RENDER_OFF",
                         text="Render Object as Thumbnail")
         layout.separator()
-        layout.operator("bonewidget.import_widget_library", icon="IMPORT", text="Import Widget Library")
-        layout.operator("bonewidget.export_widget_library", icon="EXPORT", text="Export Widget Library")
+        layout.operator("bonewidget.import_widget_library",
+                        icon="IMPORT", text="Import Widget Library")
+        layout.operator("bonewidget.export_widget_library",
+                        icon="EXPORT", text="Export Widget Library")
 
 
 class BONEWIDGET_MT_bw_color_presets_specials(Menu):
@@ -23,13 +27,18 @@ class BONEWIDGET_MT_bw_color_presets_specials(Menu):
 
     def draw(self, context):
         layout = self.layout
-        btn_text = "Add Preset from Theme" if "THEME" in context.scene.bone_widget_colors else "Add Preset from Palette"
-        layout.operator("bonewidget.add_color_set_from", text=btn_text, icon="ADD")
-        layout.operator("bonewidget.add_preset_from_bone", icon="ADD", text="Add Preset from Bone")  
-        layout.operator("bonewidget.add_presets_from_armature", icon="ADD", text="Add Preset from Armature")
+        btn_text = "Add Preset from Theme" if "THEME" in context.scene.bw_settings.bone_widget_colors else "Add Preset from Palette"
+        layout.operator("bonewidget.add_color_set_from",
+                        text=btn_text, icon="ADD")
+        layout.operator("bonewidget.add_preset_from_bone",
+                        icon="ADD", text="Add Preset from Bone")
+        layout.operator("bonewidget.add_presets_from_armature",
+                        icon="ADD", text="Add Preset from Armature")
         layout.separator()
-        layout.operator("bonewidget.import_color_presets", icon="IMPORT", text="Import Color Presets")
-        layout.operator("bonewidget.export_color_presets", icon="EXPORT", text="Export Color Presets")
+        layout.operator("bonewidget.import_color_presets",
+                        icon="IMPORT", text="Import Color Presets")
+        layout.operator("bonewidget.export_color_presets",
+                        icon="EXPORT", text="Export Color Presets")
 
 
 classes = (

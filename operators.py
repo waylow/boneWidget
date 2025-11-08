@@ -1004,7 +1004,7 @@ class BONEWIDGET_OT_set_bone_color(bpy.types.Operator):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'])
 
     def execute(self, context):
-        set_bone_color(context, context.scene.bone_widget_colors)
+        set_bone_color(context, context.scene.bw_settings.bone_widget_colors)
         return {'FINISHED'}
 
 
@@ -1082,7 +1082,7 @@ class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
 
         new_item = context.window_manager.custom_color_presets.add()
 
-        if context.scene.bone_widget_colors == "CUSTOM":
+        if context.scene.bw_settings.bone_widget_colors == "CUSTOM":
             # add item from custom color palette
 
             new_item.name = new_name
@@ -1098,10 +1098,10 @@ class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
                 new_item.select = context.scene.custom_edit_color_set.select
                 new_item.active = context.scene.custom_edit_color_set.active
 
-        elif "THEME" in context.scene.bone_widget_colors:
+        elif "THEME" in context.scene.bw_settings.bone_widget_colors:
             # add item from selected theme
 
-            theme = context.scene.bone_widget_colors
+            theme = context.scene.bw_settings.bone_widget_colors
             theme_id = int(theme[-2:]) - 1
             theme_color_set = bpy.context.preferences.themes[0].bone_color_sets[theme_id]
 

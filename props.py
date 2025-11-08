@@ -1,8 +1,11 @@
 import bpy
 import threading
-from .functions import update_bone_color
+from .functions import (
+    update_bone_color,
+    bone_color_items_short
+)
 from bpy.types import PropertyGroup
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty, EnumProperty
 
 
 class BW_Settings(PropertyGroup):
@@ -26,6 +29,16 @@ class BW_Settings(PropertyGroup):
         description="Prevent modifying the current color set",
         default=False
     )
+    bone_widget_colors: EnumProperty(
+        name="Colors",
+        description="Select a Bone Color",
+        items=bone_color_items_short,
+        default=1,  # THEME01
+    )
+
+    # Nested Property Groups
+    # custom_edit_color_set: PointerProperty(type=CustomColorSet)
+    # custom_pose_color_set: PointerProperty(type=CustomColorSet)
 
 
 save_timer = None
