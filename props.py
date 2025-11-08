@@ -5,7 +5,42 @@ from .functions import (
     bone_color_items_short
 )
 from bpy.types import PropertyGroup
-from bpy.props import BoolProperty, EnumProperty
+from bpy.props import BoolProperty, EnumProperty, PointerProperty
+
+
+class CustomColorSet(bpy.types.PropertyGroup):
+
+    name: bpy.props.StringProperty(name="Name", default="Untitled")
+
+    normal: bpy.props.FloatVectorProperty(
+        name="Normal",
+        subtype='COLOR_GAMMA',
+        default=(0.0, 0.0, 0.0),
+        size=3,
+        min=0.0, max=1.0,
+        description="Color used for the surface of bones",
+        update=update_bone_color,
+    )
+
+    select: bpy.props.FloatVectorProperty(
+        name="Select",
+        subtype='COLOR_GAMMA',
+        default=(0.0, 0.0, 0.0),
+        size=3,
+        min=0.0, max=1.0,
+        description="Color used for selected bones",
+        update=update_bone_color,
+    )
+
+    active: bpy.props.FloatVectorProperty(
+        name="Active",
+        subtype='COLOR_GAMMA',
+        default=(0.0, 0.0, 0.0),
+        size=3,
+        min=0.0, max=1.0,
+        description="Color used for active bones",
+        update=update_bone_color,
+    )
 
 
 class BW_Settings(PropertyGroup):
@@ -29,16 +64,17 @@ class BW_Settings(PropertyGroup):
         description="Prevent modifying the current color set",
         default=False
     )
+    # Blender's bone color themes
     bone_widget_colors: EnumProperty(
         name="Colors",
         description="Select a Bone Color",
-        items=bone_color_items_short,
+        items=bone_color_items_short,  # get the themes minus the blank ones
         default=1,  # THEME01
     )
 
     # Nested Property Groups
-    # custom_edit_color_set: PointerProperty(type=CustomColorSet)
-    # custom_pose_color_set: PointerProperty(type=CustomColorSet)
+    custom_edit_color_set: PointerProperty(type=CustomColorSet)
+    custom_pose_color_set: PointerProperty(type=CustomColorSet)
 
 
 save_timer = None
@@ -88,41 +124,6 @@ class PresetColorSetItem(bpy.types.PropertyGroup):
         min=0.0, max=1.0,
         description="Color used for active bones",
         update=update_colorset_list,
-    )
-
-
-class CustomColorSet(bpy.types.PropertyGroup):
-
-    name: bpy.props.StringProperty(name="Name", default="Untitled")
-
-    normal: bpy.props.FloatVectorProperty(
-        name="Normal",
-        subtype='COLOR_GAMMA',
-        default=(0.0, 0.0, 0.0),
-        size=3,
-        min=0.0, max=1.0,
-        description="Color used for the surface of bones",
-        update=update_bone_color,
-    )
-
-    select: bpy.props.FloatVectorProperty(
-        name="Select",
-        subtype='COLOR_GAMMA',
-        default=(0.0, 0.0, 0.0),
-        size=3,
-        min=0.0, max=1.0,
-        description="Color used for selected bones",
-        update=update_bone_color,
-    )
-
-    active: bpy.props.FloatVectorProperty(
-        name="Active",
-        subtype='COLOR_GAMMA',
-        default=(0.0, 0.0, 0.0),
-        size=3,
-        min=0.0, max=1.0,
-        description="Color used for active bones",
-        update=update_bone_color,
     )
 
 
@@ -180,6 +181,7 @@ class ImportItemData(bpy.types.PropertyGroup):
 
 
 def register():
+    bpy.utils.register_class(CustomColorSet)
     bpy.utils.register_class(BW_Settings)
     bpy.types.Scene.bw_settings = bpy.props.PointerProperty(type=BW_Settings)
 
@@ -187,3 +189,4 @@ def register():
 def unregister():
     del bpy.types.Scene.bw_settings
     bpy.utils.unregister_class(BW_Settings)
+    bpy.utils.unregister_class(CustomColorSet)

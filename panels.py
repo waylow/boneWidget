@@ -126,8 +126,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                 context.scene.bw_settings, "bone_widget_colors", show_labels=False, scale=1, scale_popup=1.8)
             if context.scene.bw_settings.bone_widget_colors == "CUSTOM":
 
-                custom_pose_color = context.scene.custom_pose_color_set
-                custom_edit_color = context.scene.custom_edit_color_set
+                custom_pose_color = context.scene.bw_settings.custom_pose_color_set
+                custom_edit_color = context.scene.bw_settings.custom_edit_color_set
 
                 if context.object.mode == 'POSE':  # display pose bone colors
                     row = layout.row(align=True)
@@ -222,13 +222,8 @@ def register():
     )
 
     bpy.utils.register_class(PresetColorSetItem)
-    bpy.utils.register_class(CustomColorSet)
     bpy.types.WindowManager.custom_color_presets = bpy.props.CollectionProperty(
         type=PresetColorSetItem)
-    bpy.types.Scene.custom_pose_color_set = bpy.props.PointerProperty(
-        type=CustomColorSet)
-    bpy.types.Scene.custom_edit_color_set = bpy.props.PointerProperty(
-        type=CustomColorSet)
     bpy.types.WindowManager.colorset_list_index = bpy.props.IntProperty(
         name="Index", default=0)
 
@@ -248,14 +243,10 @@ def unregister():
         del bpy.types.WindowManager.widget_list
 
     del bpy.types.WindowManager.toggle_preview
-    # del bpy.types.Scene.bone_widget_colors
     del bpy.types.WindowManager.custom_color_presets
-    del bpy.types.Scene.custom_pose_color_set
-    del bpy.types.Scene.custom_edit_color_set
     del bpy.types.WindowManager.colorset_list_index
 
     bpy.utils.unregister_class(PresetColorSetItem)
-    bpy.utils.unregister_class(CustomColorSet)
 
     for pcoll in preview_collections.values():
         bpy.utils.previews.remove(pcoll)

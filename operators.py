@@ -1087,16 +1087,16 @@ class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
 
             new_item.name = new_name
             if context.object.mode == 'POSE':
-                new_item.normal = context.scene.custom_pose_color_set.normal
-                new_item.select = context.scene.custom_pose_color_set.select
-                new_item.active = context.scene.custom_pose_color_set.active
+                new_item.normal = context.scene.bw_settings.custom_pose_color_set.normal
+                new_item.select = context.scene.bw_settings.custom_pose_color_set.select
+                new_item.active = context.scene.bw_settings.custom_pose_color_set.active
 
             elif context.object.mode == "EDIT" and \
                     get_preferences(context).edit_bone_colors != 'DEFAULT':  # edit mode colors if turned on in preferences
 
-                new_item.normal = context.scene.custom_edit_color_set.normal
-                new_item.select = context.scene.custom_edit_color_set.select
-                new_item.active = context.scene.custom_edit_color_set.active
+                new_item.normal = context.scene.bw_settings.custom_edit_color_set.normal
+                new_item.select = context.scene.bw_settings.custom_edit_color_set.select
+                new_item.active = context.scene.bw_settings.custom_edit_color_set.active
 
         elif "THEME" in context.scene.bw_settings.bone_widget_colors:
             # add item from selected theme
