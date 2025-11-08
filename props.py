@@ -1,5 +1,4 @@
 import bpy
-import threading
 from .functions import (
     update_bone_color,
     bone_color_items_short
@@ -81,13 +80,24 @@ save_timer = None
 
 
 def debounce_save(context):
-    # moved here to avoid circular dependencies
-    from .functions import save_color_sets
+    """Schedule saving the color sets 1 seconds after the last change."""
+    from .functions import save_color_sets  # moved here to avoid circular dependencies
     global save_timer
+
+    # cancel any existing scheduled save
     if save_timer is not None:
-        save_timer.cancel()
-    save_timer = threading.Timer(2.0, save_color_sets, args=[context])
-    save_timer.start()
+        try:
+            bpy.app.timers.unregister(save_timer)
+        except ValueError:
+            pass
+
+    def delayed_save():
+        from .functions import save_color_sets
+        save_color_sets(context)
+        return None  # stop the timer
+
+    save_timer_handle = bpy.app.timers.register(
+        delayed_save, first_interval=1.0)
 
 
 class PresetColorSetItem(bpy.types.PropertyGroup):
