@@ -22,7 +22,9 @@ def get_addon_dir():
 def get_custom_dir():
     pref = get_preferences(bpy.context)
     if pref.use_default_location:
-        return bpy.utils.user_resource('DATAFILES', path="bone_widget_custom_data", create=True)
+        return bpy.utils.extension_path_user(
+            package=__package__, path="bone_widget_custom_data", create=True
+        )
     else:
         return pref.user_data_location
 
@@ -174,7 +176,7 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
         write_widgets(wgts, file)
 
         # to handle circular import error
-        from . import create_preview_collection
+        from .functions import create_preview_collection
 
         create_preview_collection()
 
