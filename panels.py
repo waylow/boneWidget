@@ -6,7 +6,6 @@ from .functions import (
     preview_collections,
     create_preview_collection,
     get_preview_default,
-    live_update_toggle,
     load_color_presets,
     get_preferences,
 )
@@ -141,9 +140,10 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                     row.prop(custom_edit_color, "select", text="")
                     row.prop(custom_edit_color, "active", text="")
 
-                if context.object.mode in ['POSE', 'EDIT'] and get_preferences(context).edit_bone_colors != 'DEFAULT':
+                if context.object.mode == 'POSE' or (context.object.mode == 'EDIT' and \
+                                                     get_preferences(context).edit_bone_colors != 'DEFAULT'):
                     row.separator(factor=0.5)
-                    row.prop(context.scene, "live_update_toggle",
+                    row.prop(context.scene.bw_settings, "live_update_toggle",
                              text="", icon="UV_SYNC_SELECT")
 
                 row = layout.row()
