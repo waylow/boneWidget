@@ -214,6 +214,8 @@ classes = (
 
 
 def register():
+    if not hasattr(bpy.types.WindowManager, "widget_list"):
+        create_preview_collection()
 
     bpy.types.WindowManager.toggle_preview = bpy.props.BoolProperty(
         name="Preview Panel",
@@ -227,7 +229,6 @@ def register():
     bpy.types.WindowManager.colorset_list_index = bpy.props.IntProperty(
         name="Index", default=0)
 
-    bpy.app.handlers.load_post.append(create_preview_collection)
     bpy.app.handlers.load_post.append(load_color_presets)
 
     from bpy.utils import register_class

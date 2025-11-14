@@ -8,7 +8,7 @@ from mathutils import Vector
 preview_collections = {}
 
 
-def create_preview_collection(_ = None):
+def create_preview_collection():
     if preview_collections:
         del bpy.types.WindowManager.widget_list
         for pcoll in preview_collections.values():
