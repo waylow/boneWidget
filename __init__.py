@@ -20,24 +20,24 @@ Created by Manuel Rais and Christophe Seux
 
 if "bpy" in locals():
     import importlib
-    importlib.reload(prefs)
+    importlib.reload(operators)
+    importlib.reload(props)
     importlib.reload(panels)
+    importlib.reload(prefs)
     importlib.reload(menus)
-
+    
 else:
     import bpy
     from . import operators
+    from . import props
     from . import panels
     from . import prefs
     from . import menus
-
-import bpy
 
 
 def get_user_preferences(context):
     if hasattr(context, "user_preferences"):
         return context.user_preferences
-
     return context.preferences
 
 
@@ -59,5 +59,4 @@ def unregister():
     props.unregister()
     menus.unregister()
     prefs.unregister()
-
     panels.unregister()
