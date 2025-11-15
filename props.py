@@ -1,7 +1,8 @@
 import bpy
 from .functions import (
     update_bone_color,
-    bone_color_items_short
+    bone_color_items_short,
+    live_update_toggle
 )
 from bpy.types import PropertyGroup
 from bpy.props import BoolProperty, EnumProperty, PointerProperty
@@ -46,12 +47,13 @@ class BW_Settings(PropertyGroup):
     live_update_on: BoolProperty(
         name="Live Update On",
         description="Enable live widget updates",
-        default=True
+        default=False
     )
     live_update_toggle: BoolProperty(
         name="Live Update Toggle",
         description="Toggle live updates in the UI",
-        default=False
+        default=False,
+        update=live_update_toggle,
     )
     turn_off_colorset_save: BoolProperty(
         name="Turn Off ColorSet Save",
@@ -80,11 +82,10 @@ save_timer = None
 
 
 def debounce_save(context):
-    """Schedule saving the color sets 1 seconds after the last change."""
-    from .functions import save_color_sets  # moved here to avoid circular dependencies
+    """Schedule saving the color sets 1 second after the last change."""
+    from .functions import save_color_sets
     global save_timer
 
-    # cancel any existing scheduled save
     if save_timer is not None:
         try:
             bpy.app.timers.unregister(save_timer)
@@ -92,12 +93,11 @@ def debounce_save(context):
             pass
 
     def delayed_save():
-        from .functions import save_color_sets
         save_color_sets(context)
         return None  # stop the timer
 
-    save_timer_handle = bpy.app.timers.register(
-        delayed_save, first_interval=1.0)
+    save_timer = delayed_save
+    bpy.app.timers.register(save_timer, first_interval=1.0)
 
 
 class PresetColorSetItem(bpy.types.PropertyGroup):
@@ -194,6 +194,7 @@ def register():
     bpy.utils.register_class(CustomColorSet)
     bpy.utils.register_class(BW_Settings)
     bpy.types.Scene.bw_settings = bpy.props.PointerProperty(type=BW_Settings)
+
 
 
 def unregister():
