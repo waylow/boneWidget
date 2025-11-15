@@ -1126,7 +1126,6 @@ class BONEWIDGET_OT_add_default_colorset(bpy.types.Operator):
 
     def execute(self, context):
         add_color_set(context)
-        save_color_sets(context)
         return {'FINISHED'}
 
 
