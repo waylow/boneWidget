@@ -1039,6 +1039,8 @@ class BONEWIDGET_OT_copy_bone_color(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
+        if not context.object:
+            return False
         bones = context.selected_pose_bones if context.object.mode == 'POSE' else context.selected_bones
         return (context.object and context.object.type == 'ARMATURE'
                 and context.object.mode in ['POSE', 'EDIT'] and len(bones) == 1)
