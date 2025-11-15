@@ -121,7 +121,10 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
             row.operator("bonewidget.set_bone_color",
                          text="Set Bone Color", icon="BRUSHES_ALL")
             row.scale_x = 3.0
-            row.template_icon_view(
+            icon_row = row.row()
+            icon_row.enabled = (context.object is not None and context.object.type == 'ARMATURE' and
+                                context.object.mode in {'POSE', 'EDIT'})
+            icon_row.template_icon_view(
                 context.scene.bw_settings, "bone_widget_colors", show_labels=False, scale=1, scale_popup=1.8)
             if context.scene.bw_settings.bone_widget_colors == "CUSTOM":
 
