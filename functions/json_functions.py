@@ -617,8 +617,8 @@ def add_color_set(context, color_set=None):
 
 
 def save_color_sets(context):
-    if not bpy.context.scene.bw_settings.turn_off_colorset_save:
-        bpy.context.scene.bw_settings.turn_off_colorset_save = True
+    if not bpy.context.window_manager.turn_off_colorset_save:
+        bpy.context.window_manager.turn_off_colorset_save = True
         color_sets = [{
             "name": item.name,
             "normal": list(item.normal),
@@ -629,21 +629,20 @@ def save_color_sets(context):
         filepath = get_custom_color_preset_dir()
         with open(filepath, 'w') as f:
             json.dump(color_sets, f, indent=4)
-        bpy.context.scene.bw_settings.turn_off_colorset_save = False
+        bpy.context.window_manager.turn_off_colorset_save = False
 
 
-@persistent
-def load_color_presets(_):
+def load_color_presets():
     filepath = get_custom_color_preset_dir()
     if os.path.exists(filepath):
         with open(filepath, 'r') as f:
             color_sets = json.load(f)
             bpy.context.window_manager.custom_color_presets.clear()
-            bpy.context.scene.bw_settings.turn_off_colorset_save = True
+            bpy.context.window_manager.turn_off_colorset_save = True
             for item in color_sets:
                 new_item = bpy.context.window_manager.custom_color_presets.add()
                 new_item.name = item["name"]
                 new_item.normal = item["normal"]
                 new_item.select = item["select"]
                 new_item.active = item["active"]
-            bpy.context.scene.bw_settings.turn_off_colorset_save = False
+            bpy.context.window_manager.turn_off_colorset_save = False

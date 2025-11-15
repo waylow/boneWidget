@@ -26,6 +26,10 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_label = "Bone Widget"
 
     def draw(self, context):
+        if context.window_manager.load_presets_on_startup:
+            load_color_presets()
+            context.window_manager.load_presets_on_startup = False
+            
         layout = self.layout
 
         # preview toggle checkbox
@@ -231,8 +235,16 @@ def register():
         type=PresetColorSetItem)
     bpy.types.WindowManager.colorset_list_index = bpy.props.IntProperty(
         name="Index", default=0)
-
-    bpy.app.handlers.load_post.append(load_color_presets)
+    bpy.types.WindowManager.turn_off_colorset_save = bpy.props.BoolProperty(
+        name="Turn Off ColorSet Save",
+        description="Disable automatic saving of color sets",
+        default=False
+    )
+    bpy.types.WindowManager.load_presets_on_startup = bpy.props.BoolProperty(
+        name="Load Presets on Startup",
+        description="Load color presets when Blender starts",
+        default=True
+    )
 
     from bpy.utils import register_class
     for cls in classes:
@@ -249,6 +261,8 @@ def unregister():
     del bpy.types.WindowManager.toggle_preview
     del bpy.types.WindowManager.custom_color_presets
     del bpy.types.WindowManager.colorset_list_index
+    del bpy.types.WindowManager.turn_off_colorset_save
+    del bpy.types.WindowManager.load_presets_on_startup
 
     bpy.utils.unregister_class(PresetColorSetItem)
 
