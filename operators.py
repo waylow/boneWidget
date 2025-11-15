@@ -891,7 +891,7 @@ class BONEWIDGET_OT_toggle_collection_visibility(bpy.types.Operator):
         bw_collection = recursive_layer_collection(
             bpy.context.view_layer.layer_collection, bw_collection_name)
         bw_collection.hide_viewport = not bw_collection.hide_viewport
-        # need to recursivly search for the view_layer
+        # need to recursively search for the view_layer
         bw_collection.exclude = False
         return {'FINISHED'}
 

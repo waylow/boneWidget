@@ -30,12 +30,13 @@ def generate_previews():
     pcoll = preview_collections["widgets"]
     if pcoll.widget_list:
         return pcoll.widget_list
-    
+
     directory = get_default_image_dir('thumbnails')
     custom_directory = get_custom_image_dir("custom_thumbnails")
 
     if directory and os.path.exists(directory):
-        widget_data = {item[0]: item[1].get("image", "missing_image.png") for item in read_widgets().items()}
+        widget_data = {item[0]: item[1].get(
+            "image", "missing_image.png") for item in read_widgets().items()}
         widget_names = sorted(widget_data.keys())
 
         for i, name in enumerate(widget_names):
@@ -56,10 +57,11 @@ def generate_previews():
                 thumb = pcoll.load(name, filepath, 'IMAGE')
             else:
                 thumb = pcoll[name]
-                
-            face_data_info = "Contains Face Data" if get_widget_data(name).get("faces") else ""
+
+            face_data_info = "Contains Face Data" if get_widget_data(
+                name).get("faces") else ""
             enum_items.append((name, name, face_data_info, thumb.icon_id, i))
-    
+
     pcoll.widget_list = enum_items
     return enum_items
 
@@ -93,7 +95,7 @@ def copy_custom_image(filepath, filename):
 def remove_custom_image(filename):
     image_directory = get_custom_image_dir('custom_thumbnails')
     destination_path = os.path.join(image_directory, filename)
-    
+
     if os.path.isfile(destination_path):
         # make sure the image is only used once - else stop
         count = 0
@@ -102,7 +104,7 @@ def remove_custom_image(filename):
                 count += 1
             if count > 1:
                 return False
-            
+
         try:
             os.remove(destination_path)
             return True
@@ -122,15 +124,19 @@ def create_wireframe_copy(obj, use_color, color, thickness):
     geo_mod = copy.modifiers.new(name="BoneWidget_WireFrame", type='NODES')
 
     # Create a new node group and assign it to the modifier
-    node_group = bpy.data.node_groups.new(name="BONEWIDGET_GeometryGroup", type='GeometryNodeTree')
+    node_group = bpy.data.node_groups.new(
+        name="BONEWIDGET_GeometryGroup", type='GeometryNodeTree')
     geo_mod.node_group = node_group
 
     # Add input and output sockets
-    node_group.interface.new_socket(name="Geometry", in_out="INPUT", socket_type="NodeSocketGeometry")
-    node_group.interface.new_socket(name="Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
+    node_group.interface.new_socket(
+        name="Geometry", in_out="INPUT", socket_type="NodeSocketGeometry")
+    node_group.interface.new_socket(
+        name="Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
 
     # Add Thickness input
-    thickness_socket = node_group.interface.new_socket(name="Thickness", in_out="INPUT", socket_type="NodeSocketFloat")
+    thickness_socket = node_group.interface.new_socket(
+        name="Thickness", in_out="INPUT", socket_type="NodeSocketFloat")
     thickness_socket.default_value = 0.5
     thickness_socket.min_value = 0.01
     thickness_socket.max_value = 2
@@ -140,8 +146,10 @@ def create_wireframe_copy(obj, use_color, color, thickness):
     node_output = node_group.nodes.new('NodeGroupOutput')
     node_uv_sphere = node_group.nodes.new('GeometryNodeMeshUVSphere')
     node_mesh_to_curve = node_group.nodes.new('GeometryNodeMeshToCurve')
-    node_curve_circle = node_group.nodes.new('GeometryNodeCurvePrimitiveCircle')
-    node_instance_on_points = node_group.nodes.new('GeometryNodeInstanceOnPoints')
+    node_curve_circle = node_group.nodes.new(
+        'GeometryNodeCurvePrimitiveCircle')
+    node_instance_on_points = node_group.nodes.new(
+        'GeometryNodeInstanceOnPoints')
     node_curve_to_mesh = node_group.nodes.new('GeometryNodeCurveToMesh')
     node_join_geometry = node_group.nodes.new('GeometryNodeJoinGeometry')
 
@@ -155,24 +163,35 @@ def create_wireframe_copy(obj, use_color, color, thickness):
     node_uv_sphere.location = (-150, 100)
     node_mesh_to_curve.location = (-150, -50)
     node_curve_circle.location = (-150, -150)
-    node_instance_on_points.location = (100,250)
+    node_instance_on_points.location = (100, 250)
     node_curve_to_mesh.location = (100, -100)
     node_join_geometry.location = (350, 0)
     node_output.location = (550, 0)
 
     # Connect nodes
-    node_group.links.new(node_input.outputs["Geometry"], node_instance_on_points.inputs["Points"])
-    node_group.links.new(node_input.outputs["Geometry"], node_mesh_to_curve.inputs["Mesh"])
-    node_group.links.new(node_input.outputs["Thickness"], node_uv_sphere.inputs["Radius"])
-    node_group.links.new(node_input.outputs["Thickness"], node_curve_circle.inputs["Radius"])
-    node_group.links.new(node_uv_sphere.outputs["Mesh"], node_instance_on_points.inputs["Instance"])
-    node_group.links.new(node_mesh_to_curve.outputs["Curve"], node_curve_to_mesh.inputs["Curve"])
-    node_group.links.new(node_curve_circle.outputs["Curve"], node_curve_to_mesh.inputs["Profile Curve"])
-    node_group.links.new(node_instance_on_points.outputs["Instances"], node_join_geometry.inputs["Geometry"])
-    node_group.links.new(node_curve_to_mesh.outputs["Mesh"], node_join_geometry.inputs["Geometry"])
-    node_group.links.new(node_join_geometry.outputs["Geometry"], node_output.inputs["Geometry"])
-    
-    geo_mod["Socket_2"] = (thickness / 10) # scale this so it isn't so sensitive
+    node_group.links.new(
+        node_input.outputs["Geometry"], node_instance_on_points.inputs["Points"])
+    node_group.links.new(
+        node_input.outputs["Geometry"], node_mesh_to_curve.inputs["Mesh"])
+    node_group.links.new(
+        node_input.outputs["Thickness"], node_uv_sphere.inputs["Radius"])
+    node_group.links.new(
+        node_input.outputs["Thickness"], node_curve_circle.inputs["Radius"])
+    node_group.links.new(
+        node_uv_sphere.outputs["Mesh"], node_instance_on_points.inputs["Instance"])
+    node_group.links.new(
+        node_mesh_to_curve.outputs["Curve"], node_curve_to_mesh.inputs["Curve"])
+    node_group.links.new(
+        node_curve_circle.outputs["Curve"], node_curve_to_mesh.inputs["Profile Curve"])
+    node_group.links.new(
+        node_instance_on_points.outputs["Instances"], node_join_geometry.inputs["Geometry"])
+    node_group.links.new(
+        node_curve_to_mesh.outputs["Mesh"], node_join_geometry.inputs["Geometry"])
+    node_group.links.new(
+        node_join_geometry.outputs["Geometry"], node_output.inputs["Geometry"])
+
+    # scale this so it isn't so sensitive
+    geo_mod["Socket_2"] = (thickness / 10)
 
     return copy
 
@@ -200,15 +219,16 @@ def restore_viewport_position(context, view_matrix, view_perspective):
 
 
 def render_widget_thumbnail(image_name, widget_object, image_directory):
-    if image_directory: # If True save to the current directory but...
-        if bpy.data.filepath: # Check the file has been saved
+    if image_directory:  # If True save to the current directory but...
+        if bpy.data.filepath:  # Check the file has been saved
             image_directory = os.path.dirname(bpy.data.filepath)
         else:
-            image_directory = os.path.expanduser("~") # Fall back if it hasn't been daved
+            # Fall back if it hasn't been saved
+            image_directory = os.path.expanduser("~")
         # add '.png' to the name
         image_name = image_name + '.png'
-        
-    else: # if False use the add-on location
+
+    else:  # if False use the add-on location
         image_directory = get_custom_image_dir('custom_thumbnails')
 
     destination_path = os.path.join(image_directory, image_name)
@@ -231,7 +251,8 @@ def render_widget_thumbnail(image_name, widget_object, image_directory):
     frame_object_with_padding(camera, obj, padding=0.1)
 
     bpy.ops.render.render(write_still=False)
-    bpy.data.images['Render Result'].save_render(filepath=bpy.path.abspath(destination_path))
+    bpy.data.images['Render Result'].save_render(
+        filepath=bpy.path.abspath(destination_path))
 
     return bpy.path.abspath(destination_path)
 

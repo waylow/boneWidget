@@ -207,13 +207,13 @@ Toggle open this section to see all your saved color presets.
 
 
 
-|Icon| Function|
-|--|--|
-|<img src="images/blender_icon_add.svg" width=25px>| Add a new preset|
-|<img src="images/blender_icon_remove.svg" width=25px>| Delete the active preset|
-|<img src="images/blender_icon_downarrow_hlt.svg" width=25px>| Preset specials menu|
-|<img src="images/blender_icon_tria_up.svg" width=25px>| Move the active preset up in the list |
-|<img src="images/blender_icon_tria_down.svg" width=25px>| Move the active preset down in the list |
+| Icon                                                         | Function                                |
+|--------------------------------------------------------------|-----------------------------------------|
+| <img src="images/blender_icon_add.svg" width=25px>           | Add a new preset                        |
+| <img src="images/blender_icon_remove.svg" width=25px>        | Delete the active preset                |
+| <img src="images/blender_icon_downarrow_hlt.svg" width=25px> | Preset specials menu                    |
+| <img src="images/blender_icon_tria_up.svg" width=25px>       | Move the active preset up in the list   |
+| <img src="images/blender_icon_tria_down.svg" width=25px>     | Move the active preset down in the list |
 
 ### Apply to Selected Bones
 This will apply the active preset to the selected bones.
@@ -393,7 +393,7 @@ Roll, Root_2, Torso
 ## v1.4 Release notes
 * add function to clear widget from bone
 * add operator to show/hide the collections
-* add operator that will resync the names of the wdgts to the bones
+* add operator that will resync the names of the widgets to the bones
 * add operator to delete unused widgets
 * add property to be able to rotate the widgets
 * improve the ui

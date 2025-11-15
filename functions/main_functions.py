@@ -451,7 +451,7 @@ def add_object_as_widget(context, collection):
         # duplicate shape
         widget = widget_object.copy()
         widget.data = widget.data.copy()
-        # reamame it
+        # rename it
         bw_widget_prefix = get_preferences(context).widget_prefix
         widget_name = bw_widget_prefix + active_bone.name
         widget.name = widget_name

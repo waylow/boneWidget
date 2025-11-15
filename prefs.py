@@ -9,7 +9,7 @@ from .operators import BONEWIDGET_OT_reset_default_images, BONEWIDGET_OT_user_da
 class BoneWidget_preferences(AddonPreferences):
     bl_idname = __package__
 
-    #Use Rigify Defaults
+    # Use Rigify Defaults
     use_rigify_defaults: BoolProperty(
         name="Use Rigify Defaults",
         description="Use the same naming convention for widget creation (disable if you prefer your naming convention)",
@@ -26,7 +26,7 @@ class BoneWidget_preferences(AddonPreferences):
     # symmetry suffix
     symmetry_suffix: StringProperty(
         name="Bone Widget symmetry suffix",
-        description="Choose a naming convention for the symmetrical widgets, seperate by semicolon.",
+        description="Choose a naming convention for the symmetrical widgets, separate by semicolon.",
         default="L; R",
     )
 
@@ -83,12 +83,14 @@ class BoneWidget_preferences(AddonPreferences):
         description="Behavior of Edit Bone colors",
         items=[
             ('DEFAULT', "Default", "Set the Edit Bone color to the default colors"),
-            ('LINKED', "Linked", "Use the same colors for both the Edit bones and Pose bones"),
-            ('SEPARATE', "Separate", "Edit bones and Pose bones will have their own colors"),
+            ('LINKED', "Linked",
+             "Use the same colors for both the Edit bones and Pose bones"),
+            ('SEPARATE', "Separate",
+             "Edit bones and Pose bones will have their own colors"),
         ],
         default='DEFAULT'
     )
-    
+
     clear_both_modes: bpy.props.BoolProperty(
         name="Clear All Bone Color",
         description='When enabled, bone colors from Edit mode and Pose mode will be cleared.  When disabled, only the color from the current mode will be cleared',
@@ -113,7 +115,6 @@ class BoneWidget_preferences(AddonPreferences):
         default="",
     )
 
-
     def draw(self, context):
         layout = self.layout
 
@@ -124,7 +125,8 @@ class BoneWidget_preferences(AddonPreferences):
         box_row = box.row()
         box_col = box_row.column()
         box_col.prop(self, "widget_prefix", text="Widget Prefix")
-        box_col.prop(self, "bonewidget_collection_name", text="Collection name")
+        box_col.prop(self, "bonewidget_collection_name",
+                     text="Collection name")
         box_row.enabled = not self.use_rigify_defaults
 
         box_row = box.row()
@@ -151,20 +153,20 @@ class BoneWidget_preferences(AddonPreferences):
         row.label(text="Symmetrize Colors:")
         row.prop(self, "symmetrize_color")
 
-
         # preview area
         row = layout.row()
         box = layout.box()
-        
+
         box.label(text="Thumbnail Previews:")
         box_row = box.row()
-        box_row.prop(self, "preview_default", text="Display Previews by Default")
+        box_row.prop(self, "preview_default",
+                     text="Display Previews by Default")
 
         box_row = box.row()
         box_col = box_row.column()
         box_col.label(text="Preview Panel Size:")
         box_row.prop(self, "preview_panel_size", text="")
-        
+
         box_row = box.row()
         box_col = box_row.column()
         box_col.label(text="Preview Popup Size:")
@@ -181,7 +183,8 @@ class BoneWidget_preferences(AddonPreferences):
         box_row = box.row()
         box_col = box_row.column()
         box_col.prop(self, "user_data_location", text="Custom Path")
-        box_row.operator("bonewidget.user_data_filebrowser", icon="FILEBROWSER", text="")
+        box_row.operator("bonewidget.user_data_filebrowser",
+                         icon="FILEBROWSER", text="")
         box_row.enabled = not self.use_default_location
 
         # reset button
@@ -194,6 +197,7 @@ class BoneWidget_preferences(AddonPreferences):
 
 def register():
     bpy.utils.register_class(BoneWidget_preferences)
+
 
 def unregister():
     bpy.utils.unregister_class(BoneWidget_preferences)
