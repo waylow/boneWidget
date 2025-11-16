@@ -53,7 +53,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         row.operator("bonewidget.create_widget",
                      icon="OBJECT_DATAMODE", text="Create")
 
-        if bpy.context.mode == "POSE":
+        if context.mode == "POSE":
             row.operator("bonewidget.edit_widget", icon="OUTLINER_DATA_MESH")
         else:
             row.operator("bonewidget.return_to_armature",
@@ -84,7 +84,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         layout.operator("bonewidget.delete_unused_widgets",
                         icon='TRASH', text="Delete Unused Widgets")
 
-        if bpy.context.mode == 'POSE':
+        if context.mode == 'POSE':
             layout.operator("bonewidget.add_as_widget",
                             text="Use Selected Object",
                             icon='RESTRICT_SELECT_OFF')
@@ -101,7 +101,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
             bw_collection_name = None
 
         bw_collection = recursive_layer_collection(
-            bpy.context.view_layer.layer_collection, bw_collection_name)
+            context.view_layer.layer_collection, bw_collection_name)
 
         if bw_collection is not None:
             if bw_collection.hide_viewport:
