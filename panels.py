@@ -29,6 +29,9 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         if context.window_manager.load_presets_on_startup:
             load_color_presets()
             context.window_manager.load_presets_on_startup = False
+
+        # cache call to get preferences
+        preferences = get_preferences(context)
             
         layout = self.layout
 
@@ -39,8 +42,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         # preview view
         if context.window_manager.toggle_preview:
             row = layout.row(align=True)
-            preview_panel_size = get_preferences(context).preview_panel_size
-            preview_popup_size = get_preferences(context).preview_popup_size
+            preview_panel_size = preferences.preview_panel_size
+            preview_popup_size = preferences.preview_popup_size
             row.template_icon_view(context.window_manager, "widget_list", show_labels=True,
                                    scale=preview_panel_size, scale_popup=preview_popup_size)
 
@@ -66,9 +69,9 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         row.operator("bonewidget.symmetrize_shape",
                      icon='MOD_MIRROR', text="Symmetrize Shape")
         icon = 'RESTRICT_COLOR_OFF'
-        if get_preferences(context).symmetrize_color:
+        if preferences.symmetrize_color:
             icon = 'RESTRICT_COLOR_ON'
-        row.prop(get_preferences(context), "symmetrize_color",
+        row.prop(preferences, "symmetrize_color",
                  icon=icon, text='', toggle=True)
         row = layout.row()
         row.operator("bonewidget.match_bone_transforms",
@@ -90,9 +93,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                             icon='RESTRICT_SELECT_OFF')
 
         # if the bw collection exists, show the visibility toggle
-        if not get_preferences(context).use_rigify_defaults:  # rigify
-            bw_collection_name = get_preferences(
-                context).bonewidget_collection_name
+        if not preferences.use_rigify_defaults:  # rigify
+            bw_collection_name = preferences.bonewidget_collection_name
 
         elif context.active_object:  # active  object
             bw_collection_name = 'WGTS_' + context.active_object.name
@@ -139,14 +141,14 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                     row.prop(custom_pose_color, "select", text="")
                     row.prop(custom_pose_color, "active", text="")
                 # edit bone colors
-                elif context.object.mode == "EDIT" and get_preferences(context).edit_bone_colors != 'DEFAULT':
+                elif context.object.mode == "EDIT" and preferences.edit_bone_colors != 'DEFAULT':
                     row = layout.row(align=True)
                     row.prop(custom_edit_color, "normal", text="")
                     row.prop(custom_edit_color, "select", text="")
                     row.prop(custom_edit_color, "active", text="")
 
                 if context.object.mode == 'POSE' or (context.object.mode == 'EDIT' and \
-                                                     get_preferences(context).edit_bone_colors != 'DEFAULT'):
+                                                     preferences.edit_bone_colors != 'DEFAULT'):
                     row.separator(factor=0.5)
                     row.prop(context.scene.bw_settings, "live_update_toggle",
                              text="", icon="UV_SYNC_SELECT")
@@ -160,9 +162,9 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                          text="Clear Bone Color", icon="PANEL_CLOSE")
 
             icon = 'BONE_DATA'
-            if get_preferences(context).clear_both_modes:
+            if preferences.clear_both_modes:
                 icon = 'GROUP_BONE'
-            row.prop(get_preferences(context), "clear_both_modes",
+            row.prop(preferences, "clear_both_modes",
                      icon=icon, text='', toggle=True)
 
 
