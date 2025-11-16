@@ -59,7 +59,6 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
             row.operator("bonewidget.return_to_armature",
                          icon="LOOP_BACK", text='To bone')
 
-        layout = self.layout
         layout.separator()
 
         # Symmetry buttons etc
@@ -79,7 +78,6 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                      icon='FILE_REFRESH', text="Resync Widget Names")
 
         # Clear Bone Widget buttons etc
-        layout = self.layout
         layout.separator()
         layout.operator("bonewidget.clear_widgets",
                         icon='X', text="Clear Bone Widget")
