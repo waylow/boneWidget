@@ -29,10 +29,8 @@ from .functions import (
     update_widget_library,
     set_bone_color,
     copy_bone_color,
-    bone_color_items,
     get_preferences,
     save_color_sets,
-    load_color_presets,
     add_color_set,
     scan_armature_color_presets,
     import_color_presets,
@@ -42,8 +40,7 @@ from .functions import (
     setup_viewport,
     restore_viewport_position,
     render_widget_thumbnail,
-    add_camera_from_view,
-    frame_object_with_padding
+    add_camera_from_view
 )
 
 from .props import ImportColorSet, ImportItemData, get_import_options

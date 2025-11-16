@@ -1,6 +1,6 @@
 import bpy
 import bpy.utils.previews
-from .props import PresetColorSetItem, CustomColorSet
+from .props import PresetColorSetItem
 from .functions import (
     recursive_layer_collection,
     preview_collections,
