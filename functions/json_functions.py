@@ -3,7 +3,6 @@ import os
 import json
 import numpy
 import re
-from bpy.app.handlers import persistent
 from .main_functions import get_preferences
 from ..classes import BoneWidgetImportData, Widget, ColorSet
 from .. import __package__
