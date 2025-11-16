@@ -1001,7 +1001,8 @@ class BONEWIDGET_OT_set_bone_color(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'])
+        return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'] and
+            (context.selected_bones or context.selected_pose_bones))
 
     def execute(self, context):
         set_bone_color(context, context.scene.bw_settings.bone_widget_colors)
@@ -1021,7 +1022,8 @@ class BONEWIDGET_OT_clear_bone_color(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'])
+        return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'] and
+            (context.selected_bones or context.selected_pose_bones))
 
     def execute(self, context):
         set_bone_color(context, "DEFAULT", get_preferences(
@@ -1037,6 +1039,8 @@ class BONEWIDGET_OT_copy_bone_color(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
+        if not context.object:
+            return False
         bones = context.selected_pose_bones if context.object.mode == 'POSE' else context.selected_bones
         return (context.object and context.object.type == 'ARMATURE'
                 and context.object.mode in ['POSE', 'EDIT'] and len(bones) == 1)
@@ -1122,7 +1126,6 @@ class BONEWIDGET_OT_add_default_colorset(bpy.types.Operator):
 
     def execute(self, context):
         add_color_set(context)
-        save_color_sets(context)
         return {'FINISHED'}
 
 

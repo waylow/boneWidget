@@ -55,11 +55,6 @@ class BW_Settings(PropertyGroup):
         default=False,
         update=live_update_toggle,
     )
-    turn_off_colorset_save: BoolProperty(
-        name="Turn Off ColorSet Save",
-        description="Disable automatic saving of color sets",
-        default=False
-    )
     lock_colorset_color_changes: BoolProperty(
         name="Lock ColorSet Color Changes",
         description="Prevent modifying the current color set",
@@ -103,7 +98,7 @@ def debounce_save(context):
 class PresetColorSetItem(bpy.types.PropertyGroup):
 
     def update_colorset_list(self, context):
-        if not context.scene.bw_settings.turn_off_colorset_save and not context.scene.bw_settings.lock_colorset_color_changes:
+        if not context.window_manager.turn_off_colorset_save and not context.scene.bw_settings.lock_colorset_color_changes:
             debounce_save(context)
 
     name: bpy.props.StringProperty(
