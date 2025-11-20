@@ -1,6 +1,6 @@
 import bpy
 import bpy.utils.previews
-from .props import PresetColorSetItem, CustomColorSet
+from .props import PresetColorSetItem
 from .functions import (
     recursive_layer_collection,
     preview_collections,
@@ -29,6 +29,9 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         if context.window_manager.load_presets_on_startup:
             load_color_presets()
             context.window_manager.load_presets_on_startup = False
+
+        # cache call to get preferences
+        preferences = get_preferences(context)
             
         layout = self.layout
 
@@ -39,8 +42,8 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         # preview view
         if context.window_manager.toggle_preview:
             row = layout.row(align=True)
-            preview_panel_size = get_preferences(context).preview_panel_size
-            preview_popup_size = get_preferences(context).preview_popup_size
+            preview_panel_size = preferences.preview_panel_size
+            preview_popup_size = preferences.preview_popup_size
             row.template_icon_view(context.window_manager, "widget_list", show_labels=True,
                                    scale=preview_panel_size, scale_popup=preview_popup_size)
 
@@ -53,13 +56,12 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         row.operator("bonewidget.create_widget",
                      icon="OBJECT_DATAMODE", text="Create")
 
-        if bpy.context.mode == "POSE":
+        if context.mode == "POSE":
             row.operator("bonewidget.edit_widget", icon="OUTLINER_DATA_MESH")
         else:
             row.operator("bonewidget.return_to_armature",
                          icon="LOOP_BACK", text='To bone')
 
-        layout = self.layout
         layout.separator()
 
         # Symmetry buttons etc
@@ -67,9 +69,9 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         row.operator("bonewidget.symmetrize_shape",
                      icon='MOD_MIRROR', text="Symmetrize Shape")
         icon = 'RESTRICT_COLOR_OFF'
-        if get_preferences(context).symmetrize_color:
+        if preferences.symmetrize_color:
             icon = 'RESTRICT_COLOR_ON'
-        row.prop(get_preferences(context), "symmetrize_color",
+        row.prop(preferences, "symmetrize_color",
                  icon=icon, text='', toggle=True)
         row = layout.row()
         row.operator("bonewidget.match_bone_transforms",
@@ -79,22 +81,20 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                      icon='FILE_REFRESH', text="Resync Widget Names")
 
         # Clear Bone Widget buttons etc
-        layout = self.layout
         layout.separator()
         layout.operator("bonewidget.clear_widgets",
                         icon='X', text="Clear Bone Widget")
         layout.operator("bonewidget.delete_unused_widgets",
                         icon='TRASH', text="Delete Unused Widgets")
 
-        if bpy.context.mode == 'POSE':
+        if context.mode == 'POSE':
             layout.operator("bonewidget.add_as_widget",
                             text="Use Selected Object",
                             icon='RESTRICT_SELECT_OFF')
 
         # if the bw collection exists, show the visibility toggle
-        if not get_preferences(context).use_rigify_defaults:  # rigify
-            bw_collection_name = get_preferences(
-                context).bonewidget_collection_name
+        if not preferences.use_rigify_defaults:  # rigify
+            bw_collection_name = preferences.bonewidget_collection_name
 
         elif context.active_object:  # active  object
             bw_collection_name = 'WGTS_' + context.active_object.name
@@ -103,7 +103,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
             bw_collection_name = None
 
         bw_collection = recursive_layer_collection(
-            bpy.context.view_layer.layer_collection, bw_collection_name)
+            context.view_layer.layer_collection, bw_collection_name)
 
         if bw_collection is not None:
             if bw_collection.hide_viewport:
@@ -141,14 +141,14 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                     row.prop(custom_pose_color, "select", text="")
                     row.prop(custom_pose_color, "active", text="")
                 # edit bone colors
-                elif context.object.mode == "EDIT" and get_preferences(context).edit_bone_colors != 'DEFAULT':
+                elif context.object.mode == "EDIT" and preferences.edit_bone_colors != 'DEFAULT':
                     row = layout.row(align=True)
                     row.prop(custom_edit_color, "normal", text="")
                     row.prop(custom_edit_color, "select", text="")
                     row.prop(custom_edit_color, "active", text="")
 
                 if context.object.mode == 'POSE' or (context.object.mode == 'EDIT' and \
-                                                     get_preferences(context).edit_bone_colors != 'DEFAULT'):
+                                                     preferences.edit_bone_colors != 'DEFAULT'):
                     row.separator(factor=0.5)
                     row.prop(context.scene.bw_settings, "live_update_toggle",
                              text="", icon="UV_SYNC_SELECT")
@@ -162,9 +162,9 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                          text="Clear Bone Color", icon="PANEL_CLOSE")
 
             icon = 'BONE_DATA'
-            if get_preferences(context).clear_both_modes:
+            if preferences.clear_both_modes:
                 icon = 'GROUP_BONE'
-            row.prop(get_preferences(context), "clear_both_modes",
+            row.prop(preferences, "clear_both_modes",
                      icon=icon, text='', toggle=True)
 
 
