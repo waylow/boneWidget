@@ -175,8 +175,7 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
         write_widgets(wgts, file)
 
         # to handle circular import error
-        from .functions import create_preview_collection
-
+        from .functions.preview_functions import create_preview_collection
         create_preview_collection()
 
         # trigger an update and display widget
@@ -322,7 +321,7 @@ def update_widget_library(new_widgets: dict[str, dict[str, list | str]],
             print("zip file path doesn't exist!! - ", zip_filepath)
 
     # update the preview panel
-    from .functions import create_preview_collection
+    from .functions.preview_functions import create_preview_collection
     create_preview_collection()
 
     # trigger an update and display original but updated widget
@@ -347,7 +346,7 @@ def update_custom_image(image_name):
         write_widgets(wgts, JSON_DEFAULT_WIDGETS)
 
     # update the preview panel
-    from .functions import create_preview_collection
+    from .functions.preview_functions import create_preview_collection
     create_preview_collection()
 
     # trigger an update and display original but updated widget
@@ -365,7 +364,7 @@ def reset_default_images():
     write_widgets(wgts, JSON_DEFAULT_WIDGETS)
 
     # update the preview panel
-    from .functions import create_preview_collection
+    from .functions.preview_functions import create_preview_collection
     create_preview_collection()
 
     # trigger an update and display original but updated widget
