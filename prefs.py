@@ -105,7 +105,7 @@ class BoneWidget_preferences(AddonPreferences):
 
     use_default_location: bpy.props.BoolProperty(
         name="Use default location",
-        description='When enabled, user widgets and color sets will be saved to datafiles/bone_widget_custom_data',
+        description='When enabled, user widgets and color sets will be saved to extensions/.user/{repository_name}/bone_widget/bone_widget_custom_data',
         default=True
     )
 
