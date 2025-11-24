@@ -1,7 +1,7 @@
 import bpy
 import os
 
-from .functions import (
+from .functions.main_functions import (
     find_match_bones,
     from_widget_find_bone,
     symmetrize_widget_helper,
@@ -9,8 +9,6 @@ from .functions import (
     create_widget,
     edit_widget,
     return_to_armature,
-    add_remove_widgets,
-    get_widget_data,
     get_collection,
     get_view_layer_collection,
     recursive_layer_collection,
@@ -18,24 +16,30 @@ from .functions import (
     clear_bone_widgets,
     resync_widget_names,
     add_object_as_widget,
-    import_widget_library,
-    export_widget_library,
     advanced_options_toggled,
-    remove_custom_image,
-    copy_custom_image,
-    get_widget_data,
-    update_custom_image,
-    reset_default_images,
-    update_widget_library,
     set_bone_color,
     copy_bone_color,
     get_preferences,
+)
+from .functions.json_functions import (
+    add_remove_widgets,
+    get_widget_data,
+    import_widget_library,
+    export_widget_library,
+    update_custom_image,
+    reset_default_images,
+    update_widget_library,
     save_color_sets,
     add_color_set,
     scan_armature_color_presets,
     import_color_presets,
     export_color_presets,
     update_color_presets,
+)
+
+from .functions.preview_functions import (
+    remove_custom_image,
+    copy_custom_image,
     create_wireframe_copy,
     setup_viewport,
     restore_viewport_position,
@@ -999,7 +1003,7 @@ class BONEWIDGET_OT_set_bone_color(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'] and
-            (context.selected_bones or context.selected_pose_bones))
+                (context.selected_bones or context.selected_pose_bones))
 
     def execute(self, context):
         set_bone_color(context, context.scene.bw_settings.bone_widget_colors)
@@ -1020,7 +1024,7 @@ class BONEWIDGET_OT_clear_bone_color(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'] and
-            (context.selected_bones or context.selected_pose_bones))
+                (context.selected_bones or context.selected_pose_bones))
 
     def execute(self, context):
         set_bone_color(context, "DEFAULT", get_preferences(

@@ -1,5 +1,5 @@
 import bpy
-from .functions import (
+from .functions.main_functions import (
     update_bone_color,
     bone_color_items_short,
     live_update_toggle
@@ -189,7 +189,6 @@ def register():
     bpy.utils.register_class(CustomColorSet)
     bpy.utils.register_class(BW_Settings)
     bpy.types.Scene.bw_settings = bpy.props.PointerProperty(type=BW_Settings)
-
 
 
 def unregister():

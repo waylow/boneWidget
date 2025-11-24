@@ -1,14 +1,16 @@
 import bpy
 import bpy.utils.previews
 from .props import PresetColorSetItem
-from .functions import (
+from .functions.main_functions import (
     recursive_layer_collection,
-    preview_collections,
-    create_preview_collection,
-    get_preview_default,
-    load_color_presets,
     get_preferences,
 )
+from .functions.preview_functions import (
+    create_preview_collection,
+    preview_collections,
+    get_preview_default,
+)
+from .functions.json_functions import load_color_presets
 
 from .menus import BONEWIDGET_MT_bw_specials
 
@@ -32,7 +34,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 
         # cache call to get preferences
         preferences = get_preferences(context)
-            
+
         layout = self.layout
 
         # preview toggle checkbox
@@ -147,7 +149,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                     row.prop(custom_edit_color, "select", text="")
                     row.prop(custom_edit_color, "active", text="")
 
-                if context.object.mode == 'POSE' or (context.object.mode == 'EDIT' and \
+                if context.object.mode == 'POSE' or (context.object.mode == 'EDIT' and
                                                      preferences.edit_bone_colors != 'DEFAULT'):
                     row.separator(factor=0.5)
                     row.prop(context.scene.bw_settings, "live_update_toggle",
