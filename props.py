@@ -78,7 +78,7 @@ save_timer = None
 
 def debounce_save(context):
     """Schedule saving the color sets 1 second after the last change."""
-    from .functions import save_color_sets
+    from .functions.json_functions import save_color_sets
     global save_timer
 
     if save_timer is not None:
