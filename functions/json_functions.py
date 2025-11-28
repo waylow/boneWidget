@@ -64,6 +64,11 @@ def validate_json_data(data: dict, required_keys: tuple, can_be_empty: bool = Tr
     return True
 
 
+def update_preview_collection():
+    from .functions.preview_functions import create_preview_collection
+    create_preview_collection()
+
+
 def objectDataToDico(object, custom_image):
     verts = []
     depsgraph = bpy.context.evaluated_depsgraph_get()
@@ -174,9 +179,8 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
 
         write_widgets(wgts, file)
 
-        # to handle circular import error
-        from .functions.preview_functions import create_preview_collection
-        create_preview_collection()
+        # update the preview panel
+        update_preview_collection()
 
         # trigger an update and display widget
         bpy.context.window_manager.widget_list = activeShape
@@ -321,8 +325,7 @@ def update_widget_library(new_widgets: dict[str, dict[str, list | str]],
             print("zip file path doesn't exist!! - ", zip_filepath)
 
     # update the preview panel
-    from .functions.preview_functions import create_preview_collection
-    create_preview_collection()
+    update_preview_collection()
 
     # trigger an update and display original but updated widget
     bpy.context.window_manager.widget_list = current_widget
@@ -346,8 +349,7 @@ def update_custom_image(image_name):
         write_widgets(wgts, JSON_DEFAULT_WIDGETS)
 
     # update the preview panel
-    from .functions.preview_functions import create_preview_collection
-    create_preview_collection()
+    update_preview_collection()
 
     # trigger an update and display original but updated widget
     bpy.context.window_manager.widget_list = current_widget
@@ -364,8 +366,7 @@ def reset_default_images():
     write_widgets(wgts, JSON_DEFAULT_WIDGETS)
 
     # update the preview panel
-    from .functions.preview_functions import create_preview_collection
-    create_preview_collection()
+    update_preview_collection()
 
     # trigger an update and display original but updated widget
     bpy.context.window_manager.widget_list = current_widget
