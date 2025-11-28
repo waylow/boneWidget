@@ -71,7 +71,7 @@ class BONEWIDGET_OT_create_widget(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.mode == 'POSE')
+        return (context.object and context.object.mode == 'POSE' and context.selected_pose_bones)
 
     relative_size: BoolProperty(
         name="Scale to Bone length",
