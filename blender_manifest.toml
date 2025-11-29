@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "bone_widget"
-version = "2.3.2"
+version = "2.3.3"
 name = "Bone Widget"
 tagline = "Easily Create Bone Widgets"
 maintainer = "Wayne Dixon <waylowinternet@gmail.com>"
