@@ -91,20 +91,20 @@ class BoneWidget_preferences(AddonPreferences):
         default='DEFAULT'
     )
 
-    clear_both_modes: bpy.props.BoolProperty(
+    clear_both_modes: BoolProperty(
         name="Clear All Bone Color",
         description='When enabled, bone colors from Edit mode and Pose mode will be cleared.  When disabled, only the color from the current mode will be cleared',
         default=True
     )
 
-    symmetrize_color: bpy.props.BoolProperty(
+    symmetrize_color: BoolProperty(
         name="Symmetrize Bone Colors",
         description='When enabled, bone colors will be copied when you symmetrize a widget. When disabled, only the shape will be symmetrized',
         default=True
     )
 
-    use_default_location: bpy.props.BoolProperty(
-        name="Use default location",
+    use_default_location: BoolProperty(
+        name="Use Default Location",
         description='When enabled, user widgets and color sets will be saved to extensions/.user/{repository_name}/bone_widget/bone_widget_custom_data',
         default=True
     )
@@ -113,6 +113,12 @@ class BoneWidget_preferences(AddonPreferences):
         name="User Data Location",
         description="Choose a location where you want to save custom data",
         default="",
+    )
+
+    reset_custom_shape_transforms: BoolProperty(
+        name="Reset Custom Shape Transforms",
+        description='When enabled, any transforms to the custom shape will be reset to default when adding a new widget. This will force your new widget to display exactly as expected.',
+        default=True
     )
 
     def draw(self, context):
@@ -186,6 +192,12 @@ class BoneWidget_preferences(AddonPreferences):
         box_row.operator("bonewidget.user_data_filebrowser",
                          icon="FILEBROWSER", text="")
         box_row.enabled = not self.use_default_location
+
+        # reset custom shape transforms
+        box = layout.box()
+        box.label(text="Reset Transforms:")
+        box.prop(self, "reset_custom_shape_transforms",
+                 text="Reset Custom Shape Transforms")
 
         # reset button
         layout.separator()

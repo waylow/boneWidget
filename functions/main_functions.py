@@ -119,6 +119,12 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
     # make the data name include the prefix
     new_data = bpy.data.meshes.new(bw_widget_prefix + bone.name)
 
+    # reset the custom shape transforms (if applicable)
+    if get_preferences(bpy.context).reset_custom_shape_transforms:
+        bone.custom_shape_translation = [0, 0, 0]
+        bone.custom_shape_rotation_euler = [0, 0, 0]
+        bone.custom_shape_scale_xyz = [1.0, 1.0, 1.0]
+
     bone.use_custom_shape_bone_size = relative
 
     # deal with face data
@@ -201,7 +207,7 @@ def symmetrize_widget(bone, collection):
     new_object.name = bw_widget_prefix + rigify_object_name + mirror_bone.name
     bpy.data.collections[collection.name].objects.link(new_object)
 
-    # use custom shape transform if available
+    # use override transform if available
     transform_bone = mirror_bone.custom_shape_transform or mirror_bone
     new_object.matrix_local = transform_bone.bone.matrix_local
     new_object.scale = [transform_bone.bone.length] * 3
@@ -212,6 +218,21 @@ def symmetrize_widget(bone, collection):
     mirror_bone.custom_shape = new_object
     mirror_bone.bone.show_wire = bone.bone.show_wire
     mirror_bone.use_custom_shape_bone_size = bone.use_custom_shape_bone_size
+
+    # Mirror the custom shape transforms (if they are not default)
+    if bone.custom_shape_translation != [0, 0, 0]:
+        mirror_bone.custom_shape_translation[0] = \
+            -1 * bone.custom_shape_translation[0]  # flip X
+        mirror_bone.custom_shape_translation[1] = bone.custom_shape_translation[1]
+        mirror_bone.custom_shape_translation[2] = bone.custom_shape_translation[2]
+    if bone.custom_shape_rotation_euler != [0, 0, 0]:
+        mirror_bone.custom_shape_rotation_euler[0] = bone.custom_shape_rotation_euler[0]
+        mirror_bone.custom_shape_rotation_euler[1] = \
+            -1 * bone.custom_shape_rotation_euler[1]
+        mirror_bone.custom_shape_rotation_euler[2] = \
+            -1 * bone.custom_shape_rotation_euler[2]
+    if bone.custom_shape_scale_xyz != [1, 1, 1]:
+        mirror_bone.custom_shape_scale_xyz = bone.custom_shape_scale_xyz
 
     symmetrize_color = get_preferences(bpy.context).symmetrize_color
     if bpy.app.version >= (4, 0, 0) and symmetrize_color:
