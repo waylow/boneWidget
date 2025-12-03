@@ -914,6 +914,76 @@ class BONEWIDGET_OT_delete_unused_widgets(bpy.types.Operator):
             self.report(
                 {'INFO'}, "Can't find the Widget Collection. Does it exist?")
         return {'FINISHED'}
+    
+
+class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
+    """Copy widget from active bone to other selected bones"""
+    bl_idname = "bonewidget.copy_bone_widget"
+    bl_label = "Copy Widget to Selected Bones"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.object is not None and
+            context.object.type == 'ARMATURE' and
+            context.object.mode == 'POSE' and
+            context.active_pose_bone is not None and
+            context.active_pose_bone.custom_shape is not None
+        )
+    
+    def execute(self, context):
+        source_bone = context.active_pose_bone
+        source_widget = source_bone.custom_shape
+
+        if not source_widget:
+            self.report({'WARNING'}, "Active bone has no widget")
+            return {'CANCELLED'}
+
+        target_collection = get_collection(context)
+
+        # copy widget to each selected bone
+        for bone in context.selected_pose_bones:
+            if bone == source_bone:
+                continue
+
+            # duplicate the widget object
+            new_widget = source_widget.copy()
+            new_widget.data = source_widget.data.copy()
+            new_widget.name = f"{source_widget.name}_{bone.name}"
+            new_widget.data.name = new_widget.name
+
+            # link to collection
+            target_collection.objects.link(new_widget)
+
+            # match transforms relative to bone
+            new_widget.matrix_world = context.object.matrix_world @ bone.bone.matrix_local
+            new_widget.scale = [bone.bone.length] * 3
+
+            # assign as custom shape
+            bone.custom_shape = new_widget
+            bone.use_custom_shape_bone_size = source_bone.use_custom_shape_bone_size
+            bone.bone.show_wire = source_bone.bone.show_wire
+
+            # copy colors
+            if bpy.app.version >= (4, 0, 0):
+                # pose bone colors
+                bone.bone.color.custom.normal = source_bone.bone.color.custom.normal
+                bone.bone.color.custom.select = source_bone.bone.color.custom.select
+                bone.bone.color.custom.active = source_bone.bone.color.custom.active
+                bone.bone.color.palette = source_bone.bone.color.palette
+
+                # edit bone colors
+                bone.color.custom.normal = source_bone.color.custom.normal
+                bone.color.custom.select = source_bone.color.custom.select
+                bone.color.custom.active = source_bone.color.custom.active
+                bone.color.palette = source_bone.color.palette
+
+            # copy wireframe width
+            if bpy.app.version >= (4, 2, 0):
+                bone.custom_shape_wire_width = source_bone.custom_shape_wire_width
+
+        return {'FINISHED'}
 
 
 class BONEWIDGET_OT_clear_bone_widgets(bpy.types.Operator):
@@ -1569,6 +1639,7 @@ classes = (
     BONEWIDGET_OT_create_widget,
     BONEWIDGET_OT_toggle_collection_visibility,
     BONEWIDGET_OT_delete_unused_widgets,
+    BONEWIDGET_OT_copy_bone_widget,
     BONEWIDGET_OT_clear_bone_widgets,
     BONEWIDGET_OT_resync_widget_names,
     BONEWIDGET_OT_add_object_as_widget,
