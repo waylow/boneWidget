@@ -15,7 +15,6 @@ from .functions.main_functions import (
     delete_unused_widgets,
     clear_bone_widgets,
     resync_widget_names,
-    add_object_as_widget,
     advanced_options_toggled,
     set_bone_color,
     copy_bone_color,
@@ -35,6 +34,7 @@ from .functions.json_functions import (
     import_color_presets,
     export_color_presets,
     update_color_presets,
+    objectDataToDico,
 )
 
 from .functions.preview_functions import (
@@ -50,7 +50,7 @@ from .functions.preview_functions import (
 from .props import ImportColorSet, ImportItemData, get_import_options
 from .classes import ColorSet
 
-from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, IntVectorProperty, StringProperty, EnumProperty
+from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty, StringProperty, EnumProperty
 
 
 class BONEWIDGET_OT_shared_property_group(bpy.types.PropertyGroup):
@@ -1017,7 +1017,7 @@ class BONEWIDGET_OT_resync_widget_names(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
-    """Add selected object as widget for active bone"""
+    """Add active object as widget for selected bones"""
     bl_idname = "bonewidget.add_as_widget"
     bl_label = "Confirm selected Object as widget shape"
     bl_options = {'REGISTER', 'UNDO'}
@@ -1026,8 +1026,135 @@ class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
     def poll(cls, context):
         return (len(context.selected_objects) == 2 and context.object.mode == 'POSE')
 
+    relative_size: BoolProperty(
+        name="Scale to Bone length",
+        default=True,
+        description="Scale Widget to bone length"
+    )
+
+    use_face_data: BoolProperty(
+        name="Use Face Data",
+        default=False,
+        description="When enabled this option will include the widget's face data (if available)"
+    )
+
+    advanced_options: BoolProperty(
+        name="Advanced options",
+        default=False,
+        description="Show advanced options",
+        update=advanced_options_toggled
+    )
+
+    global_size_simple: FloatProperty(
+        name="Global Size",
+        default=1.0,
+        description="Global Size"
+    )
+
+    global_size_advanced: FloatVectorProperty(
+        name="Global Size",
+        default=(1.0, 1.0, 1.0),
+        subtype='XYZ',
+        description="Global Size"
+    )
+
+    slide_simple: FloatProperty(
+        name="Slide",
+        default=0.0,
+        subtype='NONE',
+        unit='NONE',
+        description="Slide widget along bone y axis"
+    )
+
+    slide_advanced: FloatVectorProperty(
+        name="Slide",
+        default=(0.0, 0.0, 0.0),
+        subtype='XYZ',
+        unit='NONE',
+        description="Slide widget along bone xyz axes"
+    )
+
+    rotation: FloatVectorProperty(
+        name="Rotation",
+        description="Rotate the widget",
+        default=(0.0, 0.0, 0.0),
+        subtype='EULER',
+        unit='ROTATION',
+        precision=1,
+    )
+
+    wireframe_width: FloatProperty(
+        name="Wire Width",
+        default=2.0,
+        min=1.0,
+        max=16,
+        soft_max=10,
+        description="Set the thickness of a wireframe widget"
+    )
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        col = layout.column()
+        row = col.row(align=True)
+        row.prop(self, "relative_size")
+        row = col.row(align=True)
+        if self.advanced_options:
+            row.prop(self, "use_face_data")
+        row = col.row(align=True)
+        row.prop(
+            self, "global_size_advanced" if self.advanced_options else "global_size_simple", expand=False)
+        row = col.row(align=True)
+        row.prop(
+            self, "slide_advanced" if self.advanced_options else "slide_simple", text="Slide")
+        row = col.row(align=True)
+        row.prop(self, "rotation", text="Rotation")
+        row = col.row(align=True)
+        if bpy.app.version >= (4, 2, 0):
+            row.prop(self, "wireframe_width", text="Wire Width")
+            row = col.row(align=True)
+        row.prop(self, "advanced_options")
+
     def execute(self, context):
-        add_object_as_widget(context, get_collection(context))
+        selected_bones = context.selected_pose_bones
+        if not selected_bones:
+            self.report({'WARNING'}, "No Selected bone found")
+            return {'CANCELLED'}
+        
+        allowed_object_types = {'MESH', 'CURVE'}
+        
+        widget_object = next(
+            (ob for ob in context.selected_objects if ob.type in allowed_object_types),
+            None
+        )
+        if not widget_object:
+            self.report({'WARNING'}, "Please select a mesh or curve object as widget")
+            return {'CANCELLED'}
+        
+        widget = bpy.data.objects.get(widget_object.name)
+
+        widget_data = objectDataToDico(widget, "")
+        if not widget_data:
+            self.report({'WARNING'}, "No widget data found")
+            return {'CANCELLED'}
+
+        slide = self.slide_advanced if self.advanced_options else (0.0, self.slide_simple, 0.0)
+        global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
+        use_face_data = self.use_face_data if self.advanced_options else False
+
+        for bone in selected_bones:
+            create_widget(
+                bone,
+                widget_data,
+                self.relative_size,
+                global_size,
+                slide,
+                self.rotation,
+                get_collection(context),
+                use_face_data,
+                self.wireframe_width
+            )
+
         return {'FINISHED'}
 
 

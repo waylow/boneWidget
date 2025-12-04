@@ -446,54 +446,6 @@ def clear_bone_widgets():
                 bone.custom_shape_transform = None
 
 
-def add_object_as_widget(context, collection):
-    selected_objects = bpy.context.selected_objects
-
-    if len(selected_objects) != 2:
-        print('Only a widget object and the pose bone(s)')
-        return {'FINISHED'}
-
-    allowed_object_types = ['MESH', 'CURVE']
-
-    widget_object = None
-
-    for ob in selected_objects:
-        if ob.type in allowed_object_types:
-            widget_object = ob
-
-    if widget_object:
-        active_bone = context.active_pose_bone
-
-        # deal with any existing shape
-        if active_bone.custom_shape:
-            bpy.data.objects.remove(
-                bpy.data.objects[active_bone.custom_shape.name], do_unlink=True)
-
-        # duplicate shape
-        widget = widget_object.copy()
-        widget.data = widget.data.copy()
-        # rename it
-        bw_widget_prefix = get_preferences(context).widget_prefix
-        widget_name = bw_widget_prefix + active_bone.name
-        widget.name = widget_name
-        widget.data.name = widget_name
-        # link it
-        collection.objects.link(widget)
-
-        # match transforms
-        widget.matrix_world = bpy.context.active_object.matrix_world @ active_bone.bone.matrix_local
-        widget.scale = [active_bone.bone.length,
-                        active_bone.bone.length, active_bone.bone.length]
-        layer = bpy.context.view_layer
-        layer.update()
-
-        active_bone.custom_shape = widget
-        active_bone.bone.show_wire = True
-
-        # deselect original object
-        widget_object.select_set(False)
-
-
 def set_bone_color(context, color, clear_both_modes=None):
     if context.object.mode == "POSE":
         if color == 'DEFAULT' and clear_both_modes != None:
