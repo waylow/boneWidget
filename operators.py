@@ -914,7 +914,7 @@ class BONEWIDGET_OT_delete_unused_widgets(bpy.types.Operator):
             self.report(
                 {'INFO'}, "Can't find the Widget Collection. Does it exist?")
         return {'FINISHED'}
-    
+
 
 class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
     """Copy widget from active bone to other selected bones"""
@@ -931,7 +931,7 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
             context.active_pose_bone is not None and
             context.active_pose_bone.custom_shape is not None
         )
-    
+
     def execute(self, context):
         source_bone = context.active_pose_bone
         source_widget = source_bone.custom_shape
@@ -1017,9 +1017,10 @@ class BONEWIDGET_OT_resync_widget_names(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
-    """Add active object as widget for selected bones"""
+    """Add selected mesh object as widget for all selected bones.
+    This is only available if you have 1 mesh object select and the armature is in Pose Mode."""
     bl_idname = "bonewidget.add_as_widget"
-    bl_label = "Confirm selected Object as widget shape"
+    bl_label = "Add Selected Object as Widget"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
@@ -1120,17 +1121,18 @@ class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
         if not selected_bones:
             self.report({'WARNING'}, "No Selected bone found")
             return {'CANCELLED'}
-        
+
         allowed_object_types = {'MESH', 'CURVE'}
-        
+
         widget_object = next(
             (ob for ob in context.selected_objects if ob.type in allowed_object_types),
             None
         )
         if not widget_object:
-            self.report({'WARNING'}, "Please select a mesh or curve object as widget")
+            self.report(
+                {'WARNING'}, "Please select a mesh or curve object as widget")
             return {'CANCELLED'}
-        
+
         widget = bpy.data.objects.get(widget_object.name)
 
         widget_data = objectDataToDico(widget, "")
@@ -1138,8 +1140,10 @@ class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
             self.report({'WARNING'}, "No widget data found")
             return {'CANCELLED'}
 
-        slide = self.slide_advanced if self.advanced_options else (0.0, self.slide_simple, 0.0)
-        global_size = self.global_size_advanced if self.advanced_options else (self.global_size_simple,) * 3
+        slide = self.slide_advanced if self.advanced_options else (
+            0.0, self.slide_simple, 0.0)
+        global_size = self.global_size_advanced if self.advanced_options else (
+            self.global_size_simple,) * 3
         use_face_data = self.use_face_data if self.advanced_options else False
 
         for bone in selected_bones:
