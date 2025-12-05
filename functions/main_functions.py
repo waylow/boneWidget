@@ -170,6 +170,10 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
     # show faces if use face data is enabled
     bone.bone.show_wire = not use_face_data
 
+    # flip normals if using face data with negative scale
+    if use_face_data and sum(1 for s in size if s < 0) % 2 == 1:
+        new_object.data.flip_normals()
+
     if bpy.app.version >= (4, 2, 0):
         bone.custom_shape_wire_width = wireframe_width
 
