@@ -931,7 +931,7 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
             context.active_pose_bone is not None and
             context.active_pose_bone.custom_shape is not None
         )
-
+    
     def execute(self, context):
         source_bone = context.active_pose_bone
         source_widget = source_bone.custom_shape
@@ -941,6 +941,10 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
             return {'CANCELLED'}
 
         target_collection = get_collection(context)
+
+        # get suffix list from preferences
+        bw_symmetry_suffix = get_preferences(context).symmetry_suffix.split(';')
+        source_suffix = next((s for s in bw_symmetry_suffix if source_bone.name.endswith(s.strip())), None)
 
         # copy widget to each selected bone
         for bone in context.selected_pose_bones:
@@ -959,6 +963,22 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
             # match transforms relative to bone
             new_widget.matrix_world = context.object.matrix_world @ bone.bone.matrix_local
             new_widget.scale = [bone.bone.length] * 3
+
+            # check if widget needs to be mirrored
+            if source_suffix:
+                target_suffix = next((s for s in bw_symmetry_suffix if bone.name.endswith(s.strip())), None)
+                if target_suffix and source_suffix != target_suffix:
+                    # mirror mesh data along X
+                    for vert in new_widget.data.vertices:
+                        vert.co.x *= -1
+                    new_widget.data.flip_normals()
+
+                    # re‑apply transform from mirror bone
+                    transform_bone = bone.custom_shape_transform or bone
+                    new_widget.matrix_local = transform_bone.bone.matrix_local
+                    new_widget.scale = [transform_bone.bone.length] * 3
+
+                    bpy.context.view_layer.update()
 
             # assign as custom shape
             bone.custom_shape = new_widget
