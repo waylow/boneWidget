@@ -176,11 +176,32 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
 
     if bpy.app.version >= (4, 2, 0):
         bone.custom_shape_wire_width = wireframe_width
+    
+
+def symmetrize_mesh(widget, mirror_bone, collection, prefix, rigify_name):
+    new_data = widget.data.copy()
+    for vert in new_data.vertices:
+        vert.co.x *= -1
+    new_object = widget.copy()
+    new_object.data = new_data
+    new_object.name = prefix + rigify_name + mirror_bone.name
+    bpy.data.collections[collection.name].objects.link(new_object)
+    new_object.data.flip_normals()
+    return new_object
+
+
+def symmetrize_curve(widget, mirror_bone, collection, prefix, rigify_name):
+    new_object = widget.copy()
+    new_object.data = widget.data.copy()
+    new_object.name = prefix + rigify_name + mirror_bone.name
+    bpy.data.collections[collection.name].objects.link(new_object)
+    return new_object
 
 
 def symmetrize_widget(bone, collection):
-    if not get_preferences(bpy.context).use_rigify_defaults:
-        bw_widget_prefix = get_preferences(bpy.context).widget_prefix
+    prefs = get_preferences(bpy.context)
+    if not prefs.use_rigify_defaults:
+        bw_widget_prefix = prefs.widget_prefix
         rigify_object_name = ''
     else:
         bw_widget_prefix = "WGT-"
@@ -202,20 +223,16 @@ def symmetrize_widget(bone, collection):
             bpy.data.objects.remove(existing)
 
     # create mirrored mesh data
-    new_data = widget.data.copy()
-    for vert in new_data.vertices:
-        vert.co.x *= -1  # mirror along X-axis
+    new_object = None
+    if widget.type == 'MESH':
+        new_object = symmetrize_mesh(widget, mirror_bone, collection,
+                                     bw_widget_prefix, rigify_object_name)
+    elif widget.type == 'CURVE':
+        new_object = symmetrize_curve(widget, mirror_bone, collection,
+                                      bw_widget_prefix, rigify_object_name)
 
-    new_object = widget.copy()
-    new_object.data = new_data
-    new_object.name = bw_widget_prefix + rigify_object_name + mirror_bone.name
-    bpy.data.collections[collection.name].objects.link(new_object)
-
-    # use override transform if available
-    transform_bone = mirror_bone.custom_shape_transform or mirror_bone
-    new_object.matrix_local = transform_bone.bone.matrix_local
-    new_object.scale = [transform_bone.bone.length] * 3
-    new_object.data.flip_normals()
+    if not new_object:
+        return
 
     bpy.context.view_layer.update()
 
@@ -224,21 +241,27 @@ def symmetrize_widget(bone, collection):
     mirror_bone.use_custom_shape_bone_size = bone.use_custom_shape_bone_size
 
     # Mirror the custom shape transforms (if they are not default)
+    # translation
     if bone.custom_shape_translation != [0, 0, 0]:
-        mirror_bone.custom_shape_translation[0] = \
-            -1 * bone.custom_shape_translation[0]  # flip X
+        mirror_bone.custom_shape_translation[0] = -bone.custom_shape_translation[0] # flip X
         mirror_bone.custom_shape_translation[1] = bone.custom_shape_translation[1]
         mirror_bone.custom_shape_translation[2] = bone.custom_shape_translation[2]
+
+    # rotation
     if bone.custom_shape_rotation_euler != [0, 0, 0]:
         mirror_bone.custom_shape_rotation_euler[0] = bone.custom_shape_rotation_euler[0]
-        mirror_bone.custom_shape_rotation_euler[1] = \
-            -1 * bone.custom_shape_rotation_euler[1]
-        mirror_bone.custom_shape_rotation_euler[2] = \
-            -1 * bone.custom_shape_rotation_euler[2]
-    if bone.custom_shape_scale_xyz != [1, 1, 1]:
-        mirror_bone.custom_shape_scale_xyz = bone.custom_shape_scale_xyz
+        mirror_bone.custom_shape_rotation_euler[1] = -bone.custom_shape_rotation_euler[1]
+        mirror_bone.custom_shape_rotation_euler[2] = -bone.custom_shape_rotation_euler[2]
 
-    symmetrize_color = get_preferences(bpy.context).symmetrize_color
+    # scale
+    if bone.custom_shape_scale_xyz != [1, 1, 1]:
+        mirror_bone.custom_shape_scale_xyz = bone.custom_shape_scale_xyz.copy()
+        if widget.type == 'CURVE':
+            mirror_bone.custom_shape_scale_xyz.x *= -1
+
+
+    # symmetrize colors
+    symmetrize_color = prefs.symmetrize_color
     if bpy.app.version >= (4, 0, 0) and symmetrize_color:
         # pose bone colors
         mirror_bone.bone.color.custom.normal = bone.bone.color.custom.normal
@@ -252,6 +275,7 @@ def symmetrize_widget(bone, collection):
         mirror_bone.color.custom.active = bone.color.custom.active
         mirror_bone.color.palette = bone.color.palette
 
+    # wire width
     if bpy.app.version >= (4, 2, 0):
         mirror_bone.custom_shape_wire_width = bone.custom_shape_wire_width
 
