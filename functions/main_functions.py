@@ -263,11 +263,8 @@ def symmetrize_widget_helper(bone, collection, active_object, widgets_and_bones)
     suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
     suffix_2 = bw_symmetry_suffix[1].replace(" ", "")
 
-    if active_object.name.endswith(suffix_1):
-        if bone.name.endswith(suffix_1) and widgets_and_bones[bone]:
-            symmetrize_widget(bone, collection)
-    elif active_object.name.endswith(suffix_2):
-        if bone.name.endswith(suffix_2) and widgets_and_bones[bone]:
+    if active_object.name.endswith((suffix_1, suffix_2)):
+        if bone.name.endswith((suffix_1, suffix_2)) and widgets_and_bones[bone]:
             symmetrize_widget(bone, collection)
 
 

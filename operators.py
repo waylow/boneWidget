@@ -251,10 +251,11 @@ class BONEWIDGET_OT_match_symmetrize_shape(bpy.types.Operator):
         if widget is None:
             self.report({"INFO"}, "There is no widget on this bone.")
             return {'FINISHED'}
+        
         collection = get_view_layer_collection(context, widget)
-        widgets_and_bones = find_match_bones()[0]
-        active_object = find_match_bones()[1]
-        widgets_and_bones = find_match_bones()[0]
+        match_bones = find_match_bones()
+        widgets_and_bones = match_bones[0]
+        active_object = match_bones[1]
 
         if not active_object:
             self.report({"INFO"}, "No active bone or object")
