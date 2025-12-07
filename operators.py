@@ -203,7 +203,7 @@ class BONEWIDGET_OT_return_to_armature(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.type == 'MESH'
+        return (context.object and context.object.type in {'MESH', 'CURVE'}
                 and context.object.mode in ['EDIT', 'OBJECT'])
 
     def execute(self, context):
