@@ -977,7 +977,7 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
                         vert.co.x *= -1
                     new_widget.data.flip_normals()
 
-                    # re‑apply transform from mirror bone
+                    # re-apply transform from mirror bone
                     transform_bone = bone.custom_shape_transform or bone
                     new_widget.matrix_local = transform_bone.bone.matrix_local
                     new_widget.scale = [transform_bone.bone.length] * 3
@@ -988,6 +988,39 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
             bone.custom_shape = new_widget
             bone.use_custom_shape_bone_size = source_bone.use_custom_shape_bone_size
             bone.bone.show_wire = source_bone.bone.show_wire
+
+            # copy transforms from source bone
+            bone.custom_shape_translation = source_bone.custom_shape_translation.copy()
+            bone.custom_shape_rotation_euler = source_bone.custom_shape_rotation_euler.copy()
+            bone.custom_shape_scale_xyz = source_bone.custom_shape_scale_xyz.copy()
+
+            # check if widget needs to be mirrored
+            if source_suffix:
+                target_suffix = next(
+                    (s for s in bw_symmetry_suffix if bone.name.endswith(s.strip())), None)
+                if target_suffix and source_suffix != target_suffix:
+                    if new_widget.type == 'MESH':
+                        # mirror mesh data along X
+                        for vert in new_widget.data.vertices:
+                            vert.co.x *= -1
+                        new_widget.data.flip_normals()
+                    elif new_widget.type == 'CURVE':
+                        # mirror transforms
+                        if source_bone.custom_shape_translation != [0, 0, 0]:
+                            bone.custom_shape_translation[0] = -source_bone.custom_shape_translation[0]
+                            bone.custom_shape_translation[1] = source_bone.custom_shape_translation[1]
+                            bone.custom_shape_translation[2] = source_bone.custom_shape_translation[2]
+
+                        if source_bone.custom_shape_rotation_euler != [0, 0, 0]:
+                            bone.custom_shape_rotation_euler[0] = source_bone.custom_shape_rotation_euler[0]
+                            bone.custom_shape_rotation_euler[1] = -source_bone.custom_shape_rotation_euler[1]
+                            bone.custom_shape_rotation_euler[2] = -source_bone.custom_shape_rotation_euler[2]
+
+                        if source_bone.custom_shape_scale_xyz != [1, 1, 1]:
+                            bone.custom_shape_scale_xyz = source_bone.custom_shape_scale_xyz.copy()
+                            bone.custom_shape_scale_xyz.x *= -1
+
+                    bpy.context.view_layer.update()
 
             # copy colors
             if bpy.app.version >= (4, 0, 0):
