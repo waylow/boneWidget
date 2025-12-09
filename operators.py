@@ -7,6 +7,7 @@ from .functions.main_functions import (
     symmetrize_widget_helper,
     match_bone_matrix,
     create_widget,
+    create_curve_widget,
     edit_widget,
     return_to_armature,
     get_collection,
@@ -35,6 +36,7 @@ from .functions.json_functions import (
     export_color_presets,
     update_color_presets,
     objectDataToDico,
+    curveDataToDico,
 )
 
 from .functions.preview_functions import (
@@ -1192,7 +1194,11 @@ class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
 
         widget = bpy.data.objects.get(widget_object.name)
 
-        widget_data = objectDataToDico(widget, "")
+        widget_data = None
+        if widget_object.type == 'MESH':
+            widget_data = objectDataToDico(widget, "")
+        elif widget_object.type == 'CURVE':
+            widget_data = curveDataToDico(widget, "")
         if not widget_data:
             self.report({'WARNING'}, "No widget data found")
             return {'CANCELLED'}
@@ -1204,17 +1210,18 @@ class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
         use_face_data = self.use_face_data if self.advanced_options else False
 
         for bone in selected_bones:
-            create_widget(
-                bone,
-                widget_data,
-                self.relative_size,
-                global_size,
-                slide,
-                self.rotation,
-                get_collection(context),
-                use_face_data,
-                self.wireframe_width
-            )
+            if widget_object.type == 'MESH':
+                create_widget(
+                    bone, widget_data, self.relative_size, global_size,
+                    slide, self.rotation, get_collection(context),
+                    use_face_data, self.wireframe_width
+                )
+            elif widget_object.type == 'CURVE':
+                create_curve_widget(
+                    bone, widget_data, self.relative_size, global_size,
+                    slide, self.rotation, get_collection(context),
+                    self.wireframe_width
+                )
 
         return {'FINISHED'}
 

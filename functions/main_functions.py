@@ -176,6 +176,86 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
 
     if bpy.app.version >= (4, 2, 0):
         bone.custom_shape_wire_width = wireframe_width
+
+
+def create_curve_widget(bone, curve_dict, relative, size, slide, rotation, collection, wireframe_width):
+    if not get_preferences(bpy.context).use_rigify_defaults:
+        bw_widget_prefix = get_preferences(bpy.context).widget_prefix
+    else:
+        bw_widget_prefix = "WGT-" + bpy.context.active_object.name + "_"
+
+    # reuse existing curve object if present
+    if bone.custom_shape and bone.custom_shape.type == 'CURVE':
+        new_obj = bone.custom_shape
+        new_curve = new_obj.data
+        new_curve.splines.clear()
+    else:
+        new_curve = bpy.data.curves.new(bw_widget_prefix + bone.name, type='CURVE')
+        new_obj = bpy.data.objects.new(bw_widget_prefix + bone.name, new_curve)
+        collection.objects.link(new_obj)
+        bone.custom_shape = new_obj
+
+    # set curve properties
+    new_curve.extrude = curve_dict.get("extrude", 0.0)
+    new_curve.bevel_depth = curve_dict.get("bevel_depth", 0.0)
+    new_curve.bevel_resolution = curve_dict.get("bevel_resolution", 0)
+
+    # rebuild splines
+    for spline_info in curve_dict["splines"]:
+        spline = new_curve.splines.new(type=spline_info["type"])
+        spline.use_cyclic_u = spline_info.get("cyclic", False)
+        spline.resolution_u = spline_info.get("resolution_u", 12)
+
+        if spline_info["type"] == 'BEZIER':
+            spline.bezier_points.add(len(spline_info["points"]) - 1)
+            for i, pt in enumerate(spline_info["points"]):
+                bp = spline.bezier_points[i]
+                bp.co = Vector(pt["co"])
+                bp.handle_left = Vector(pt["handle_left"])
+                bp.handle_right = Vector(pt["handle_right"])
+                bp.tilt = pt["tilt"]
+                bp.radius = pt["radius"]
+        else:
+            spline.points.add(len(spline_info["points"]) - 1)
+            for i, pt in enumerate(spline_info["points"]):
+                p = spline.points[i]
+                p.co = Vector(pt["co"])
+                p.weight = pt.get("weight", 1.0)
+
+        # apply transforms to spline points
+        if not relative:
+            slide_vec = Vector(slide) * bone.length
+        else:
+            slide_vec = Vector(slide)
+
+        trans = Matrix.Translation(slide_vec)
+        rot = rotation.to_matrix().to_4x4()
+        scale = (
+            Matrix.Scale(size[0], 4, Vector((1,0,0))) @
+            Matrix.Scale(size[1], 4, Vector((0,1,0))) @
+            Matrix.Scale(size[2], 4, Vector((0,0,1)))
+        )
+
+        widget_matrix = trans @ rot @ scale
+
+        if spline.type == 'BEZIER':
+            for bp in spline.bezier_points:
+                bp.co = widget_matrix @ bp.co
+                bp.handle_left = widget_matrix @ bp.handle_left
+                bp.handle_right = widget_matrix @ bp.handle_right
+        else:
+            for p in spline.points:
+                p.co = widget_matrix @ Vector(p.co)
+
+    # scale relative to bone length
+    new_obj.scale = [bone.length, bone.length, bone.length]
+
+    # wireframe display
+    bone.bone.show_wire = True
+    if bpy.app.version >= (4, 2, 0):
+        bone.custom_shape_wire_width = wireframe_width
+
+    return new_obj
     
 
 def symmetrize_mesh(widget, mirror_bone, collection, prefix, rigify_name):
