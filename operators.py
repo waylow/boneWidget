@@ -223,14 +223,22 @@ class BONEWIDGET_OT_match_bone_transforms(bpy.types.Operator):
     bl_label = "Match bone transforms"
     bl_options = {'REGISTER', 'UNDO'}
 
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.selected_pose_bones
+            or (context.selected_objects and
+                context.object.type in {'MESH', 'CURVE'})
+        )
+
     def execute(self, context):
-        if bpy.context.mode == "POSE":
-            for bone in bpy.context.selected_pose_bones:
+        if context.mode == "POSE":
+            for bone in context.selected_pose_bones:
                 match_bone_matrix(bone.custom_shape, bone)
 
         else:
-            for ob in bpy.context.selected_objects:
-                if ob.type == 'MESH':
+            for ob in context.selected_objects:
+                if ob.type in {'MESH', 'CURVE'}:
                     match_bone = from_widget_find_bone(ob)
                     if match_bone:
                         match_bone_matrix(ob, match_bone)

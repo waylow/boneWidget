@@ -90,8 +90,6 @@ def match_bone_matrix(widget, match_bone):
     widget.matrix_world = widget.matrix_world @ Matrix.LocRotScale(
         loc, rot, widget.scale)
 
-    widget.data.update()
-
 
 def from_widget_find_bone(widget):
     match_bone = None
