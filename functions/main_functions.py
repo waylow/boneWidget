@@ -191,6 +191,18 @@ def create_curve_widget(bone, curve_dict, relative, size, slide, rotation, colle
         new_curve = bpy.data.curves.new(bw_widget_prefix + bone.name, type='CURVE')
         new_obj = bpy.data.objects.new(bw_widget_prefix + bone.name, new_curve)
         collection.objects.link(new_obj)
+
+        if get_preferences(bpy.context).reset_custom_shape_transforms:
+            bone.custom_shape_translation = [0, 0, 0]
+            bone.custom_shape_rotation_euler = [0, 0, 0]
+            bone.custom_shape_scale_xyz = [1.0, 1.0, 1.0]
+
+        bone.use_custom_shape_bone_size = relative
+
+        # align object to bone transforms
+        new_obj.matrix_world = bpy.context.active_object.matrix_world @ bone.bone.matrix_local
+        new_obj.scale = [bone.length, bone.length, bone.length]
+
         bone.custom_shape = new_obj
 
     # set curve properties
