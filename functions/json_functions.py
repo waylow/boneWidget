@@ -111,6 +111,7 @@ def curveDataToDico(curve_obj, name=""):
             "type": spline.type,
             "cyclic": spline.use_cyclic_u,
             "resolution_u": spline.resolution_u,
+            "tilt_interpolation": spline.tilt_interpolation,
             "points": []
         }
 

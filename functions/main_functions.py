@@ -210,11 +210,15 @@ def create_curve_widget(bone, curve_dict, relative, size, slide, rotation, colle
     new_curve.bevel_depth = curve_dict.get("bevel_depth", 0.0)
     new_curve.bevel_resolution = curve_dict.get("bevel_resolution", 0)
 
+    new_curve.dimensions = curve_dict.get("dimensions", '3D')
+    new_curve.fill_mode = curve_dict.get("fill_mode", 'FULL')
+
     # rebuild splines
     for spline_info in curve_dict["splines"]:
         spline = new_curve.splines.new(type=spline_info["type"])
         spline.use_cyclic_u = spline_info.get("cyclic", False)
         spline.resolution_u = spline_info.get("resolution_u", 12)
+        spline.tilt_interpolation = spline_info.get("tilt_interpolation", 'LINEAR')
 
         if spline_info["type"] == 'BEZIER':
             spline.bezier_points.add(len(spline_info["points"]) - 1)
