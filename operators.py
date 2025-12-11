@@ -931,7 +931,7 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
             context.active_pose_bone is not None and
             context.active_pose_bone.custom_shape is not None
         )
-    
+
     def execute(self, context):
         source_bone = context.active_pose_bone
         source_widget = source_bone.custom_shape
@@ -943,8 +943,10 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
         target_collection = get_collection(context)
 
         # get suffix list from preferences
-        bw_symmetry_suffix = get_preferences(context).symmetry_suffix.split(';')
-        source_suffix = next((s for s in bw_symmetry_suffix if source_bone.name.endswith(s.strip())), None)
+        bw_symmetry_suffix = get_preferences(
+            context).symmetry_suffix.split(';')
+        source_suffix = next(
+            (s for s in bw_symmetry_suffix if source_bone.name.endswith(s.strip())), None)
 
         # copy widget to each selected bone
         for bone in context.selected_pose_bones:
@@ -966,7 +968,8 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
 
             # check if widget needs to be mirrored
             if source_suffix:
-                target_suffix = next((s for s in bw_symmetry_suffix if bone.name.endswith(s.strip())), None)
+                target_suffix = next(
+                    (s for s in bw_symmetry_suffix if bone.name.endswith(s.strip())), None)
                 if target_suffix and source_suffix != target_suffix:
                     # mirror mesh data along X
                     for vert in new_widget.data.vertices:
@@ -1022,7 +1025,7 @@ class BONEWIDGET_OT_clear_bone_widgets(bpy.types.Operator):
 
 
 class BONEWIDGET_OT_resync_widget_names(bpy.types.Operator):
-    """Clear widgets from selected pose bones"""
+    """Rename the widget objects to match the bone names"""
     bl_idname = "bonewidget.resync_widget_names"
     bl_label = "Resync Widget Names"
     bl_options = {'REGISTER', 'UNDO'}
