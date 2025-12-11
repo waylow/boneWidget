@@ -84,8 +84,12 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 
         # Clear Bone Widget buttons etc
         layout.separator()
-        layout.operator("bonewidget.copy_bone_widget",
+        row = layout.row(align=True)
+        row.operator("bonewidget.copy_bone_widget",
                         icon='COPYDOWN', text="Copy Bone Widget")
+        copy_color_icon = 'RESTRICT_COLOR_ON' if preferences.copy_color else 'RESTRICT_COLOR_OFF'
+        row.prop(preferences, "copy_color",
+                 icon=copy_color_icon, text='', toggle=True)
         layout.operator("bonewidget.clear_widgets",
                         icon='X', text="Clear Bone Widget")
         layout.operator("bonewidget.delete_unused_widgets",

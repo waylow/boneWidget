@@ -1033,7 +1033,8 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
                     bpy.context.view_layer.update()
 
             # copy colors
-            if bpy.app.version >= (4, 0, 0):
+            copy_color = get_preferences(context).copy_color
+            if bpy.app.version >= (4, 0, 0) and copy_color:
                 # pose bone colors
                 bone.bone.color.custom.normal = source_bone.bone.color.custom.normal
                 bone.bone.color.custom.select = source_bone.bone.color.custom.select
