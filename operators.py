@@ -35,8 +35,8 @@ from .functions.json_functions import (
     import_color_presets,
     export_color_presets,
     update_color_presets,
-    objectDataToDico,
-    curveDataToDico,
+    object_data_to_dico,
+    curve_data_to_dico,
 )
 
 from .functions.preview_functions import (
@@ -1189,9 +1189,9 @@ class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
 
         widget_data = None
         if widget_object.type == 'MESH':
-            widget_data = objectDataToDico(widget, "")
+            widget_data = object_data_to_dico(widget, "")
         elif widget_object.type == 'CURVE':
-            widget_data = curveDataToDico(widget, "")
+            widget_data = curve_data_to_dico(widget, "")
         if not widget_data:
             self.report({'WARNING'}, "No widget data found")
             return {'CANCELLED'}

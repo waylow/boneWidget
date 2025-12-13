@@ -69,7 +69,7 @@ def update_preview_collection():
     create_preview_collection()
 
 
-def objectDataToDico(object, custom_image):
+def object_data_to_dico(object, custom_image):
     verts = []
     depsgraph = bpy.context.evaluated_depsgraph_get()
     mesh = object.evaluated_get(depsgraph).to_mesh()
@@ -94,7 +94,7 @@ def objectDataToDico(object, custom_image):
     return (wgts)
 
 
-def curveDataToDico(curve_obj, name=""):
+def curve_data_to_dico(curve_obj, name=""):
     curve_data = curve_obj.data
     result = {
         "name": name or curve_obj.name,
@@ -212,7 +212,7 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
 
             if (ob_name) not in widget_items:
                 widget_items.append(ob_name)
-                wgts[ob_name] = objectDataToDico(ob, custom_image)
+                wgts[ob_name] = object_data_to_dico(ob, custom_image)
                 activeShape = ob_name
                 return_message = "Widget - " + ob_name + " has been added!"
 
