@@ -201,9 +201,9 @@ class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Pa
         col.menu("BONEWIDGET_MT_bw_color_presets_specials",
                  icon="DOWNARROW_HLT", text="")
         col.separator()
-        col.operator("bonewidget.move_custom_item_up", icon="TRIA_UP", text="")
-        col.operator("bonewidget.move_custom_item_down",
-                     icon="TRIA_DOWN", text="")
+        col.operator("bonewidget.move_custom_item", icon="TRIA_UP", text="").direction = "UP"
+        col.operator("bonewidget.move_custom_item",
+                     icon="TRIA_DOWN", text="").direction = "DOWN"
         row = layout.row()
         row.operator("bonewidget.add_colorset_to_bone",
                      text="Apply To Selected Bones")

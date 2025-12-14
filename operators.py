@@ -1458,39 +1458,32 @@ class BONEWIDGET_OT_lock_custom_colorset_changes(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_move_custom_item_up(bpy.types.Operator):
-    """Moves the selected color set up in the list"""
-    bl_idname = "bonewidget.move_custom_item_up"
-    bl_label = "Move Custom Item Up"
+class BONEWIDGET_OT_move_custom_item(bpy.types.Operator):
+    """Change the position of the selected color set in the list"""
+    bl_idname = "bonewidget.move_custom_item"
+    bl_label = "Move Custom Item"
     bl_options = {'INTERNAL'}
+
+    direction: EnumProperty(
+        items=[
+            ("UP", "Up", "Move up"),
+            ("DOWN", "Down", "Move down"),
+        ],
+        default="UP"
+    )
 
     def execute(self, context):
         wm = context.window_manager
         idx = wm.colorset_list_index
 
-        if idx > 0:
-            wm.custom_color_presets.move(idx, idx - 1)
-            wm.colorset_list_index -= 1
+        # translate enum into offset
+        offset = -1 if self.direction == "UP" else 1
+        new_idx = idx + offset
 
-            save_color_sets(context)
-
-        return {'FINISHED'}
-
-
-class BONEWIDGET_OT_move_custom_item_down(bpy.types.Operator):
-    """Moves the selected color set down in the list"""
-    bl_idname = "bonewidget.move_custom_item_down"
-    bl_label = "Move Custom Item Down"
-    bl_options = {'INTERNAL'}
-
-    def execute(self, context):
-        wm = context.window_manager
-        idx = wm.colorset_list_index
-
-        if idx < len(wm.custom_color_presets) - 1:
-            wm.custom_color_presets.move(idx, idx + 1)
-            wm.colorset_list_index += 1
-
+        # only move if new index is valid
+        if 0 <= new_idx < len(wm.custom_color_presets):
+            wm.custom_color_presets.move(idx, new_idx)
+            wm.colorset_list_index = new_idx
             save_color_sets(context)
 
         return {'FINISHED'}
@@ -1846,8 +1839,7 @@ classes = (
     BONEWIDGET_OT_add_colorset_to_bone,
     BONEWIDGET_OT_remove_item,
     BONEWIDGET_OT_lock_custom_colorset_changes,
-    BONEWIDGET_OT_move_custom_item_up,
-    BONEWIDGET_OT_move_custom_item_down,
+    BONEWIDGET_OT_move_custom_item,
     BONEWIDGET_OT_add_preset_from_bone,
     BONEWIDGET_OT_add_presets_from_armature,
     BONEWIDGET_OT_import_color_presets,
