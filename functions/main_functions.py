@@ -158,13 +158,14 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
     new_object.name = bw_widget_prefix + bone.name
     collection.objects.link(new_object)
 
+    bpy.context.view_layer.update()
+
     new_object.matrix_world = bpy.context.active_object.matrix_world @ matrix_bone.bone.matrix_local
     new_object.scale = [matrix_bone.bone.length,
                         matrix_bone.bone.length, matrix_bone.bone.length]
-    layer = bpy.context.view_layer
-    layer.update()
-
+    
     bone.custom_shape = new_object
+
     # show faces if use face data is enabled
     bone.bone.show_wire = not use_face_data
 
@@ -198,6 +199,8 @@ def create_curve_widget(bone, curve_dict, relative, size, slide, rotation, colle
             bone.custom_shape_scale_xyz = [1.0, 1.0, 1.0]
 
         bone.use_custom_shape_bone_size = relative
+
+        bpy.context.view_layer.update()
 
         # align object to bone transforms
         new_obj.matrix_world = bpy.context.active_object.matrix_world @ bone.bone.matrix_local
@@ -260,9 +263,6 @@ def create_curve_widget(bone, curve_dict, relative, size, slide, rotation, colle
         else:
             for p in spline.points:
                 p.co = widget_matrix @ Vector(p.co)
-
-    # scale relative to bone length
-    new_obj.scale = [bone.length, bone.length, bone.length]
 
     # wireframe display
     bone.bone.show_wire = True
