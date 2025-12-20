@@ -67,109 +67,120 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         layout.separator()
 
         # Symmetry buttons etc
-        row = layout.row(align=True)
+        col = layout.column(align=True)
+
+        row = col.row(align=True)
         row.operator("bonewidget.symmetrize_shape",
-                     icon='MOD_MIRROR', text="Symmetrize Shape")
+                    icon='MOD_MIRROR', text="Symmetrize Shape")
         icon = 'RESTRICT_COLOR_OFF'
         if preferences.symmetrize_color:
             icon = 'RESTRICT_COLOR_ON'
         row.prop(preferences, "symmetrize_color",
-                 icon=icon, text='', toggle=True)
-        row = layout.row()
-        row.operator("bonewidget.match_bone_transforms",
-                     icon='GROUP_BONE', text="Match Bone Transforms")
-        row = layout.row()
-        row.operator("bonewidget.resync_widget_names",
-                     icon='FILE_REFRESH', text="Resync Widget Names")
+                icon=icon, text='', toggle=True)
+
+        col.operator("bonewidget.match_bone_transforms",
+                    icon='GROUP_BONE', text="Match Bone Transforms")
+
+        col.operator("bonewidget.resync_widget_names",
+                    icon='FILE_REFRESH', text="Resync Widget Names")
 
         # Clear Bone Widget buttons etc
         layout.separator()
-        layout.operator("bonewidget.copy_bone_widget",
-                        icon='COPYDOWN', text="Copy Bone Widget")
-        layout.operator("bonewidget.clear_widgets",
-                        icon='X', text="Clear Bone Widget")
-        layout.operator("bonewidget.delete_unused_widgets",
-                        icon='TRASH', text="Delete Unused Widgets")
+        col = layout.column(align=True)
+        row = col.row(align=True)
+
+        row.operator("bonewidget.copy_bone_widget",
+                    icon='COPYDOWN', text="Copy Bone Widget")
+        copy_color_icon = 'RESTRICT_COLOR_ON' if preferences.copy_color else 'RESTRICT_COLOR_OFF'
+        row.prop(preferences, "copy_color",
+                icon=copy_color_icon, text='', toggle=True)
+
+        col.operator("bonewidget.clear_widgets",
+                    icon='X', text="Clear Bone Widget")
+
+        col.operator("bonewidget.delete_unused_widgets",
+                    icon='TRASH', text="Delete Unused Widgets")
 
         if context.mode == 'POSE':
-            layout.operator("bonewidget.add_as_widget",
-                            text="Use Selected Object",
-                            icon='RESTRICT_SELECT_OFF')
+            col.operator("bonewidget.add_as_widget",
+                        text="Use Selected Object",
+                        icon='RESTRICT_SELECT_OFF')
+
+        layout.separator()
 
         # if the bw collection exists, show the visibility toggle
+        bw_collection_name = None
         if not preferences.use_rigify_defaults:  # rigify
             bw_collection_name = preferences.bonewidget_collection_name
-
-        elif context.active_object:  # active  object
+        elif context.active_object:  # active object
             bw_collection_name = 'WGTS_' + context.active_object.name
-
-        else:  # this is needed because sometimes there is no active object
-            bw_collection_name = None
 
         bw_collection = recursive_layer_collection(
             context.view_layer.layer_collection, bw_collection_name)
 
         if bw_collection is not None:
-            if bw_collection.hide_viewport:
-                icon = "HIDE_ON"
-                text = "Show Collection"
-            else:
-                icon = "HIDE_OFF"
-                text = "Hide Collection"
-            row = layout.row()
-            row.separator()
-            row = layout.row()
-            row.operator("bonewidget.toggle_collection_visibilty",
-                         icon=icon, text=text)
+            icon = "HIDE_ON" if bw_collection.hide_viewport else "HIDE_OFF"
+            text = "Show Collection" if bw_collection.hide_viewport else "Hide Collection"
 
-        # BONE COLORS
+            col = layout.column(align=True)
+            col.operator("bonewidget.toggle_collection_visibilty",
+                        icon=icon, text=text)
+
+        # bone colors
         if bpy.app.version >= (4, 0, 0):
             layout.separator()
-            row = layout.row(align=True)
+            col = layout.column(align=True)
+
+            # Set Bone Color + icon view
+            row = col.row(align=True)
             row.operator("bonewidget.set_bone_color",
-                         text="Set Bone Color", icon="BRUSHES_ALL")
+                        text="Set Bone Color", icon="BRUSHES_ALL")
             row.scale_x = 3.0
             icon_row = row.row()
             icon_row.enabled = (context.object is not None and context.object.type == 'ARMATURE' and
                                 context.object.mode in {'POSE', 'EDIT'})
             icon_row.template_icon_view(
-                context.scene.bw_settings, "bone_widget_colors", show_labels=False, scale=1, scale_popup=1.8)
-            if context.scene.bw_settings.bone_widget_colors == "CUSTOM":
+                context.scene.bw_settings, "bone_widget_colors",
+                show_labels=False, scale=1, scale_popup=1.8)
 
+            # custom color sets
+            if context.scene.bw_settings.bone_widget_colors == "CUSTOM":
                 custom_pose_color = context.scene.bw_settings.custom_pose_color_set
                 custom_edit_color = context.scene.bw_settings.custom_edit_color_set
+            
+                col = layout.column(align=True)
 
-                if context.object.mode == 'POSE':  # display pose bone colors
-                    row = layout.row(align=True)
+                # pose bone colors
+                if context.object.mode == 'POSE':
+                    row = col.row(align=True)
                     row.prop(custom_pose_color, "normal", text="")
                     row.prop(custom_pose_color, "select", text="")
                     row.prop(custom_pose_color, "active", text="")
+                    row.separator(factor=0.5)
+                    row.prop(context.scene.bw_settings, "live_update_toggle",
+                            text="", icon="UV_SYNC_SELECT")
                 # edit bone colors
                 elif context.object.mode == "EDIT" and preferences.edit_bone_colors != 'DEFAULT':
-                    row = layout.row(align=True)
+                    row = col.row(align=True)
                     row.prop(custom_edit_color, "normal", text="")
                     row.prop(custom_edit_color, "select", text="")
                     row.prop(custom_edit_color, "active", text="")
-
-                if context.object.mode == 'POSE' or (context.object.mode == 'EDIT' and
-                                                     preferences.edit_bone_colors != 'DEFAULT'):
                     row.separator(factor=0.5)
                     row.prop(context.scene.bw_settings, "live_update_toggle",
-                             text="", icon="UV_SYNC_SELECT")
+                            text="", icon="UV_SYNC_SELECT")
+                
+                col = layout.column(align=True)
+                col.operator("bonewidget.copy_bone_color",
+                            text="Copy Bone Color", icon="COPYDOWN")
 
-                row = layout.row()
-                row.operator("bonewidget.copy_bone_color",
-                             text="Copy Bone Color", icon="COPYDOWN")
-
-            row = layout.row(align=True)
+            row = col.row(align=True)
             row.operator("bonewidget.clear_bone_color",
-                         text="Clear Bone Color", icon="PANEL_CLOSE")
-
-            icon = 'BONE_DATA'
-            if preferences.clear_both_modes:
-                icon = 'GROUP_BONE'
+                        text="Clear Bone Color", icon="PANEL_CLOSE")
+            
+            icon = 'GROUP_BONE' if preferences.clear_both_modes else 'BONE_DATA'
             row.prop(preferences, "clear_both_modes",
-                     icon=icon, text='', toggle=True)
+                    icon=icon, text='', toggle=True)
+
 
 
 class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
@@ -197,9 +208,9 @@ class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Pa
         col.menu("BONEWIDGET_MT_bw_color_presets_specials",
                  icon="DOWNARROW_HLT", text="")
         col.separator()
-        col.operator("bonewidget.move_custom_item_up", icon="TRIA_UP", text="")
-        col.operator("bonewidget.move_custom_item_down",
-                     icon="TRIA_DOWN", text="")
+        col.operator("bonewidget.move_custom_item", icon="TRIA_UP", text="").direction = "UP"
+        col.operator("bonewidget.move_custom_item",
+                     icon="TRIA_DOWN", text="").direction = "DOWN"
         row = layout.row()
         row.operator("bonewidget.add_colorset_to_bone",
                      text="Apply To Selected Bones")

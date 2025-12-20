@@ -103,6 +103,12 @@ class BoneWidget_preferences(AddonPreferences):
         default=True
     )
 
+    copy_color: BoolProperty(
+        name="Copy Bone Colors",
+        description='When enabled, bone colors will be copied when you copy a widget. When disabled, only the shape will be copied',
+        default=True
+    )
+
     use_default_location: BoolProperty(
         name="Use Default Location",
         description='When enabled, user widgets and color sets will be saved to extensions/.user/{repository_name}/bone_widget/bone_widget_custom_data',
@@ -158,6 +164,9 @@ class BoneWidget_preferences(AddonPreferences):
         row = box.row()
         row.label(text="Symmetrize Colors:")
         row.prop(self, "symmetrize_color")
+        row = box.row()
+        row.label(text="Copy Colors:")
+        row.prop(self, "copy_color")
 
         # preview area
         row = layout.row()

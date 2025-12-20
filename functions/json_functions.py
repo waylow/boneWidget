@@ -69,7 +69,7 @@ def update_preview_collection():
     create_preview_collection()
 
 
-def objectDataToDico(object, custom_image):
+def object_data_to_dico(object, custom_image):
     verts = []
     depsgraph = bpy.context.evaluated_depsgraph_get()
     mesh = object.evaluated_get(depsgraph).to_mesh()
@@ -92,6 +92,63 @@ def objectDataToDico(object, custom_image):
             "faces": polygons, "image": custom_image}
 
     return (wgts)
+
+
+def curve_data_to_dico(curve_obj, name=""):
+    curve_data = curve_obj.data
+    result = {
+        "name": name or curve_obj.name,
+        "extrude": curve_data.extrude,
+        "bevel_depth": curve_data.bevel_depth,
+        "bevel_resolution": curve_data.bevel_resolution,
+        "dimensions": curve_data.dimensions,
+        "fill_mode": curve_data.fill_mode,
+        "splines": []
+    }
+
+    for spline in curve_data.splines:
+        spline_info = {
+            "type": spline.type,
+            "cyclic": spline.use_cyclic_u,
+            "resolution_u": spline.resolution_u,
+            "tilt_interpolation": spline.tilt_interpolation,
+            "points": []
+        }
+
+        if spline.type == 'BEZIER':
+            for bp in spline.bezier_points:
+                spline_info["points"].append({
+                    "co": list(bp.co),
+                    "handle_left": list(bp.handle_left),
+                    "handle_right": list(bp.handle_right),
+                    "tilt": bp.tilt,
+                    "radius": bp.radius
+                })
+
+        elif spline.type == 'NURBS':
+            spline_info["order_u"] = spline.order_u
+            spline_info["use_endpoint_u"] = spline.use_endpoint_u
+            spline_info["use_bezier_u"] = spline.use_bezier_u
+            spline_info["resolution_v"] = spline.resolution_v
+            spline_info["order_v"] = spline.order_v
+
+            for p in spline.points:
+                spline_info["points"].append({
+                    "co": list(p.co),
+                    "weight": p.weight
+                })
+
+        else:  # poly or other types with .points
+            for p in spline.points:
+                spline_info["points"].append({
+                    "co": list(p.co),
+                    "weight": p.weight
+                })
+
+        if spline_info["points"]:  # only append if points exist
+            result["splines"].append(spline_info)
+
+    return result
 
 
 def read_widgets(filename=""):
@@ -155,7 +212,7 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
 
             if (ob_name) not in widget_items:
                 widget_items.append(ob_name)
-                wgts[ob_name] = objectDataToDico(ob, custom_image)
+                wgts[ob_name] = object_data_to_dico(ob, custom_image)
                 activeShape = ob_name
                 return_message = "Widget - " + ob_name + " has been added!"
 

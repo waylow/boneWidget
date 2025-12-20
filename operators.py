@@ -7,6 +7,7 @@ from .functions.main_functions import (
     symmetrize_widget_helper,
     match_bone_matrix,
     create_widget,
+    create_curve_widget,
     edit_widget,
     return_to_armature,
     get_collection,
@@ -34,7 +35,8 @@ from .functions.json_functions import (
     import_color_presets,
     export_color_presets,
     update_color_presets,
-    objectDataToDico,
+    object_data_to_dico,
+    curve_data_to_dico,
 )
 
 from .functions.preview_functions import (
@@ -203,7 +205,7 @@ class BONEWIDGET_OT_return_to_armature(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.type == 'MESH'
+        return (context.object and context.object.type in {'MESH', 'CURVE'}
                 and context.object.mode in ['EDIT', 'OBJECT'])
 
     def execute(self, context):
@@ -221,14 +223,22 @@ class BONEWIDGET_OT_match_bone_transforms(bpy.types.Operator):
     bl_label = "Match bone transforms"
     bl_options = {'REGISTER', 'UNDO'}
 
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.selected_pose_bones
+            or (context.selected_objects and
+                context.object.type in {'MESH', 'CURVE'})
+        )
+
     def execute(self, context):
-        if bpy.context.mode == "POSE":
-            for bone in bpy.context.selected_pose_bones:
+        if context.mode == "POSE":
+            for bone in context.selected_pose_bones:
                 match_bone_matrix(bone.custom_shape, bone)
 
         else:
-            for ob in bpy.context.selected_objects:
-                if ob.type == 'MESH':
+            for ob in context.selected_objects:
+                if ob.type in {'MESH', 'CURVE'}:
                     match_bone = from_widget_find_bone(ob)
                     if match_bone:
                         match_bone_matrix(ob, match_bone)
@@ -251,10 +261,11 @@ class BONEWIDGET_OT_match_symmetrize_shape(bpy.types.Operator):
         if widget is None:
             self.report({"INFO"}, "There is no widget on this bone.")
             return {'FINISHED'}
+        
         collection = get_view_layer_collection(context, widget)
-        widgets_and_bones = find_match_bones()[0]
-        active_object = find_match_bones()[1]
-        widgets_and_bones = find_match_bones()[0]
+        match_bones = find_match_bones()
+        widgets_and_bones = match_bones[0]
+        active_object = match_bones[1]
 
         if not active_object:
             self.report({"INFO"}, "No active bone or object")
@@ -966,30 +977,48 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
             new_widget.matrix_world = context.object.matrix_world @ bone.bone.matrix_local
             new_widget.scale = [bone.bone.length] * 3
 
-            # check if widget needs to be mirrored
-            if source_suffix:
-                target_suffix = next(
-                    (s for s in bw_symmetry_suffix if bone.name.endswith(s.strip())), None)
-                if target_suffix and source_suffix != target_suffix:
-                    # mirror mesh data along X
-                    for vert in new_widget.data.vertices:
-                        vert.co.x *= -1
-                    new_widget.data.flip_normals()
-
-                    # re‑apply transform from mirror bone
-                    transform_bone = bone.custom_shape_transform or bone
-                    new_widget.matrix_local = transform_bone.bone.matrix_local
-                    new_widget.scale = [transform_bone.bone.length] * 3
-
-                    bpy.context.view_layer.update()
-
             # assign as custom shape
             bone.custom_shape = new_widget
             bone.use_custom_shape_bone_size = source_bone.use_custom_shape_bone_size
             bone.bone.show_wire = source_bone.bone.show_wire
 
+            # copy transforms from source bone
+            bone.custom_shape_translation = source_bone.custom_shape_translation.copy()
+            bone.custom_shape_rotation_euler = source_bone.custom_shape_rotation_euler.copy()
+            bone.custom_shape_scale_xyz = source_bone.custom_shape_scale_xyz.copy()
+
+            # check if widget needs to be mirrored
+            if source_suffix:
+                target_suffix = next(
+                    (s for s in bw_symmetry_suffix if bone.name.endswith(s.strip())), None)
+                if target_suffix and source_suffix != target_suffix:
+                    if new_widget.type == 'MESH':
+                        # mirror mesh data along X
+                        for vert in new_widget.data.vertices:
+                            vert.co.x *= -1
+                        new_widget.data.flip_normals()
+                    elif new_widget.type == 'CURVE':
+
+                        # mirror transforms
+                        # translation
+                        bone.custom_shape_translation[0] = -source_bone.custom_shape_translation[0]
+                        bone.custom_shape_translation[1] = source_bone.custom_shape_translation[1]
+                        bone.custom_shape_translation[2] = source_bone.custom_shape_translation[2]
+
+                        # rotation
+                        bone.custom_shape_rotation_euler[0] = source_bone.custom_shape_rotation_euler[0]
+                        bone.custom_shape_rotation_euler[1] = -source_bone.custom_shape_rotation_euler[1]
+                        bone.custom_shape_rotation_euler[2] = -source_bone.custom_shape_rotation_euler[2]
+
+                        # scale
+                        bone.custom_shape_scale_xyz = source_bone.custom_shape_scale_xyz.copy()
+                        bone.custom_shape_scale_xyz.x *= -1
+
+                    bpy.context.view_layer.update()
+
             # copy colors
-            if bpy.app.version >= (4, 0, 0):
+            copy_color = get_preferences(context).copy_color
+            if bpy.app.version >= (4, 0, 0) and copy_color:
                 # pose bone colors
                 bone.bone.color.custom.normal = source_bone.bone.color.custom.normal
                 bone.bone.color.custom.select = source_bone.bone.color.custom.select
@@ -1158,7 +1187,11 @@ class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
 
         widget = bpy.data.objects.get(widget_object.name)
 
-        widget_data = objectDataToDico(widget, "")
+        widget_data = None
+        if widget_object.type == 'MESH':
+            widget_data = object_data_to_dico(widget, "")
+        elif widget_object.type == 'CURVE':
+            widget_data = curve_data_to_dico(widget, "")
         if not widget_data:
             self.report({'WARNING'}, "No widget data found")
             return {'CANCELLED'}
@@ -1170,17 +1203,18 @@ class BONEWIDGET_OT_add_object_as_widget(bpy.types.Operator):
         use_face_data = self.use_face_data if self.advanced_options else False
 
         for bone in selected_bones:
-            create_widget(
-                bone,
-                widget_data,
-                self.relative_size,
-                global_size,
-                slide,
-                self.rotation,
-                get_collection(context),
-                use_face_data,
-                self.wireframe_width
-            )
+            if widget_object.type == 'MESH':
+                create_widget(
+                    bone, widget_data, self.relative_size, global_size,
+                    slide, self.rotation, get_collection(context),
+                    use_face_data, self.wireframe_width
+                )
+            elif widget_object.type == 'CURVE':
+                create_curve_widget(
+                    bone, widget_data, self.relative_size, global_size,
+                    slide, self.rotation, get_collection(context),
+                    self.wireframe_width
+                )
 
         return {'FINISHED'}
 
@@ -1424,39 +1458,32 @@ class BONEWIDGET_OT_lock_custom_colorset_changes(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_move_custom_item_up(bpy.types.Operator):
-    """Moves the selected color set up in the list"""
-    bl_idname = "bonewidget.move_custom_item_up"
-    bl_label = "Move Custom Item Up"
+class BONEWIDGET_OT_move_custom_item(bpy.types.Operator):
+    """Change the position of the selected color set in the list"""
+    bl_idname = "bonewidget.move_custom_item"
+    bl_label = "Move Custom Item"
     bl_options = {'INTERNAL'}
+
+    direction: EnumProperty(
+        items=[
+            ("UP", "Up", "Move up"),
+            ("DOWN", "Down", "Move down"),
+        ],
+        default="UP"
+    )
 
     def execute(self, context):
         wm = context.window_manager
         idx = wm.colorset_list_index
 
-        if idx > 0:
-            wm.custom_color_presets.move(idx, idx - 1)
-            wm.colorset_list_index -= 1
+        # translate enum into offset
+        offset = -1 if self.direction == "UP" else 1
+        new_idx = idx + offset
 
-            save_color_sets(context)
-
-        return {'FINISHED'}
-
-
-class BONEWIDGET_OT_move_custom_item_down(bpy.types.Operator):
-    """Moves the selected color set down in the list"""
-    bl_idname = "bonewidget.move_custom_item_down"
-    bl_label = "Move Custom Item Down"
-    bl_options = {'INTERNAL'}
-
-    def execute(self, context):
-        wm = context.window_manager
-        idx = wm.colorset_list_index
-
-        if idx < len(wm.custom_color_presets) - 1:
-            wm.custom_color_presets.move(idx, idx + 1)
-            wm.colorset_list_index += 1
-
+        # only move if new index is valid
+        if 0 <= new_idx < len(wm.custom_color_presets):
+            wm.custom_color_presets.move(idx, new_idx)
+            wm.colorset_list_index = new_idx
             save_color_sets(context)
 
         return {'FINISHED'}
@@ -1812,8 +1839,7 @@ classes = (
     BONEWIDGET_OT_add_colorset_to_bone,
     BONEWIDGET_OT_remove_item,
     BONEWIDGET_OT_lock_custom_colorset_changes,
-    BONEWIDGET_OT_move_custom_item_up,
-    BONEWIDGET_OT_move_custom_item_down,
+    BONEWIDGET_OT_move_custom_item,
     BONEWIDGET_OT_add_preset_from_bone,
     BONEWIDGET_OT_add_presets_from_armature,
     BONEWIDGET_OT_import_color_presets,

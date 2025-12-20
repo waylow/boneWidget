@@ -90,8 +90,6 @@ def match_bone_matrix(widget, match_bone):
     widget.matrix_world = widget.matrix_world @ Matrix.LocRotScale(
         loc, rot, widget.scale)
 
-    widget.data.update()
-
 
 def from_widget_find_bone(widget):
     match_bone = None
@@ -160,13 +158,14 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
     new_object.name = bw_widget_prefix + bone.name
     collection.objects.link(new_object)
 
+    bpy.context.view_layer.update()
+
     new_object.matrix_world = bpy.context.active_object.matrix_world @ matrix_bone.bone.matrix_local
     new_object.scale = [matrix_bone.bone.length,
                         matrix_bone.bone.length, matrix_bone.bone.length]
-    layer = bpy.context.view_layer
-    layer.update()
-
+    
     bone.custom_shape = new_object
+
     # show faces if use face data is enabled
     bone.bone.show_wire = not use_face_data
 
@@ -178,9 +177,125 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
         bone.custom_shape_wire_width = wireframe_width
 
 
-def symmetrize_widget(bone, collection):
+def create_curve_widget(bone, curve_dict, relative, size, slide, rotation, collection, wireframe_width):
     if not get_preferences(bpy.context).use_rigify_defaults:
         bw_widget_prefix = get_preferences(bpy.context).widget_prefix
+    else:
+        bw_widget_prefix = "WGT-" + bpy.context.active_object.name + "_"
+
+    # reuse existing curve object if present
+    if bone.custom_shape and bone.custom_shape.type == 'CURVE':
+        new_obj = bone.custom_shape
+        new_curve = new_obj.data
+        new_curve.splines.clear()
+    else:
+        new_curve = bpy.data.curves.new(bw_widget_prefix + bone.name, type='CURVE')
+        new_obj = bpy.data.objects.new(bw_widget_prefix + bone.name, new_curve)
+        collection.objects.link(new_obj)
+
+        if get_preferences(bpy.context).reset_custom_shape_transforms:
+            bone.custom_shape_translation = [0, 0, 0]
+            bone.custom_shape_rotation_euler = [0, 0, 0]
+            bone.custom_shape_scale_xyz = [1.0, 1.0, 1.0]
+
+        bone.use_custom_shape_bone_size = relative
+
+        bpy.context.view_layer.update()
+
+        # align object to bone transforms
+        new_obj.matrix_world = bpy.context.active_object.matrix_world @ bone.bone.matrix_local
+        new_obj.scale = [bone.length, bone.length, bone.length]
+
+        bone.custom_shape = new_obj
+
+    # set curve properties
+    new_curve.extrude = curve_dict.get("extrude", 0.0)
+    new_curve.bevel_depth = curve_dict.get("bevel_depth", 0.0)
+    new_curve.bevel_resolution = curve_dict.get("bevel_resolution", 0)
+
+    new_curve.dimensions = curve_dict.get("dimensions", '3D')
+    new_curve.fill_mode = curve_dict.get("fill_mode", 'FULL')
+
+    # rebuild splines
+    for spline_info in curve_dict["splines"]:
+        spline = new_curve.splines.new(type=spline_info["type"])
+        spline.use_cyclic_u = spline_info.get("cyclic", False)
+        spline.resolution_u = spline_info.get("resolution_u", 12)
+        spline.tilt_interpolation = spline_info.get("tilt_interpolation", 'LINEAR')
+
+        if spline_info["type"] == 'BEZIER':
+            spline.bezier_points.add(len(spline_info["points"]) - 1)
+            for i, pt in enumerate(spline_info["points"]):
+                bp = spline.bezier_points[i]
+                bp.co = Vector(pt["co"])
+                bp.handle_left = Vector(pt["handle_left"])
+                bp.handle_right = Vector(pt["handle_right"])
+                bp.tilt = pt["tilt"]
+                bp.radius = pt["radius"]
+        else:
+            spline.points.add(len(spline_info["points"]) - 1)
+            for i, pt in enumerate(spline_info["points"]):
+                p = spline.points[i]
+                p.co = Vector(pt["co"])
+                p.weight = pt.get("weight", 1.0)
+
+        # apply transforms to spline points
+        if not relative:
+            slide_vec = Vector(slide) * bone.length
+        else:
+            slide_vec = Vector(slide)
+
+        trans = Matrix.Translation(slide_vec)
+        rot = rotation.to_matrix().to_4x4()
+        scale = (
+            Matrix.Scale(size[0], 4, Vector((1,0,0))) @
+            Matrix.Scale(size[1], 4, Vector((0,1,0))) @
+            Matrix.Scale(size[2], 4, Vector((0,0,1)))
+        )
+
+        widget_matrix = trans @ rot @ scale
+
+        if spline.type == 'BEZIER':
+            for bp in spline.bezier_points:
+                bp.co = widget_matrix @ bp.co
+                bp.handle_left = widget_matrix @ bp.handle_left
+                bp.handle_right = widget_matrix @ bp.handle_right
+        else:
+            for p in spline.points:
+                p.co = widget_matrix @ Vector(p.co)
+
+    # wireframe display
+    bone.bone.show_wire = True
+    if bpy.app.version >= (4, 2, 0):
+        bone.custom_shape_wire_width = wireframe_width
+
+    return new_obj
+    
+
+def symmetrize_mesh(widget, mirror_bone, collection, prefix, rigify_name):
+    new_data = widget.data.copy()
+    for vert in new_data.vertices:
+        vert.co.x *= -1
+    new_object = widget.copy()
+    new_object.data = new_data
+    new_object.name = prefix + rigify_name + mirror_bone.name
+    bpy.data.collections[collection.name].objects.link(new_object)
+    new_object.data.flip_normals()
+    return new_object
+
+
+def symmetrize_curve(widget, mirror_bone, collection, prefix, rigify_name):
+    new_object = widget.copy()
+    new_object.data = widget.data.copy()
+    new_object.name = prefix + rigify_name + mirror_bone.name
+    bpy.data.collections[collection.name].objects.link(new_object)
+    return new_object
+
+
+def symmetrize_widget(bone, collection):
+    prefs = get_preferences(bpy.context)
+    if not prefs.use_rigify_defaults:
+        bw_widget_prefix = prefs.widget_prefix
         rigify_object_name = ''
     else:
         bw_widget_prefix = "WGT-"
@@ -202,20 +317,16 @@ def symmetrize_widget(bone, collection):
             bpy.data.objects.remove(existing)
 
     # create mirrored mesh data
-    new_data = widget.data.copy()
-    for vert in new_data.vertices:
-        vert.co.x *= -1  # mirror along X-axis
+    new_object = None
+    if widget.type == 'MESH':
+        new_object = symmetrize_mesh(widget, mirror_bone, collection,
+                                     bw_widget_prefix, rigify_object_name)
+    elif widget.type == 'CURVE':
+        new_object = symmetrize_curve(widget, mirror_bone, collection,
+                                      bw_widget_prefix, rigify_object_name)
 
-    new_object = widget.copy()
-    new_object.data = new_data
-    new_object.name = bw_widget_prefix + rigify_object_name + mirror_bone.name
-    bpy.data.collections[collection.name].objects.link(new_object)
-
-    # use override transform if available
-    transform_bone = mirror_bone.custom_shape_transform or mirror_bone
-    new_object.matrix_local = transform_bone.bone.matrix_local
-    new_object.scale = [transform_bone.bone.length] * 3
-    new_object.data.flip_normals()
+    if not new_object:
+        return
 
     bpy.context.view_layer.update()
 
@@ -224,21 +335,27 @@ def symmetrize_widget(bone, collection):
     mirror_bone.use_custom_shape_bone_size = bone.use_custom_shape_bone_size
 
     # Mirror the custom shape transforms (if they are not default)
+    # translation
     if bone.custom_shape_translation != [0, 0, 0]:
-        mirror_bone.custom_shape_translation[0] = \
-            -1 * bone.custom_shape_translation[0]  # flip X
+        mirror_bone.custom_shape_translation[0] = -bone.custom_shape_translation[0] # flip X
         mirror_bone.custom_shape_translation[1] = bone.custom_shape_translation[1]
         mirror_bone.custom_shape_translation[2] = bone.custom_shape_translation[2]
+
+    # rotation
     if bone.custom_shape_rotation_euler != [0, 0, 0]:
         mirror_bone.custom_shape_rotation_euler[0] = bone.custom_shape_rotation_euler[0]
-        mirror_bone.custom_shape_rotation_euler[1] = \
-            -1 * bone.custom_shape_rotation_euler[1]
-        mirror_bone.custom_shape_rotation_euler[2] = \
-            -1 * bone.custom_shape_rotation_euler[2]
-    if bone.custom_shape_scale_xyz != [1, 1, 1]:
-        mirror_bone.custom_shape_scale_xyz = bone.custom_shape_scale_xyz
+        mirror_bone.custom_shape_rotation_euler[1] = -bone.custom_shape_rotation_euler[1]
+        mirror_bone.custom_shape_rotation_euler[2] = -bone.custom_shape_rotation_euler[2]
 
-    symmetrize_color = get_preferences(bpy.context).symmetrize_color
+    # scale
+    if bone.custom_shape_scale_xyz != [1, 1, 1]:
+        mirror_bone.custom_shape_scale_xyz = bone.custom_shape_scale_xyz.copy()
+        if widget.type == 'CURVE':
+            mirror_bone.custom_shape_scale_xyz.x *= -1
+
+
+    # symmetrize colors
+    symmetrize_color = prefs.symmetrize_color
     if bpy.app.version >= (4, 0, 0) and symmetrize_color:
         # pose bone colors
         mirror_bone.bone.color.custom.normal = bone.bone.color.custom.normal
@@ -252,6 +369,7 @@ def symmetrize_widget(bone, collection):
         mirror_bone.color.custom.active = bone.color.custom.active
         mirror_bone.color.palette = bone.color.palette
 
+    # wire width
     if bpy.app.version >= (4, 2, 0):
         mirror_bone.custom_shape_wire_width = bone.custom_shape_wire_width
 
@@ -263,11 +381,8 @@ def symmetrize_widget_helper(bone, collection, active_object, widgets_and_bones)
     suffix_1 = bw_symmetry_suffix[0].replace(" ", "")
     suffix_2 = bw_symmetry_suffix[1].replace(" ", "")
 
-    if active_object.name.endswith(suffix_1):
-        if bone.name.endswith(suffix_1) and widgets_and_bones[bone]:
-            symmetrize_widget(bone, collection)
-    elif active_object.name.endswith(suffix_2):
-        if bone.name.endswith(suffix_2) and widgets_and_bones[bone]:
+    if active_object.name.endswith((suffix_1, suffix_2)):
+        if bone.name.endswith((suffix_1, suffix_2)) and widgets_and_bones[bone]:
             symmetrize_widget(bone, collection)
 
 
