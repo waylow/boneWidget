@@ -101,6 +101,16 @@ def from_widget_find_bone(widget):
     return match_bone
 
 
+def is_widget_shared(bone):
+    obj = bone.custom_shape
+    armature = bone.id_data
+
+    for pose_bone in armature.pose.bones:
+        if pose_bone != bone and pose_bone.custom_shape is obj:
+            return True
+    return False
+
+
 def create_widget(bone, widget, relative, size, slide, rotation, collection, use_face_data, wireframe_width):
     if not get_preferences(bpy.context).use_rigify_defaults:
         bw_widget_prefix = get_preferences(bpy.context).widget_prefix
@@ -109,8 +119,8 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
 
     matrix_bone = bone
 
-    # delete the existing shape
-    if bone.custom_shape:
+    # delete the existing shape if it's not shared
+    if bone.custom_shape and not is_widget_shared(bone):
         bpy.data.objects.remove(
             bpy.data.objects[bone.custom_shape.name], do_unlink=True)
 
