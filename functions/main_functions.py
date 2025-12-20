@@ -193,8 +193,8 @@ def create_curve_widget(bone, curve_dict, relative, size, slide, rotation, colle
     else:
         bw_widget_prefix = "WGT-" + bpy.context.active_object.name + "_"
 
-    # reuse existing curve object if present
-    if bone.custom_shape and bone.custom_shape.type == 'CURVE':
+    # reuse existing curve object if present and not shared
+    if bone.custom_shape and bone.custom_shape.type == 'CURVE' and not is_widget_shared(bone):
         new_obj = bone.custom_shape
         new_curve = new_obj.data
         new_curve.splines.clear()
