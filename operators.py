@@ -18,7 +18,7 @@ from .functions.main_functions import (
     resync_widget_names,
     advanced_options_toggled,
     set_bone_color,
-    copy_bone_color,
+    copy_color_to_palette,
     get_preferences,
 )
 from .functions.json_functions import (
@@ -261,7 +261,7 @@ class BONEWIDGET_OT_match_symmetrize_shape(bpy.types.Operator):
         if widget is None:
             self.report({"INFO"}, "There is no widget on this bone.")
             return {'FINISHED'}
-        
+
         collection = get_view_layer_collection(context, widget)
         match_bones = find_match_bones()
         widgets_and_bones = match_bones[0]
@@ -1001,14 +1001,17 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
 
                         # mirror transforms
                         # translation
-                        bone.custom_shape_translation[0] = -source_bone.custom_shape_translation[0]
+                        bone.custom_shape_translation[0] = - \
+                            source_bone.custom_shape_translation[0]
                         bone.custom_shape_translation[1] = source_bone.custom_shape_translation[1]
                         bone.custom_shape_translation[2] = source_bone.custom_shape_translation[2]
 
                         # rotation
                         bone.custom_shape_rotation_euler[0] = source_bone.custom_shape_rotation_euler[0]
-                        bone.custom_shape_rotation_euler[1] = -source_bone.custom_shape_rotation_euler[1]
-                        bone.custom_shape_rotation_euler[2] = -source_bone.custom_shape_rotation_euler[2]
+                        bone.custom_shape_rotation_euler[1] = - \
+                            source_bone.custom_shape_rotation_euler[1]
+                        bone.custom_shape_rotation_euler[2] = - \
+                            source_bone.custom_shape_rotation_euler[2]
 
                         # scale
                         bone.custom_shape_scale_xyz = source_bone.custom_shape_scale_xyz.copy()
@@ -1290,9 +1293,9 @@ class BONEWIDGET_OT_clear_bone_color(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class BONEWIDGET_OT_copy_bone_color(bpy.types.Operator):
-    """Copy the colors of the active bone to the custom colors above (ignores default colors)"""
-    bl_idname = "bonewidget.copy_bone_color"
+class BONEWIDGET_OT_copy_color_to_palette(bpy.types.Operator):
+    """Copy the colors of the active bone to the custom palette above (ignores default colors)"""
+    bl_idname = "bonewidget.copy_color_to_palette"
     bl_label = "Copy Bone Color"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -1309,9 +1312,9 @@ class BONEWIDGET_OT_copy_bone_color(bpy.types.Operator):
             selected_bone = context.selected_pose_bones[0]
             if not selected_bone.color.is_custom and not 'THEME' in selected_bone.color.palette:
                 selected_bone = context.active_bone
-            copy_bone_color(context, selected_bone)
+            copy_color_to_palette(context, selected_bone)
         elif context.object.mode == 'EDIT':
-            copy_bone_color(context, context.selected_bones[0])
+            copy_color_to_palette(context, context.selected_bones[0])
         return {'FINISHED'}
 
 
@@ -1833,7 +1836,7 @@ classes = (
     BONEWIDGET_OT_user_data_filebrowser,
     BONEWIDGET_OT_set_bone_color,
     BONEWIDGET_OT_clear_bone_color,
-    BONEWIDGET_OT_copy_bone_color,
+    BONEWIDGET_OT_copy_color_to_palette,
     BONEWIDGET_OT_add_color_set_from,
     BONEWIDGET_OT_add_default_colorset,
     BONEWIDGET_OT_add_colorset_to_bone,
