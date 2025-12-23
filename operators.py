@@ -19,6 +19,7 @@ from .functions.main_functions import (
     advanced_options_toggled,
     set_bone_color,
     copy_color_to_palette,
+    copy_color_to_selected,
     get_preferences,
 )
 from .functions.json_functions import (
@@ -1318,6 +1319,33 @@ class BONEWIDGET_OT_copy_color_to_palette(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_copy_color_to_selected(bpy.types.Operator):
+    """Copy the colors of the active bone to the selected bones"""
+    bl_idname = "bonewidget.copy_color_to_selected"
+    bl_label = "Copy Bone Color"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        if not context.object:
+            return False
+        bones = context.selected_pose_bones if context.object.mode == 'POSE' else context.selected_bones
+        return (context.object and context.object.type == 'ARMATURE'
+                and context.object.mode in ['POSE', 'EDIT'] and len(bones) > 1)
+
+    def execute(self, context):
+        if context.object.mode == 'POSE':
+            selected_bones = context.selected_pose_bones
+            active_bone = context.active_bone
+
+        elif context.object.mode == 'EDIT':
+            selected_bones = context.selected_editable_bones
+            active_bone = context.active_bone
+
+        copy_color_to_selected(context, active_bone, selected_bones)
+        return {'FINISHED'}
+
+
 class BONEWIDGET_OT_add_color_set_from(bpy.types.Operator):
     """Adds a color set to presets from selected Theme or from custom palette"""
     bl_idname = "bonewidget.add_color_set_from"
@@ -1837,6 +1865,7 @@ classes = (
     BONEWIDGET_OT_set_bone_color,
     BONEWIDGET_OT_clear_bone_color,
     BONEWIDGET_OT_copy_color_to_palette,
+    BONEWIDGET_OT_copy_color_to_selected,
     BONEWIDGET_OT_add_color_set_from,
     BONEWIDGET_OT_add_default_colorset,
     BONEWIDGET_OT_add_colorset_to_bone,

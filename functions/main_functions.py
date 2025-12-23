@@ -173,7 +173,7 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
     new_object.matrix_world = bpy.context.active_object.matrix_world @ matrix_bone.bone.matrix_local
     new_object.scale = [matrix_bone.bone.length,
                         matrix_bone.bone.length, matrix_bone.bone.length]
-    
+
     bone.custom_shape = new_object
 
     # show faces if use face data is enabled
@@ -199,7 +199,8 @@ def create_curve_widget(bone, curve_dict, relative, size, slide, rotation, colle
         new_curve = new_obj.data
         new_curve.splines.clear()
     else:
-        new_curve = bpy.data.curves.new(bw_widget_prefix + bone.name, type='CURVE')
+        new_curve = bpy.data.curves.new(
+            bw_widget_prefix + bone.name, type='CURVE')
         new_obj = bpy.data.objects.new(bw_widget_prefix + bone.name, new_curve)
         collection.objects.link(new_obj)
 
@@ -231,7 +232,8 @@ def create_curve_widget(bone, curve_dict, relative, size, slide, rotation, colle
         spline = new_curve.splines.new(type=spline_info["type"])
         spline.use_cyclic_u = spline_info.get("cyclic", False)
         spline.resolution_u = spline_info.get("resolution_u", 12)
-        spline.tilt_interpolation = spline_info.get("tilt_interpolation", 'LINEAR')
+        spline.tilt_interpolation = spline_info.get(
+            "tilt_interpolation", 'LINEAR')
 
         if spline_info["type"] == 'BEZIER':
             spline.bezier_points.add(len(spline_info["points"]) - 1)
@@ -258,9 +260,9 @@ def create_curve_widget(bone, curve_dict, relative, size, slide, rotation, colle
         trans = Matrix.Translation(slide_vec)
         rot = rotation.to_matrix().to_4x4()
         scale = (
-            Matrix.Scale(size[0], 4, Vector((1,0,0))) @
-            Matrix.Scale(size[1], 4, Vector((0,1,0))) @
-            Matrix.Scale(size[2], 4, Vector((0,0,1)))
+            Matrix.Scale(size[0], 4, Vector((1, 0, 0))) @
+            Matrix.Scale(size[1], 4, Vector((0, 1, 0))) @
+            Matrix.Scale(size[2], 4, Vector((0, 0, 1)))
         )
 
         widget_matrix = trans @ rot @ scale
@@ -280,7 +282,7 @@ def create_curve_widget(bone, curve_dict, relative, size, slide, rotation, colle
         bone.custom_shape_wire_width = wireframe_width
 
     return new_obj
-    
+
 
 def symmetrize_mesh(widget, mirror_bone, collection, prefix, rigify_name):
     new_data = widget.data.copy()
@@ -347,22 +349,24 @@ def symmetrize_widget(bone, collection):
     # Mirror the custom shape transforms (if they are not default)
     # translation
     if bone.custom_shape_translation != [0, 0, 0]:
-        mirror_bone.custom_shape_translation[0] = -bone.custom_shape_translation[0] # flip X
+        mirror_bone.custom_shape_translation[0] = - \
+            bone.custom_shape_translation[0]  # flip X
         mirror_bone.custom_shape_translation[1] = bone.custom_shape_translation[1]
         mirror_bone.custom_shape_translation[2] = bone.custom_shape_translation[2]
 
     # rotation
     if bone.custom_shape_rotation_euler != [0, 0, 0]:
         mirror_bone.custom_shape_rotation_euler[0] = bone.custom_shape_rotation_euler[0]
-        mirror_bone.custom_shape_rotation_euler[1] = -bone.custom_shape_rotation_euler[1]
-        mirror_bone.custom_shape_rotation_euler[2] = -bone.custom_shape_rotation_euler[2]
+        mirror_bone.custom_shape_rotation_euler[1] = - \
+            bone.custom_shape_rotation_euler[1]
+        mirror_bone.custom_shape_rotation_euler[2] = - \
+            bone.custom_shape_rotation_euler[2]
 
     # scale
     if bone.custom_shape_scale_xyz != [1, 1, 1]:
         mirror_bone.custom_shape_scale_xyz = bone.custom_shape_scale_xyz.copy()
         if widget.type == 'CURVE':
             mirror_bone.custom_shape_scale_xyz.x *= -1
-
 
     # symmetrize colors
     symmetrize_color = prefs.symmetrize_color
@@ -649,7 +653,7 @@ def set_bone_color(context, color, clear_both_modes=None):
                     edit_bone.color.custom.active = context.scene.bw_settings.custom_edit_color_set.active
 
 
-def copy_bone_color(context, bone):
+def copy_color_to_palette(context, bone):
     live_update_current_state = context.scene.bw_settings.live_update_on
     context.scene.bw_settings.live_update_on = False
 
@@ -675,6 +679,31 @@ def copy_bone_color(context, bone):
         palette.active = theme_color_set.active
 
     context.scene.bw_settings.live_update_on = live_update_current_state
+
+
+def copy_color_to_selected(context, active_bone, selected_bones):
+    for bone in selected_bones:
+        if bone.name != active_bone.name:
+            # Edit Bone Color (While in Pose Mode)
+            context.object.data.bones[bone.name].color.palette = context.object.data.bones[active_bone.name].color.palette
+            if active_bone.color.palette == 'CUSTOM':
+                context.object.data.bones[bone.name].color.custom.normal = context.object.data.bones[active_bone.name].color.custom.normal
+                context.object.data.bones[bone.name].color.custom.select = context.object.data.bones[active_bone.name].color.custom.select
+                context.object.data.bones[bone.name].color.custom.active = context.object.data.bones[active_bone.name].color.custom.active
+
+            # Pose Bone Color (both modes)
+            context.object.pose.bones[bone.name].color.palette = context.object.pose.bones[active_bone.name].color.palette
+            if active_bone.color.palette == 'CUSTOM':
+                context.object.pose.bones[bone.name].color.custom.normal = context.object.pose.bones[active_bone.name].color.custom.normal
+                context.object.pose.bones[bone.name].color.custom.select = context.object.pose.bones[active_bone.name].color.custom.select
+                context.object.pose.bones[bone.name].color.custom.active = context.object.pose.bones[active_bone.name].color.custom.active
+
+            # Edit Bone Colors (While in Edit Mode)
+            if context.object.mode == 'EDIT':
+                bone.color.palette = active_bone.color.palette
+                bone.color.custom.normal = active_bone.color.custom.normal
+                bone.color.custom.select = active_bone.color.custom.select
+                bone.color.custom.active = active_bone.color.custom.active
 
 
 def update_bone_color(self, context):
