@@ -934,6 +934,12 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
     bl_label = "Copy Widget to Selected Bones"
     bl_options = {'REGISTER', 'UNDO'}
 
+    flip_widgets: BoolProperty(
+        name="Flip Widgets",
+        description="When enabled all widgets will flip x direction",
+        default=False,
+    )
+
     @classmethod
     def poll(cls, context):
         return (
@@ -988,37 +994,46 @@ class BONEWIDGET_OT_copy_bone_widget(bpy.types.Operator):
             bone.custom_shape_rotation_euler = source_bone.custom_shape_rotation_euler.copy()
             bone.custom_shape_scale_xyz = source_bone.custom_shape_scale_xyz.copy()
 
+            mirror_needed = False
+
             # check if widget needs to be mirrored
             if source_suffix:
                 target_suffix = next(
                     (s for s in bw_symmetry_suffix if bone.name.endswith(s.strip())), None)
                 if target_suffix and source_suffix != target_suffix:
-                    if new_widget.type == 'MESH':
-                        # mirror mesh data along X
-                        for vert in new_widget.data.vertices:
-                            vert.co.x *= -1
-                        new_widget.data.flip_normals()
-                    elif new_widget.type == 'CURVE':
+                    mirror_needed = True
 
-                        # mirror transforms
-                        # translation
-                        bone.custom_shape_translation[0] = - \
-                            source_bone.custom_shape_translation[0]
-                        bone.custom_shape_translation[1] = source_bone.custom_shape_translation[1]
-                        bone.custom_shape_translation[2] = source_bone.custom_shape_translation[2]
+            # invert the decision if flip_widgets is enabled
+            if self.flip_widgets:
+                mirror_needed = not mirror_needed
 
-                        # rotation
-                        bone.custom_shape_rotation_euler[0] = source_bone.custom_shape_rotation_euler[0]
-                        bone.custom_shape_rotation_euler[1] = - \
-                            source_bone.custom_shape_rotation_euler[1]
-                        bone.custom_shape_rotation_euler[2] = - \
-                            source_bone.custom_shape_rotation_euler[2]
+            if mirror_needed:
+                if new_widget.type == 'MESH':
+                    # mirror mesh data along X
+                    for vert in new_widget.data.vertices:
+                        vert.co.x *= -1
+                    new_widget.data.flip_normals()
+                elif new_widget.type == 'CURVE':
 
-                        # scale
-                        bone.custom_shape_scale_xyz = source_bone.custom_shape_scale_xyz.copy()
-                        bone.custom_shape_scale_xyz.x *= -1
+                    # mirror transforms
+                    # translation
+                    bone.custom_shape_translation[0] = - \
+                        source_bone.custom_shape_translation[0]
+                    bone.custom_shape_translation[1] = source_bone.custom_shape_translation[1]
+                    bone.custom_shape_translation[2] = source_bone.custom_shape_translation[2]
 
-                    bpy.context.view_layer.update()
+                    # rotation
+                    bone.custom_shape_rotation_euler[0] = source_bone.custom_shape_rotation_euler[0]
+                    bone.custom_shape_rotation_euler[1] = - \
+                        source_bone.custom_shape_rotation_euler[1]
+                    bone.custom_shape_rotation_euler[2] = - \
+                        source_bone.custom_shape_rotation_euler[2]
+
+                    # scale
+                    bone.custom_shape_scale_xyz = source_bone.custom_shape_scale_xyz.copy()
+                    bone.custom_shape_scale_xyz.x *= -1
+
+                bpy.context.view_layer.update()
 
             # copy colors
             copy_color = get_preferences(context).copy_color
