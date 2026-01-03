@@ -91,20 +91,41 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         # 2ND BLOCK
         # Match Transforms | Resync Names
         col = layout.column(align=True)
+
         row = col.row(align=True)
-        row.operator("bonewidget.match_bone_transforms",
-                     icon='GROUP_BONE', text="Match Transforms")
+        split = row.split(factor=0.75, align=True)
 
-        row.operator("bonewidget.resync_widget_names",
-                     icon='FILE_REFRESH', text='')
+        left = split.row(align=True)
+        left.operator(
+            "bonewidget.match_bone_transforms",
+            icon='GROUP_BONE',
+            text="Match Transforms"
+        )
 
-        # Clear Widgets | Delete Unused
+        right = split.row(align=True)
+        right.operator(
+            "bonewidget.resync_widget_names",
+            icon='FILE_REFRESH',
+            text="Resync"
+        )
+
+        # Clear | Delete
         row = col.row(align=True)
-        row.operator("bonewidget.clear_widgets",
-                     icon='X', text="Clear Widget(s)")
+        split = row.split(factor=0.75, align=True)
 
-        row.operator("bonewidget.delete_unused_widgets",
-                     icon='TRASH', text='')
+        left = split.row(align=True)
+        left.operator(
+            "bonewidget.clear_widgets",
+            icon='X',
+            text="Clear Widget(s)"
+        )
+
+        right = split.row(align=True)
+        right.operator(
+            "bonewidget.delete_unused_widgets",
+            icon='TRASH',
+            text="Delete"
+        )
 
         # if the bw collection exists, show the visibility toggle
         bw_collection_name = None
