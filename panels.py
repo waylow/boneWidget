@@ -240,6 +240,8 @@ class BONEWIDGET_PT_bw_blender_color_set(BONEWIDGET_PT_bw_panel, bpy.types.Panel
         return bpy.app.version >= (4, 0, 0)
 
     def draw(self, context):
+        preferences = get_preferences(context)
+
         layout = self.layout
         col = layout.column(align=True)
 
