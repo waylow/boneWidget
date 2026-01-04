@@ -183,9 +183,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 
 
 class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
-
     bl_idname = "BONEWIDGET_PT_bw_custom_color_presets"
-    bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
     bl_label = "Custom Color Presets"
 
     @classmethod
@@ -229,9 +227,7 @@ class BONEWIDGET_UL_colorset_items(bpy.types.UIList):
 
 
 class BONEWIDGET_PT_bw_blender_color_set(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
-
     bl_idname = "BONEWIDGET_PT_bw_blender_color_set"
-    bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
     bl_label = "Blender Color Sets"
     bl_options = {'DEFAULT_CLOSED'}
 
