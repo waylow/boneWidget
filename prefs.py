@@ -303,8 +303,8 @@ def register():
         ("BONEWIDGET_PT_bw_blender_color_set", "Blender Color Sets"),
     ]
 
-    # convert to dict
-    expected_ids = {pid: name for pid, name in expected_panels}
+    # map panel_id to default index
+    default_index = {pid: i for i, (pid, _) in enumerate(expected_panels)}
 
     # track IDs
     existing_ids = {entry.panel_id for entry in prefs.panel_order}
@@ -312,16 +312,29 @@ def register():
     # add missing panels
     for pid, name in expected_panels:
         if pid not in existing_ids:
-            e = prefs.panel_order.add()
-            e.panel_id = pid
-            e.name = name
-            e.enabled = True
-            e.expanded = True
+            # decide where to insert the new panel based on its default index
+            target_default_index = default_index[pid]
+
+            # count how many have a lower default index
+            insert_at = sum(
+                1 for entry in prefs.panel_order
+                if default_index.get(entry.panel_id, 9999) < target_default_index
+            )
+
+            # add missing panels at the end first
+            new = prefs.panel_order.add()
+            new.panel_id = pid
+            new.name = name
+            new.enabled = True
+            new.expanded = True
+
+            # move it to the correct position
+            prefs.panel_order.move(len(prefs.panel_order) - 1, insert_at)
 
     # remove any panels that no longer exist
+    expected_ids = {pid for pid, _ in expected_panels}
     for i in reversed(range(len(prefs.panel_order))):
-        entry = prefs.panel_order[i]
-        if entry.panel_id not in expected_ids:
+        if prefs.panel_order[i].panel_id not in expected_ids:
             prefs.panel_order.remove(i)
 
 
