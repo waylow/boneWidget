@@ -185,6 +185,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_idname = "BONEWIDGET_PT_bw_custom_color_presets"
     bl_label = "Custom Color Presets"
+    bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
 
     @classmethod
     def poll(self, context):
@@ -229,6 +230,7 @@ class BONEWIDGET_UL_colorset_items(bpy.types.UIList):
 class BONEWIDGET_PT_bw_blender_color_set(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_idname = "BONEWIDGET_PT_bw_blender_color_set"
     bl_label = "Blender Color Sets"
+    bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
     bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
@@ -318,10 +320,13 @@ class BONEWIDGET_PT_bw_blender_color_set(BONEWIDGET_PT_bw_panel, bpy.types.Panel
 
 classes = (
     BONEWIDGET_PT_bw_panel_main,
-    BONEWIDGET_PT_bw_custom_color_presets,
     BONEWIDGET_UL_colorset_items,
-    BONEWIDGET_PT_bw_blender_color_set,
 )
+
+panel_classes = {
+    "BONEWIDGET_PT_bw_custom_color_presets": BONEWIDGET_PT_bw_custom_color_presets,
+    "BONEWIDGET_PT_bw_blender_color_set": BONEWIDGET_PT_bw_blender_color_set,
+}
 
 
 def register():
@@ -357,6 +362,14 @@ def register():
         except:
             pass
 
+    prefs = bpy.context.preferences.addons[__package__].preferences
+
+    for panel in prefs.panel_order:
+        if panel.enabled:
+            panel_cls = panel_classes.get(panel.panel_id)
+            if panel_cls:
+                bpy.utils.register_class(panel_cls)
+
 
 def unregister():
     if hasattr(bpy.types.WindowManager, "widget_list"):
@@ -376,6 +389,12 @@ def unregister():
 
     from bpy.utils import unregister_class
     for cls in classes:
+        try:
+            unregister_class(cls)
+        except:
+            pass
+
+    for cls in panel_classes:
         try:
             unregister_class(cls)
         except:
