@@ -177,7 +177,7 @@ class ImportItemData(bpy.types.PropertyGroup):
         description="The name of the imported item"
     )
 
-    import_option: bpy.props.EnumProperty(
+    import_option: EnumProperty(
         name="Options",
         description="Choose an option",
         items=get_import_options(),
@@ -188,13 +188,14 @@ class ImportItemData(bpy.types.PropertyGroup):
 class BW_ColorPanel(bpy.types.PropertyGroup):
     panel_id: bpy.props.StringProperty()   # internal panel id
     name: bpy.props.StringProperty()       # display name
-    enabled: bpy.props.BoolProperty(default=True)
+    enabled: BoolProperty(default=True)
+    expanded: BoolProperty(default=True)
 
 
 def register():
     bpy.utils.register_class(CustomColorSet)
     bpy.utils.register_class(BW_Settings)
-    bpy.types.Scene.bw_settings = bpy.props.PointerProperty(type=BW_Settings)
+    bpy.types.Scene.bw_settings = PointerProperty(type=BW_Settings)
 
 
 def unregister():

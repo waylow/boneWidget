@@ -231,7 +231,6 @@ class BONEWIDGET_PT_bw_blender_color_set(BONEWIDGET_PT_bw_panel, bpy.types.Panel
     bl_idname = "BONEWIDGET_PT_bw_blender_color_set"
     bl_label = "Blender Color Sets"
     bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
-    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(self, context):
@@ -368,7 +367,11 @@ def register():
         if panel.enabled:
             panel_cls = panel_classes.get(panel.panel_id)
             if panel_cls:
-                bpy.utils.register_class(panel_cls)
+                if panel.expanded:
+                    panel_cls.bl_options = set()
+                else:
+                    panel_cls.bl_options = {'DEFAULT_CLOSED'}
+                register_class(panel_cls)
 
 
 def unregister():

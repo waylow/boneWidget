@@ -316,6 +316,7 @@ def register():
             e.panel_id = pid
             e.name = name
             e.enabled = True
+            e.expanded = True
 
     # remove any panels that no longer exist
     for i in reversed(range(len(prefs.panel_order))):
