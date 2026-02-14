@@ -733,7 +733,6 @@ def bone_color_items_short(self, context):
     for i in range(1, 16):
         items.append((f"THEME{i:02}", f"Theme {i:02}",
                      "", f"COLORSET_{i:02}_VEC", i))
-    items.append(("CUSTOM", "Custom", "", "COLOR", 16))
     return items
 
 

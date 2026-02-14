@@ -239,49 +239,81 @@ class BONEWIDGET_PT_bw_blender_color_set(BONEWIDGET_PT_bw_panel, bpy.types.Panel
         preferences = get_preferences(context)
 
         layout = self.layout
+        bw_settings = context.scene.bw_settings
+        obj = context.object
+
+        row = layout.row(align=True)
+
+        row.operator(
+            "bonewidget.set_bone_color",
+            text="Apply Color Theme",
+            icon="BRUSHES_ALL"
+        )
+
+        icon_row = row.row()
+        icon_row.enabled = (
+            obj is not None
+            and obj.type == 'ARMATURE'
+            and obj.mode in {'POSE', 'EDIT'}
+        )
+        icon_row.template_icon_view(
+            bw_settings,
+            "bone_widget_colors",
+            show_labels=False,
+            scale=1,
+            scale_popup=1.8
+        )
+
+        layout.separator()
+
         col = layout.column(align=True)
 
-        # Bone Theme Colors
-        row = col.row(align=True)
-        row.operator("bonewidget.set_bone_color",
-                     text="Set Bone Color", icon="BRUSHES_ALL")
-        row.scale_x = 3.0
-        icon_row = row.row()
-        icon_row.enabled = (context.object is not None and context.object.type == 'ARMATURE' and
-                            context.object.mode in {'POSE', 'EDIT'})
-        icon_row.template_icon_view(
-            context.scene.bw_settings, "bone_widget_colors",
-            show_labels=False, scale=1, scale_popup=1.8)
+        custom_pose_color = bw_settings.custom_pose_color_set
+        custom_edit_color = bw_settings.custom_edit_color_set
 
-        # custom color sets
-        if context.scene.bw_settings.bone_widget_colors == "CUSTOM":
-            custom_pose_color = context.scene.bw_settings.custom_pose_color_set
-            custom_edit_color = context.scene.bw_settings.custom_edit_color_set
+        show_live_button = False
 
-            col = layout.column(align=True)
+        if obj is not None and obj.mode == 'POSE':
+            row = col.row(align=True)
+            row.prop(custom_pose_color, "normal", text="")
+            row.prop(custom_pose_color, "select", text="")
+            row.prop(custom_pose_color, "active", text="")
+            row.separator(factor=0.5)
+            show_live_button = True
 
-            # pose bone colors
-            if context.object.mode == 'POSE':
-                row = col.row(align=True)
-                row.prop(custom_pose_color, "normal", text="")
-                row.prop(custom_pose_color, "select", text="")
-                row.prop(custom_pose_color, "active", text="")
-                row.separator(factor=0.5)
-                row.prop(context.scene.bw_settings, "live_update_toggle",
-                         text="", icon="UV_SYNC_SELECT")
-            # edit bone colors
-            elif context.object.mode == "EDIT" and preferences.edit_bone_colors != 'DEFAULT':
-                row = col.row(align=True)
-                row.prop(custom_edit_color, "normal", text="")
-                row.prop(custom_edit_color, "select", text="")
-                row.prop(custom_edit_color, "active", text="")
-                row.separator(factor=0.5)
-                row.prop(context.scene.bw_settings, "live_update_toggle",
-                         text="", icon="UV_SYNC_SELECT")
+        elif (
+            obj is not None
+            and obj.mode == "EDIT"
+            and preferences.edit_bone_colors != 'DEFAULT'
+        ):
+            row = col.row(align=True)
+            row.prop(custom_edit_color, "normal", text="")
+            row.prop(custom_edit_color, "select", text="")
+            row.prop(custom_edit_color, "active", text="")
+            row.separator(factor=0.5)
+            show_live_button = True
 
-            col = layout.column(align=True)
-            col.operator("bonewidget.copy_color_to_palette",
-                         text="Copy Color to Palette", icon="COPYDOWN")
+        if show_live_button:
+            row.prop(
+                bw_settings,
+                "live_update_toggle",
+                text="",
+                icon="UV_SYNC_SELECT"
+            )
+        
+        col_buttons = layout.column(align=True)
+
+        col_buttons.operator(
+            "bonewidget.copy_color_to_palette",
+            text="Copy Color to Palette",
+        icon="COPYDOWN"
+        )
+
+        col_buttons.operator(
+            "bonewidget.set_bone_color",
+            text="Set Bone Color",
+            icon="BRUSHES_ALL"
+        )
 
 
 classes = (
