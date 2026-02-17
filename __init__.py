@@ -46,11 +46,6 @@ def register():
     props.register()
     menus.register()
     prefs.register()
-
-    # Apply preferences of the panel location.
-    context = bpy.context
-    pref = get_user_preferences(context).addons[__package__].preferences
-    prefs.BoneWidget_preferences.panel_category_update_fn(pref, context)
     panels.register()
 
 
