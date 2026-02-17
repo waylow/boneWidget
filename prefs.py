@@ -77,7 +77,6 @@ class BoneWidget_preferences(AddonPreferences):
     )
 
     def panel_category_update_fn(self, context):
-        BONEWIDGET_PT_bw_panel_main.bl_category = self.panel_category
         register_panels()
 
     panel_category: StringProperty(
