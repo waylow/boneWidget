@@ -17,9 +17,9 @@ class BONEWIDGET_UL_panel_order(bpy.types.UIList):
         row.prop(item, "expanded", text="", icon="TRIA_DOWN" if item.expanded else "TRIA_RIGHT", toggle=True)
 
 
-class BONEWIDGET_OT_move_color_panel(bpy.types.Operator):
-    bl_idname = "bonewidget.move_color_panel"
-    bl_label = "Move Color Panel"
+class BONEWIDGET_OT_move_panel(bpy.types.Operator):
+    bl_idname = "bonewidget.move_panel"
+    bl_label = "Move Panel"
 
     direction: bpy.props.EnumProperty(
         items=[
@@ -263,9 +263,9 @@ class BoneWidget_preferences(AddonPreferences):
         )
 
         btn_col = row.column(align=True)
-        op = btn_col.operator("bonewidget.move_color_panel", icon="TRIA_UP", text="")
+        op = btn_col.operator("bonewidget.move_panel", icon="TRIA_UP", text="")
         op.direction = 'UP'
-        op = btn_col.operator("bonewidget.move_color_panel", icon="TRIA_DOWN", text="")
+        op = btn_col.operator("bonewidget.move_panel", icon="TRIA_DOWN", text="")
         op.direction = 'DOWN'
 
         # reset button
@@ -279,7 +279,7 @@ class BoneWidget_preferences(AddonPreferences):
 classes = (
     BW_ColorPanel,
     BONEWIDGET_UL_panel_order,
-    BONEWIDGET_OT_move_color_panel,
+    BONEWIDGET_OT_move_panel,
     BoneWidget_preferences,
 )
 
