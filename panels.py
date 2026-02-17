@@ -23,9 +23,16 @@ class BONEWIDGET_PT_bw_panel:
     bl_label = "Bone Widget"
 
 
+class BONEWIDGET_PT_bw_master_panel(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
+    bl_idname = 'BONEWIDGET_PT_bw_master_panel'
+
+    def draw(self, context):
+        pass
+
+
 class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_idname = 'BONEWIDGET_PT_bw_panel_main'
-    bl_label = "Bone Widget"
+    bl_label = "Widget Library"
 
     def draw(self, context):
         if context.window_manager.load_presets_on_startup:
@@ -331,38 +338,37 @@ panel_classes = {
 def register_panels():
     prefs = bpy.context.preferences.addons[__package__].preferences
 
-    # Unregister all panels
+    # unregister master panel first
+    try:
+        bpy.utils.unregister_class(BONEWIDGET_PT_bw_master_panel)
+    except RuntimeError:
+        pass
+
+    # unregister all sub panels
     for panel_cls in panel_classes.values():
         try:
             bpy.utils.unregister_class(panel_cls)
         except RuntimeError:
             pass
 
-    enabled_entries = [e for e in prefs.panel_order if e.enabled]
-    if not enabled_entries:
-        return
-    
-    # parent panel is the first enabled panel in the list
-    parent_entry = enabled_entries[0]
-    parent_id = parent_entry.panel_id
-    parent_cls = panel_classes.get(parent_id)
+    # register master panel with category name
+    BONEWIDGET_PT_bw_master_panel.bl_category = prefs.panel_category
+    bpy.utils.register_class(BONEWIDGET_PT_bw_master_panel)
 
-    parent_cls.bl_parent_id = "" # top-level panel
-    parent_cls.bl_category = prefs.panel_category
-    parent_cls.bl_options = set() if parent_entry.expanded else {'DEFAULT_CLOSED'}
-    bpy.utils.register_class(parent_cls)
+    # re-register the sub panels in user-defined order
+    for panel in prefs.panel_order:
+        if not panel.enabled:
+            continue
 
-    # re-register the other panels in user-defined order
-    for entry in enabled_entries[1:]:
-        panel_cls = panel_classes.get(entry.panel_id)
+        panel_cls = panel_classes.get(panel.panel_id)
         if not panel_cls:
             continue
 
-        # make this panel a child of the parent
-        panel_cls.bl_parent_id = parent_id
+        # make this panel a child of the master panel
+        panel_cls.bl_parent_id = "BONEWIDGET_PT_bw_master_panel"
 
         # apply expanded/collapsed state
-        panel_cls.bl_options = set() if entry.expanded else {'DEFAULT_CLOSED'}
+        panel_cls.bl_options = set() if panel.expanded else {'DEFAULT_CLOSED'}
 
         bpy.utils.register_class(panel_cls)
 
