@@ -300,6 +300,7 @@ def register():
 
     # the panels to show in the UI list, with their default order
     expected_panels = [
+        ("BONEWIDGET_PT_bw_panel_main", "Widget Panel"),
         ("BONEWIDGET_PT_bw_custom_color_presets", "Custom Color Presets"),
         ("BONEWIDGET_PT_bw_blender_color_set", "Blender Color Sets"),
     ]
