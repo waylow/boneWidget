@@ -14,6 +14,7 @@ class BONEWIDGET_UL_panel_order(bpy.types.UIList):
 
         icon_name = "HIDE_ON" if not item.enabled else "HIDE_OFF"
         row.prop(item, "enabled", text="", icon=icon_name, toggle=True)
+        row.prop(item, "expanded", text="", icon="TRIA_DOWN" if item.expanded else "TRIA_RIGHT", toggle=True)
 
 
 class BONEWIDGET_OT_move_color_panel(bpy.types.Operator):
