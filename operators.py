@@ -1908,10 +1908,14 @@ def register():
 
 
 def unregister():
-    del bpy.types.WindowManager.prop_grp
+    if hasattr(bpy.types.WindowManager, "prop_grp"):
+        del bpy.types.WindowManager.prop_grp
 
-    bpy.utils.previews.remove(
-        BONEWIDGET_OT_shared_property_group.image_collection)
+    try:
+        bpy.utils.previews.remove(
+            BONEWIDGET_OT_shared_property_group.image_collection)
+    except Exception:
+        pass
 
     from bpy.utils import unregister_class
     for cls in classes:
