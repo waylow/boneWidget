@@ -397,7 +397,7 @@ def unregister():
         except:
             pass
 
-    for cls in panel_classes:
+    for cls in panel_classes.values():
         try:
             unregister_class(cls)
         except:
