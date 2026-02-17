@@ -2,7 +2,7 @@ import bpy
 from bpy.types import AddonPreferences
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 
-from .panels import BONEWIDGET_PT_bw_panel_main
+from .panels import BONEWIDGET_PT_bw_panel_main, register_panels
 from .operators import BONEWIDGET_OT_reset_default_images, BONEWIDGET_OT_user_data_filebrowser
 from .props import BW_ColorPanel
 
@@ -77,14 +77,8 @@ class BoneWidget_preferences(AddonPreferences):
     )
 
     def panel_category_update_fn(self, context):
-        has_panel = hasattr(bpy.types, BONEWIDGET_PT_bw_panel_main.bl_idname)
-        if has_panel:
-            try:
-                bpy.utils.unregister_class(BONEWIDGET_PT_bw_panel_main)
-            except:
-                pass
         BONEWIDGET_PT_bw_panel_main.bl_category = self.panel_category
-        bpy.utils.register_class(BONEWIDGET_PT_bw_panel_main)
+        register_panels()
 
     panel_category: StringProperty(
         name="Panel Category",
