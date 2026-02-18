@@ -248,7 +248,7 @@ class BoneWidget_preferences(AddonPreferences):
         row = layout.row()
         box = layout.box()
         row = box.row(align=True)
-        row.label(text="Color Panel Order:")
+        row.label(text="Panel Order:")
 
         list_col = row.column()
         list_col.template_list(
@@ -258,7 +258,7 @@ class BoneWidget_preferences(AddonPreferences):
             "panel_order",
             self,
             "panel_order_index",
-            rows=2,
+            rows=3,
             sort_lock=True,
         )
 
