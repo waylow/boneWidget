@@ -20,7 +20,7 @@ def create_preview_collection():
     preview_collections["widgets"] = pcoll
 
     bpy.types.WindowManager.widget_list = bpy.props.EnumProperty(
-        items=generate_previews(), name="Shape", description="Shape", update=preview_update
+        items=generate_previews(), name="Shape", description="Shape"
     )
 
 
@@ -64,10 +64,6 @@ def generate_previews():
 
     pcoll.widget_list = enum_items
     return enum_items
-
-
-def preview_update(self, context):
-    generate_previews()
 
 
 def get_preview_default():
