@@ -65,8 +65,8 @@ def validate_json_data(data: dict, required_keys: tuple, can_be_empty: bool = Tr
 
 
 def update_preview_collection():
-    from .functions.preview_functions import create_preview_collection
-    create_preview_collection()
+    from .functions.preview_functions import update_widget_list
+    update_widget_list()
 
 
 def object_data_to_dico(object, custom_image):

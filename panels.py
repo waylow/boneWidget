@@ -7,6 +7,7 @@ from .functions.main_functions import (
 )
 from .functions.preview_functions import (
     create_preview_collection,
+    refresh_widget_list,
     preview_collections,
     get_preview_default,
 )
@@ -14,6 +15,20 @@ from .functions.json_functions import load_color_presets
 
 from .menus import BONEWIDGET_MT_bw_specials
 
+
+def bw_filter_mode_update(self, context):
+    # update the preview collection based on the new filter mode
+    # restore the current widget selection if possible,
+    # otherwise reset to first item
+    current_widget = context.window_manager.widget_list
+    refresh_widget_list()
+    items = bpy.types.WindowManager.widget_list.keywords['items']
+    found_same_widget = any(current_widget == item[0] for item in items)
+    if not found_same_widget:
+        context.window_manager.widget_list = items[0][0] if items else ""
+    else:
+        context.window_manager.widget_list = current_widget
+    
 
 class BONEWIDGET_PT_bw_panel:
     """BoneWidget Addon UI"""
@@ -47,6 +62,29 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         # preview toggle checkbox
         row = layout.row(align=True)
         row.prop(context.window_manager, "toggle_preview")
+
+        # filter mode toggle
+        row.prop(
+            context.window_manager,
+            "bw_enable_filter_panel",
+            text="",
+            icon='FILTER',
+            toggle=True
+        )
+
+        # ------------------------------------------------------------
+        # FILTER PANEL
+        # Only visible when search mode is enabled
+        # ------------------------------------------------------------
+        if context.window_manager.bw_enable_filter_panel:
+            box = layout.box()
+            col = box.column(align=True)
+
+            # horizontal enum buttons
+            row = col.row(align=True)
+            row.prop(context.window_manager, "bw_filter_mode", expand=True)
+
+            col.separator()
 
         # preview view
         if context.window_manager.toggle_preview:
@@ -374,6 +412,24 @@ def register_panels():
 
 
 def register():
+    bpy.types.WindowManager.bw_filter_mode = bpy.props.EnumProperty(
+        name="Filter Mode",
+        items=[
+            ('ALL', "All", "Show all widgets"),
+            ('BUILTIN', "Built-In", "Show built-in widgets"),
+            ('CUSTOM', "Custom", "Show custom widgets"),
+        ],
+        default='ALL',
+        update=bw_filter_mode_update,
+    )
+
+    bpy.types.WindowManager.bw_enable_filter_panel = bpy.props.BoolProperty(
+        name="Enable Search",
+        description="Show search filter options",
+        default=False,
+        update=bw_filter_mode_update,
+    )
+
     if not hasattr(bpy.types.WindowManager, "widget_list"):
         create_preview_collection()
 
@@ -413,6 +469,8 @@ def unregister():
     if hasattr(bpy.types.WindowManager, "widget_list"):
         del bpy.types.WindowManager.widget_list
 
+    del bpy.types.WindowManager.bw_filter_mode
+    del bpy.types.WindowManager.bw_enable_filter_panel
     del bpy.types.WindowManager.toggle_preview
     del bpy.types.WindowManager.custom_color_presets
     del bpy.types.WindowManager.colorset_list_index
