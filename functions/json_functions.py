@@ -702,3 +702,17 @@ def load_color_presets():
                 new_item.select = item["select"]
                 new_item.active = item["active"]
             bpy.context.window_manager.turn_off_colorset_save = False
+
+
+def load_disabled_widgets():
+    filepath = os.path.join(get_custom_dir(), "disabled_widgets.json")
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as f:
+            return json.load(f)
+    return []
+
+
+def save_disabled_widgets(disabled_widgets):
+    filepath = os.path.join(get_custom_dir(), "disabled_widgets.json")
+    with open(filepath, 'w') as f:
+        json.dump(disabled_widgets, f, indent=4)

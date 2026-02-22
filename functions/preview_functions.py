@@ -7,12 +7,23 @@ from .json_functions import (
     get_custom_image_dir,
     JSON_DEFAULT_WIDGETS,
     JSON_USER_WIDGETS,
+    load_disabled_widgets,
 )
 import os
 from .. import __package__
 from mathutils import Vector
 
 preview_collections = {}
+BUILTIN_WIDGET_NAMES = []
+DISABLED_WIDGET_NAMES = []
+
+
+def get_disabled_widgets():
+    return DISABLED_WIDGET_NAMES
+
+
+def get_builtin_widget_names():
+    return BUILTIN_WIDGET_NAMES
 
 
 def create_preview_collection():    
@@ -57,6 +68,9 @@ def generate_previews():
     directory = get_default_image_dir('thumbnails')
     custom_directory = get_custom_image_dir("custom_thumbnails")
 
+    DISABLED_WIDGET_NAMES.clear() # reset the list before loading to avoid duplicates if this is called multiple times
+    DISABLED_WIDGET_NAMES.extend(load_disabled_widgets())
+
     if directory and os.path.exists(directory):
         for widget_type in ('ALL', 'BUILTIN', 'CUSTOM'):
             if widget_type == "ALL":
@@ -74,7 +88,14 @@ def generate_previews():
                     "image", "missing_image.png") for item in widgets.items()}
             widget_names = sorted(widget_data.keys())
 
+            # store built-in widget names in a global list for later use in the filter panel
+            if widget_type == "BUILTIN":
+                BUILTIN_WIDGET_NAMES.extend(widget_names)
+
             for i, name in enumerate(widget_names):
+                if name in DISABLED_WIDGET_NAMES:
+                    continue  # skip disabled widgets
+                
                 image = widget_data.get(name, "")
                 if image is not None:
                     filepath = os.path.join(directory, image)

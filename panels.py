@@ -10,10 +10,32 @@ from .functions.preview_functions import (
     refresh_widget_list,
     preview_collections,
     get_preview_default,
+    get_builtin_widget_names,
+    get_disabled_widgets,
+    update_widget_list,
 )
-from .functions.json_functions import load_color_presets
+from .functions.json_functions import (
+    load_color_presets,
+    save_disabled_widgets,
+)
 
 from .menus import BONEWIDGET_MT_bw_specials
+
+
+def draw_dropdown_header(layout, obj, attr, label):
+    value = getattr(obj, attr)
+    icon = 'TRIA_DOWN' if value else 'TRIA_RIGHT'
+
+    row = layout.row(align=True)
+    row.use_property_split = False
+
+    # triangle icon
+    row.prop(obj, attr, text="", icon=icon, emboss=False)
+
+    # left-aligned label
+    row2 = row.row(align=True)
+    row2.alignment = 'LEFT'
+    row2.prop(obj, attr, text=label, emboss=False)
 
 
 def bw_filter_mode_update(self, context):
@@ -28,7 +50,51 @@ def bw_filter_mode_update(self, context):
         context.window_manager.widget_list = items[0][0] if items else ""
     else:
         context.window_manager.widget_list = current_widget
-    
+
+
+def bw_disable_widget_update(self, context):
+    if not context.window_manager.is_initializing_disabled_widgets:
+
+        current_widget = context.window_manager.widget_list
+        disabled_widgets_list = get_disabled_widgets()
+
+        if self.disabled:
+            if self.name not in disabled_widgets_list:
+                disabled_widgets_list.append(self.name)
+        else:
+            if self.name in disabled_widgets_list:
+                disabled_widgets_list.remove(self.name)
+        
+        save_disabled_widgets(disabled_widgets_list)
+        update_widget_list()  # refresh the widget list to apply changes immediately
+        
+        # fix the currently selected widget if it's now disabled
+        if current_widget in disabled_widgets_list:
+            items = bpy.types.WindowManager.widget_list.keywords['items']
+            # find the first non-disabled widget and set it as the current widget
+            for item in items:
+                if item[0] not in disabled_widgets_list:
+                    context.window_manager.widget_list = item[0]
+                    break
+
+
+class BONEWIDGET_UL_disabled_widgets(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        row = layout.row(align=True)
+        row.label(text=item.name)
+
+        icon_name = "HIDE_ON" if item.disabled else "HIDE_OFF"
+        row.prop(item, "disabled", text="", icon=icon_name, toggle=True)
+
+
+class BONEWIDGET_DisabledWidget(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+    disabled: bpy.props.BoolProperty(
+        default=False,
+        description="Disable this widget in the library",
+        update=bw_disable_widget_update,
+        )
+
 
 class BONEWIDGET_PT_bw_panel:
     """BoneWidget Addon UI"""
@@ -53,6 +119,17 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         if context.window_manager.load_presets_on_startup:
             load_color_presets()
             context.window_manager.load_presets_on_startup = False
+            
+            # populate the disabled widgets list on startup
+            if len(context.window_manager.bw_disabled_widgets) == 0:
+                disabled_widgets = get_disabled_widgets()
+ 
+                for name in get_builtin_widget_names():
+                    new = context.window_manager.bw_disabled_widgets.add()
+                    new.name = name      # visible name
+                    new.disabled = name in disabled_widgets
+                
+                context.window_manager.is_initializing_disabled_widgets = False
 
         # cache call to get preferences
         preferences = get_preferences(context)
@@ -85,6 +162,27 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
             row.prop(context.window_manager, "bw_filter_mode", expand=True)
 
             col.separator()
+
+            # ------------------------------------------------------------
+            # Disable Widgets
+            # ------------------------------------------------------------
+            draw_dropdown_header(
+                col,
+                context.window_manager,
+                "bw_show_disable_widgets",
+                "Disable Built-In Widgets"
+            )
+
+            if context.window_manager.bw_show_disable_widgets:
+                col.template_list(
+                    "BONEWIDGET_UL_disabled_widgets",
+                    "",
+                    context.window_manager,
+                    "bw_disabled_widgets",
+                    context.window_manager,
+                    "bw_disabled_widgets_index",
+                    rows=5
+                )
 
         # preview view
         if context.window_manager.toggle_preview:
@@ -364,6 +462,8 @@ class BONEWIDGET_PT_bw_blender_color_set(BONEWIDGET_PT_bw_panel, bpy.types.Panel
 
 classes = (
     BONEWIDGET_UL_colorset_items,
+    BONEWIDGET_DisabledWidget,
+    BONEWIDGET_UL_disabled_widgets,
 )
 
 panel_classes = {
@@ -430,6 +530,11 @@ def register():
         update=bw_filter_mode_update,
     )
 
+    bpy.types.WindowManager.is_initializing_disabled_widgets = bpy.props.BoolProperty(
+        name="Initializing Disabled Widgets",
+        default=True
+    )
+
     if not hasattr(bpy.types.WindowManager, "widget_list"):
         create_preview_collection()
 
@@ -455,6 +560,13 @@ def register():
         default=True
     )
 
+    bpy.types.WindowManager.bw_show_disable_widgets = bpy.props.BoolProperty(
+    name="Show Disable Widgets Panel",
+    default=False
+    )
+
+    bpy.types.WindowManager.bw_disabled_widgets_index = bpy.props.IntProperty()
+
     from bpy.utils import register_class
     for cls in classes:
         try:
@@ -463,6 +575,10 @@ def register():
             pass
 
     register_panels()
+
+    bpy.types.WindowManager.bw_disabled_widgets = bpy.props.CollectionProperty(
+        type=BONEWIDGET_DisabledWidget
+    )
 
 
 def unregister():
@@ -476,6 +592,10 @@ def unregister():
     del bpy.types.WindowManager.colorset_list_index
     del bpy.types.WindowManager.turn_off_colorset_save
     del bpy.types.WindowManager.load_presets_on_startup
+    del bpy.types.WindowManager.is_initializing_disabled_widgets
+    del bpy.types.WindowManager.bw_disabled_widgets_index
+    del bpy.types.WindowManager.bw_show_disable_widgets
+    del bpy.types.WindowManager.bw_disabled_widgets
 
     bpy.utils.unregister_class(PresetColorSetItem)
 
