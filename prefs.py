@@ -42,6 +42,19 @@ class BONEWIDGET_OT_move_panel(bpy.types.Operator):
                 prefs.panel_order.move(idx, idx + 1)
                 prefs.panel_order_index += 1
 
+        register_panels()
+
+        # trigger a refresh of the panels
+        context.window_manager.bw_enable_filter_panel = not context.window_manager.bw_enable_filter_panel
+
+        def toggle_back():
+            # toggle back the value to original state
+            context.window_manager.bw_enable_filter_panel = not context.window_manager.bw_enable_filter_panel
+            return None
+
+        # use timer to let the UI refresh before toggling back
+        bpy.app.timers.register(toggle_back, first_interval=0.01)
+
         return {'FINISHED'}
 
 
