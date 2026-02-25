@@ -24,8 +24,18 @@ def trigger_panel_update(self, context):
 class BW_SubPanel(bpy.types.PropertyGroup):
     panel_id: bpy.props.StringProperty()   # internal panel id
     name: bpy.props.StringProperty()       # display name
-    enabled: BoolProperty(default=True, update=trigger_panel_update)
-    expanded: BoolProperty(default=True)
+    enabled: BoolProperty(
+        name="Enabled",
+        description="Enable/Disable panel",
+        default=True,
+        update=trigger_panel_update
+        )
+    expanded: BoolProperty(
+        name="Expanded",
+        description="Panels open/closed default behavior",
+        default=True,
+        update=trigger_panel_update
+        )
     
 
 class BONEWIDGET_UL_panel_order(bpy.types.UIList):
@@ -178,7 +188,7 @@ class BoneWidget_preferences(AddonPreferences):
 
     # panel order
     panel_order: bpy.props.CollectionProperty(type=BW_SubPanel)
-    panel_order_index: bpy.props.IntProperty()
+    panel_order_index: bpy.props.IntProperty(name="Panel Index")
 
     reset_custom_shape_transforms: BoolProperty(
         name="Reset Custom Shape Transforms",

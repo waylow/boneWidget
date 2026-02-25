@@ -170,7 +170,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                 col,
                 context.window_manager,
                 "bw_show_disable_widgets",
-                "Disable Built-In Widgets"
+                "Disable Built-in Widgets"
             )
 
             if context.window_manager.bw_show_disable_widgets:
@@ -515,17 +515,17 @@ def register():
     bpy.types.WindowManager.bw_filter_mode = bpy.props.EnumProperty(
         name="Filter Mode",
         items=[
-            ('ALL', "All", "Show all widgets"),
-            ('BUILTIN', "Built-In", "Show built-in widgets"),
-            ('CUSTOM', "Custom", "Show custom widgets"),
+            ('ALL', "All", "Display all widgets"),
+            ('BUILTIN', "Built-in", "Display built-in widgets only"),
+            ('CUSTOM', "Custom", "Display custom widgets only"),
         ],
         default='ALL',
         update=bw_filter_mode_update,
     )
 
     bpy.types.WindowManager.bw_enable_filter_panel = bpy.props.BoolProperty(
-        name="Enable Search",
-        description="Show search filter options",
+        name="Enable Widget Filter",
+        description="Show widget filter options",
         default=False,
         update=bw_filter_mode_update,
     )
