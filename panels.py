@@ -81,6 +81,8 @@ def bw_disable_widget_update(self, context):
 class BONEWIDGET_UL_disabled_widgets(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         row = layout.row(align=True)
+        
+        row.template_icon(item.icon_id, scale=1.0)
         row.label(text=item.name)
 
         icon_name = "HIDE_ON" if item.disabled else "HIDE_OFF"
@@ -94,6 +96,7 @@ class BONEWIDGET_DisabledWidget(bpy.types.PropertyGroup):
         description="Disable this widget in the library",
         update=bw_disable_widget_update,
         )
+    icon_id: bpy.props.IntProperty()
 
 
 class BONEWIDGET_PT_bw_panel:
@@ -128,6 +131,11 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                     new = context.window_manager.bw_disabled_widgets.add()
                     new.name = name      # visible name
                     new.disabled = name in disabled_widgets
+                    preview = preview_collections["BUILTIN"].get(name)
+                    if preview:
+                        new.icon_id = preview.icon_id
+                    else:
+                        new.icon_id = 0
                 
                 context.window_manager.is_initializing_disabled_widgets = False
 
