@@ -185,13 +185,6 @@ class ImportItemData(bpy.types.PropertyGroup):
     )
 
 
-class BW_ColorPanel(bpy.types.PropertyGroup):
-    panel_id: bpy.props.StringProperty()   # internal panel id
-    name: bpy.props.StringProperty()       # display name
-    enabled: BoolProperty(default=True)
-    expanded: BoolProperty(default=True)
-
-
 def register():
     bpy.utils.register_class(CustomColorSet)
     bpy.utils.register_class(BW_Settings)

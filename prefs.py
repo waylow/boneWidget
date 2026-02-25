@@ -4,8 +4,29 @@ from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 
 from .panels import BONEWIDGET_PT_bw_panel_main, register_panels
 from .operators import BONEWIDGET_OT_reset_default_images, BONEWIDGET_OT_user_data_filebrowser
-from .props import BW_ColorPanel
 
+
+def trigger_panel_update(self, context):
+    register_panels()
+
+    # trigger a refresh of the panels
+    context.window_manager.bw_enable_filter_panel = not context.window_manager.bw_enable_filter_panel
+
+    def toggle_back():
+        # toggle back the value to original state
+        context.window_manager.bw_enable_filter_panel = not context.window_manager.bw_enable_filter_panel
+        return None
+
+    # use timer to let the UI refresh before toggling back
+    bpy.app.timers.register(toggle_back, first_interval=0.01)
+
+
+class BW_SubPanel(bpy.types.PropertyGroup):
+    panel_id: bpy.props.StringProperty()   # internal panel id
+    name: bpy.props.StringProperty()       # display name
+    enabled: BoolProperty(default=True, update=trigger_panel_update)
+    expanded: BoolProperty(default=True)
+    
 
 class BONEWIDGET_UL_panel_order(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
@@ -42,18 +63,7 @@ class BONEWIDGET_OT_move_panel(bpy.types.Operator):
                 prefs.panel_order.move(idx, idx + 1)
                 prefs.panel_order_index += 1
 
-        register_panels()
-
-        # trigger a refresh of the panels
-        context.window_manager.bw_enable_filter_panel = not context.window_manager.bw_enable_filter_panel
-
-        def toggle_back():
-            # toggle back the value to original state
-            context.window_manager.bw_enable_filter_panel = not context.window_manager.bw_enable_filter_panel
-            return None
-
-        # use timer to let the UI refresh before toggling back
-        bpy.app.timers.register(toggle_back, first_interval=0.01)
+        trigger_panel_update(self, context)
 
         return {'FINISHED'}
 
@@ -167,7 +177,7 @@ class BoneWidget_preferences(AddonPreferences):
     )
 
     # panel order
-    panel_order: bpy.props.CollectionProperty(type=BW_ColorPanel)
+    panel_order: bpy.props.CollectionProperty(type=BW_SubPanel)
     panel_order_index: bpy.props.IntProperty()
 
     reset_custom_shape_transforms: BoolProperty(
@@ -290,7 +300,7 @@ class BoneWidget_preferences(AddonPreferences):
 
 
 classes = (
-    BW_ColorPanel,
+    BW_SubPanel,
     BONEWIDGET_UL_panel_order,
     BONEWIDGET_OT_move_panel,
     BoneWidget_preferences,
@@ -306,7 +316,7 @@ def register():
 
     # the panels to show in the UI list, with their default order
     expected_panels = [
-        ("BONEWIDGET_PT_bw_panel_main", "Widget Panel"),
+        ("BONEWIDGET_PT_bw_panel_main", "Widget Library"),
         ("BONEWIDGET_PT_bw_custom_color_presets", "Custom Color Presets"),
         ("BONEWIDGET_PT_bw_blender_color_set", "Blender Color Sets"),
     ]
@@ -319,6 +329,12 @@ def register():
 
     # add missing panels
     for pid, name in expected_panels:
+        # update existing if out of sync
+        for entry in prefs.panel_order:
+            if entry.panel_id == pid:
+                if entry.name != name:
+                    entry.name = name
+                    
         if pid not in existing_ids:
             # decide where to insert the new panel based on its default index
             target_default_index = default_index[pid]
