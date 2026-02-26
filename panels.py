@@ -131,7 +131,9 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
                     new = context.window_manager.bw_disabled_widgets.add()
                     new.name = name      # visible name
                     new.disabled = name in disabled_widgets
-                    preview = preview_collections["BUILTIN"].get(name)
+                    preview = preview_collections["BUILTIN"].get(name, None)
+                    if preview is None:
+                        preview = preview_collections["DISABLED"].get(name, None)
                     if preview:
                         new.icon_id = preview.icon_id
                     else:

@@ -33,9 +33,12 @@ def create_preview_collection():
     pcoll_built_in.widget_list = ()
     pcoll_custom = bpy.utils.previews.new()
     pcoll_custom.widget_list = ()
+    pcoll_disabled = bpy.utils.previews.new()
+    pcoll_disabled.widget_list = ()
     preview_collections["ALL"] = pcoll_all
     preview_collections["BUILTIN"] = pcoll_built_in
     preview_collections["CUSTOM"] = pcoll_custom
+    preview_collections["DISABLED"] = pcoll_disabled
     
     generate_previews()
     refresh_widget_list()
@@ -81,6 +84,7 @@ def generate_previews():
                 widgets = read_widgets(JSON_USER_WIDGETS)
 
             enum_items = []
+            disabled_items = []
             
             pcoll = preview_collections[widget_type]
 
@@ -92,10 +96,7 @@ def generate_previews():
             if widget_type == "BUILTIN":
                 BUILTIN_WIDGET_NAMES.extend(widget_names)
 
-            for i, name in enumerate(widget_names):
-                if name in DISABLED_WIDGET_NAMES:
-                    continue  # skip disabled widgets
-                
+            for i, name in enumerate(widget_names):                
                 image = widget_data.get(name, "")
                 if image is not None:
                     filepath = os.path.join(directory, image)
@@ -116,9 +117,19 @@ def generate_previews():
 
                 face_data_info = "Contains Face Data" if get_widget_data(
                     name).get("faces") else ""
+
+                if name in DISABLED_WIDGET_NAMES:
+                    # add disabled widget to collection so it can still be viewed in filter panel
+                    disabled_items.append((name, name, face_data_info, thumb.icon_id, i))
+                    continue  # skip disabled widgets
+                
                 enum_items.append((name, name, face_data_info, thumb.icon_id, i))
 
             pcoll.widget_list = enum_items
+
+            # if disabled widgets
+            if disabled_items:
+                preview_collections["DISABLED"].widget_list = disabled_items
 
 
 def get_preview_default():
