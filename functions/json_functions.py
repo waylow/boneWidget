@@ -227,8 +227,13 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
         del wgts[widgets]
         if widgets in widget_items:
             widget_index = widget_items.index(widgets)
-            activeShape = widget_items[widget_index +
+
+            if len(widget_items) > 1:
+                activeShape = widget_items[widget_index +
                                        1] if widget_index == 0 else widget_items[widget_index - 1]
+            else:
+                activeShape = "NO_WIDGETS"
+                
             widget_items.remove(widgets)
         return_message = "Widget - " + widgets + " has been removed!"
 
@@ -239,8 +244,9 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
         # update the preview panel
         update_preview_collection()
 
-        # trigger an update and display widget
-        bpy.context.window_manager.widget_list = activeShape
+        # trigger an update and display widget if any widgets remain
+        if activeShape != "NO_WIDGETS":
+            bpy.context.window_manager.widget_list = activeShape
 
         return 'INFO', return_message
     elif ob_name is not None:

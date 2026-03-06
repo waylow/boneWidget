@@ -58,7 +58,8 @@ def get_previews():
     filter_mode = getattr(bpy.context.window_manager, "bw_filter_mode", "ALL")
     pcoll = preview_collections[filter_mode]
     if not pcoll.widget_list:
-        print("No previews found - pcoll.widget_list is empty.")
+        # assign empty widget if no real widgets found
+        pcoll.widget_list = [("NO_WIDGETS", "", "No widgets found", 'ERROR', 0)]
     return pcoll.widget_list
 
 
