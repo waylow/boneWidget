@@ -391,7 +391,8 @@ def update_widget_library(new_widgets: dict[str, dict[str, list | str]],
     update_preview_collection()
 
     # trigger an update and display original but updated widget
-    bpy.context.window_manager.widget_list = current_widget
+    if current_widget != "NO_WIDGETS":
+        bpy.context.window_manager.widget_list = current_widget
 
 
 def update_custom_image(image_name):
