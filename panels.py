@@ -64,10 +64,10 @@ def bw_disable_widget_update(self, context):
         else:
             if self.name in disabled_widgets_list:
                 disabled_widgets_list.remove(self.name)
-        
+
         save_disabled_widgets(disabled_widgets_list)
         update_widget_list()  # refresh the widget list to apply changes immediately
-        
+
         # fix the currently selected widget if it's now disabled
         if current_widget in disabled_widgets_list:
             items = bpy.types.WindowManager.widget_list.keywords['items']
@@ -81,7 +81,7 @@ def bw_disable_widget_update(self, context):
 class BONEWIDGET_UL_disabled_widgets(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         row = layout.row(align=True)
-        
+
         row.template_icon(item.icon_id, scale=1.0)
         row.label(text=item.name)
 
@@ -95,7 +95,7 @@ class BONEWIDGET_DisabledWidget(bpy.types.PropertyGroup):
         default=False,
         description="Disable this widget in the library",
         update=bw_disable_widget_update,
-        )
+    )
     icon_id: bpy.props.IntProperty()
 
 
@@ -122,23 +122,24 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         if context.window_manager.load_presets_on_startup:
             load_color_presets()
             context.window_manager.load_presets_on_startup = False
-            
+
             # populate the disabled widgets list on startup
             if len(context.window_manager.bw_disabled_widgets) == 0:
                 disabled_widgets = get_disabled_widgets()
- 
+
                 for name in get_builtin_widget_names():
                     new = context.window_manager.bw_disabled_widgets.add()
                     new.name = name      # visible name
                     new.disabled = name in disabled_widgets
                     preview = preview_collections["BUILTIN"].get(name, None)
                     if preview is None:
-                        preview = preview_collections["DISABLED"].get(name, None)
+                        preview = preview_collections["DISABLED"].get(
+                            name, None)
                     if preview:
                         new.icon_id = preview.icon_id
                     else:
                         new.icon_id = 0
-                
+
                 context.window_manager.is_initializing_disabled_widgets = False
 
         # cache call to get preferences
@@ -338,7 +339,7 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_idname = "BONEWIDGET_PT_bw_custom_color_presets"
     bl_label = "Custom Color Presets"
-    #bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
+    # bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
 
     @classmethod
     def poll(self, context):
@@ -383,7 +384,7 @@ class BONEWIDGET_UL_colorset_items(bpy.types.UIList):
 class BONEWIDGET_PT_bw_blender_color_set(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_idname = "BONEWIDGET_PT_bw_blender_color_set"
     bl_label = "Blender Color Sets"
-    #bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
+    # bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
 
     @classmethod
     def poll(self, context):
@@ -398,11 +399,12 @@ class BONEWIDGET_PT_bw_blender_color_set(BONEWIDGET_PT_bw_panel, bpy.types.Panel
 
         row = layout.row(align=True)
 
-        row.operator(
+        op = row.operator(
             "bonewidget.set_bone_color",
-            text="Apply Color Theme",
+            text="Apply Bone Theme",
             icon="BRUSHES_ALL"
         )
+        op.use_bone_theme = True
 
         icon_row = row.row()
         icon_row.enabled = (
@@ -454,20 +456,21 @@ class BONEWIDGET_PT_bw_blender_color_set(BONEWIDGET_PT_bw_panel, bpy.types.Panel
                 text="",
                 icon="UV_SYNC_SELECT"
             )
-        
+
         col_buttons = layout.column(align=True)
 
         col_buttons.operator(
             "bonewidget.copy_color_to_palette",
             text="Copy Color to Palette",
-        icon="COPYDOWN"
+            icon="COPYDOWN"
         )
 
-        col_buttons.operator(
+        op = col_buttons.operator(
             "bonewidget.set_bone_color",
-            text="Set Bone Color",
+            text="Apply Color Palette",
             icon="BRUSHES_ALL"
         )
+        op.use_bone_theme = False
 
 
 classes = (
@@ -571,8 +574,8 @@ def register():
     )
 
     bpy.types.WindowManager.bw_show_disable_widgets = bpy.props.BoolProperty(
-    name="Show Disable Widgets Panel",
-    default=False
+        name="Show Disable Widgets Panel",
+        default=False
     )
 
     bpy.types.WindowManager.bw_disabled_widgets_index = bpy.props.IntProperty()

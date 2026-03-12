@@ -1282,13 +1282,23 @@ class BONEWIDGET_OT_set_bone_color(bpy.types.Operator):
     bl_label = "Set Bone Color to Widget"
     bl_options = {'REGISTER', 'UNDO'}
 
+    use_bone_theme: bpy.props.BoolProperty(
+        name="Use Bone Theme Color",
+        default=False
+    )
+
     @classmethod
     def poll(cls, context):
         return (context.object and context.object.type == 'ARMATURE' and context.object.mode in ['POSE', 'EDIT'] and
                 (context.selected_bones or context.selected_pose_bones))
 
     def execute(self, context):
-        set_bone_color(context, context.scene.bw_settings.bone_widget_colors)
+        if self.use_bone_theme:
+            color = context.scene.bw_settings.bone_widget_colors
+        else:
+            color = 'CUSTOM'
+
+        set_bone_color(context, color, self.use_bone_theme)
         return {'FINISHED'}
 
 
