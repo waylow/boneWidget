@@ -7,12 +7,96 @@ from .functions.main_functions import (
 )
 from .functions.preview_functions import (
     create_preview_collection,
+    refresh_widget_list,
     preview_collections,
     get_preview_default,
+    get_builtin_widget_names,
+    get_disabled_widgets,
+    update_widget_list,
 )
-from .functions.json_functions import load_color_presets
+from .functions.json_functions import (
+    load_color_presets,
+    save_disabled_widgets,
+)
 
 from .menus import BONEWIDGET_MT_bw_specials
+
+
+def draw_dropdown_header(layout, obj, attr, label):
+    value = getattr(obj, attr)
+    icon = 'TRIA_DOWN' if value else 'TRIA_RIGHT'
+
+    row = layout.row(align=True)
+    row.use_property_split = False
+
+    # triangle icon
+    row.prop(obj, attr, text="", icon=icon, emboss=False)
+
+    # left-aligned label
+    row2 = row.row(align=True)
+    row2.alignment = 'LEFT'
+    row2.prop(obj, attr, text=label, emboss=False)
+
+
+def bw_filter_mode_update(self, context):
+    # update the preview collection based on the new filter mode
+    # restore the current widget selection if possible,
+    # otherwise reset to first item
+    current_widget = context.window_manager.widget_list
+    refresh_widget_list()
+    items = bpy.types.WindowManager.widget_list.keywords['items']
+    found_same_widget = any(current_widget == item[0] for item in items)
+    if not found_same_widget:
+        context.window_manager.widget_list = items[0][0] if items else ""
+    else:
+        context.window_manager.widget_list = current_widget
+
+
+def bw_disable_widget_update(self, context):
+    if not context.window_manager.is_initializing_disabled_widgets:
+
+        current_widget = context.window_manager.widget_list
+        disabled_widgets_list = get_disabled_widgets()
+
+        if self.disabled:
+            if self.name not in disabled_widgets_list:
+                disabled_widgets_list.append(self.name)
+        else:
+            if self.name in disabled_widgets_list:
+                disabled_widgets_list.remove(self.name)
+        
+        save_disabled_widgets(disabled_widgets_list)
+        update_widget_list()  # refresh the widget list to apply changes immediately
+        
+        # fix the currently selected widget if it's now disabled
+        if current_widget in disabled_widgets_list:
+            items = bpy.types.WindowManager.widget_list.keywords['items']
+            # find the first non-disabled widget and set it as the current widget
+            for item in items:
+                if item[0] not in disabled_widgets_list:
+                    context.window_manager.widget_list = item[0]
+                    break
+
+
+class BONEWIDGET_UL_disabled_widgets(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        row = layout.row(align=True)
+        
+        row.template_icon(item.icon_id, scale=1.0)
+        row.label(text=item.name)
+
+        icon_name = "HIDE_ON" if item.disabled else "HIDE_OFF"
+        row.prop(item, "disabled", text="", icon=icon_name, toggle=True)
+
+
+class BONEWIDGET_DisabledWidget(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+    disabled: bpy.props.BoolProperty(
+        default=False,
+        description="Disable this widget in the library",
+        update=bw_disable_widget_update,
+        )
+    icon_id: bpy.props.IntProperty()
 
 
 class BONEWIDGET_PT_bw_panel:
@@ -23,14 +107,39 @@ class BONEWIDGET_PT_bw_panel:
     bl_label = "Bone Widget"
 
 
+class BONEWIDGET_PT_bw_master_panel(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
+    bl_idname = 'BONEWIDGET_PT_bw_master_panel'
+
+    def draw(self, context):
+        pass
+
+
 class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
     bl_idname = 'BONEWIDGET_PT_bw_panel_main'
-    bl_label = "Bone Widget"
+    bl_label = "Widget Library"
 
     def draw(self, context):
         if context.window_manager.load_presets_on_startup:
             load_color_presets()
             context.window_manager.load_presets_on_startup = False
+            
+            # populate the disabled widgets list on startup
+            if len(context.window_manager.bw_disabled_widgets) == 0:
+                disabled_widgets = get_disabled_widgets()
+ 
+                for name in get_builtin_widget_names():
+                    new = context.window_manager.bw_disabled_widgets.add()
+                    new.name = name      # visible name
+                    new.disabled = name in disabled_widgets
+                    preview = preview_collections["BUILTIN"].get(name, None)
+                    if preview is None:
+                        preview = preview_collections["DISABLED"].get(name, None)
+                    if preview:
+                        new.icon_id = preview.icon_id
+                    else:
+                        new.icon_id = 0
+                
+                context.window_manager.is_initializing_disabled_widgets = False
 
         # cache call to get preferences
         preferences = get_preferences(context)
@@ -40,6 +149,50 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         # preview toggle checkbox
         row = layout.row(align=True)
         row.prop(context.window_manager, "toggle_preview")
+
+        # filter mode toggle
+        row.prop(
+            context.window_manager,
+            "bw_enable_filter_panel",
+            text="",
+            icon='FILTER',
+            toggle=True
+        )
+
+        # ------------------------------------------------------------
+        # FILTER PANEL
+        # Only visible when search mode is enabled
+        # ------------------------------------------------------------
+        if context.window_manager.bw_enable_filter_panel:
+            box = layout.box()
+            col = box.column(align=True)
+
+            # horizontal enum buttons
+            row = col.row(align=True)
+            row.prop(context.window_manager, "bw_filter_mode", expand=True)
+
+            col.separator()
+
+            # ------------------------------------------------------------
+            # Disable Widgets
+            # ------------------------------------------------------------
+            draw_dropdown_header(
+                col,
+                context.window_manager,
+                "bw_show_disable_widgets",
+                "Disable Built-in Widgets"
+            )
+
+            if context.window_manager.bw_show_disable_widgets:
+                col.template_list(
+                    "BONEWIDGET_UL_disabled_widgets",
+                    "",
+                    context.window_manager,
+                    "bw_disabled_widgets",
+                    context.window_manager,
+                    "bw_disabled_widgets_index",
+                    rows=5
+                )
 
         # preview view
         if context.window_manager.toggle_preview:
@@ -183,10 +336,9 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
 
 
 class BONEWIDGET_PT_bw_custom_color_presets(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
-
     bl_idname = "BONEWIDGET_PT_bw_custom_color_presets"
-    bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
     bl_label = "Custom Color Presets"
+    #bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
 
     @classmethod
     def poll(self, context):
@@ -229,72 +381,170 @@ class BONEWIDGET_UL_colorset_items(bpy.types.UIList):
 
 
 class BONEWIDGET_PT_bw_blender_color_set(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
-
     bl_idname = "BONEWIDGET_PT_bw_blender_color_set"
-    bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
     bl_label = "Blender Color Sets"
-    bl_options = {'DEFAULT_CLOSED'}
+    #bl_parent_id = "BONEWIDGET_PT_bw_panel_main"
 
     @classmethod
     def poll(self, context):
         return bpy.app.version >= (4, 0, 0)
 
     def draw(self, context):
+        preferences = get_preferences(context)
+
         layout = self.layout
+        bw_settings = context.scene.bw_settings
+        obj = context.object
+
+        row = layout.row(align=True)
+
+        row.operator(
+            "bonewidget.set_bone_color",
+            text="Apply Color Theme",
+            icon="BRUSHES_ALL"
+        )
+
+        icon_row = row.row()
+        icon_row.enabled = (
+            obj is not None
+            and obj.type == 'ARMATURE'
+            and obj.mode in {'POSE', 'EDIT'}
+        )
+        icon_row.template_icon_view(
+            bw_settings,
+            "bone_widget_colors",
+            show_labels=False,
+            scale=1,
+            scale_popup=1.8
+        )
+
+        layout.separator()
+
         col = layout.column(align=True)
 
-        # Bone Theme Colors
-        row = col.row(align=True)
-        row.operator("bonewidget.set_bone_color",
-                     text="Set Bone Color", icon="BRUSHES_ALL")
-        row.scale_x = 3.0
-        icon_row = row.row()
-        icon_row.enabled = (context.object is not None and context.object.type == 'ARMATURE' and
-                            context.object.mode in {'POSE', 'EDIT'})
-        icon_row.template_icon_view(
-            context.scene.bw_settings, "bone_widget_colors",
-            show_labels=False, scale=1, scale_popup=1.8)
+        custom_pose_color = bw_settings.custom_pose_color_set
+        custom_edit_color = bw_settings.custom_edit_color_set
 
-        # custom color sets
-        if context.scene.bw_settings.bone_widget_colors == "CUSTOM":
-            custom_pose_color = context.scene.bw_settings.custom_pose_color_set
-            custom_edit_color = context.scene.bw_settings.custom_edit_color_set
+        show_live_button = False
 
-            col = layout.column(align=True)
+        if obj is not None and obj.mode == 'POSE':
+            row = col.row(align=True)
+            row.prop(custom_pose_color, "normal", text="")
+            row.prop(custom_pose_color, "select", text="")
+            row.prop(custom_pose_color, "active", text="")
+            row.separator(factor=0.5)
+            show_live_button = True
 
-            # pose bone colors
-            if context.object.mode == 'POSE':
-                row = col.row(align=True)
-                row.prop(custom_pose_color, "normal", text="")
-                row.prop(custom_pose_color, "select", text="")
-                row.prop(custom_pose_color, "active", text="")
-                row.separator(factor=0.5)
-                row.prop(context.scene.bw_settings, "live_update_toggle",
-                         text="", icon="UV_SYNC_SELECT")
-            # edit bone colors
-            elif context.object.mode == "EDIT" and preferences.edit_bone_colors != 'DEFAULT':
-                row = col.row(align=True)
-                row.prop(custom_edit_color, "normal", text="")
-                row.prop(custom_edit_color, "select", text="")
-                row.prop(custom_edit_color, "active", text="")
-                row.separator(factor=0.5)
-                row.prop(context.scene.bw_settings, "live_update_toggle",
-                         text="", icon="UV_SYNC_SELECT")
+        elif (
+            obj is not None
+            and obj.mode == "EDIT"
+            and preferences.edit_bone_colors != 'DEFAULT'
+        ):
+            row = col.row(align=True)
+            row.prop(custom_edit_color, "normal", text="")
+            row.prop(custom_edit_color, "select", text="")
+            row.prop(custom_edit_color, "active", text="")
+            row.separator(factor=0.5)
+            show_live_button = True
 
-            col = layout.column(align=True)
-            col.operator("bonewidget.copy_color_to_palette",
-                         text="Copy Color to Palette", icon="COPYDOWN")
+        if show_live_button:
+            row.prop(
+                bw_settings,
+                "live_update_toggle",
+                text="",
+                icon="UV_SYNC_SELECT"
+            )
+        
+        col_buttons = layout.column(align=True)
+
+        col_buttons.operator(
+            "bonewidget.copy_color_to_palette",
+            text="Copy Color to Palette",
+        icon="COPYDOWN"
+        )
+
+        col_buttons.operator(
+            "bonewidget.set_bone_color",
+            text="Set Bone Color",
+            icon="BRUSHES_ALL"
+        )
 
 
 classes = (
-    BONEWIDGET_PT_bw_panel_main,
-    BONEWIDGET_PT_bw_custom_color_presets,
     BONEWIDGET_UL_colorset_items,
-    BONEWIDGET_PT_bw_blender_color_set,
+    BONEWIDGET_DisabledWidget,
+    BONEWIDGET_UL_disabled_widgets,
 )
+
+panel_classes = {
+    "BONEWIDGET_PT_bw_panel_main": BONEWIDGET_PT_bw_panel_main,
+    "BONEWIDGET_PT_bw_custom_color_presets": BONEWIDGET_PT_bw_custom_color_presets,
+    "BONEWIDGET_PT_bw_blender_color_set": BONEWIDGET_PT_bw_blender_color_set,
+}
+
+
+def register_panels():
+    prefs = bpy.context.preferences.addons[__package__].preferences
+
+    # unregister master panel first
+    try:
+        bpy.utils.unregister_class(BONEWIDGET_PT_bw_master_panel)
+    except RuntimeError:
+        pass
+
+    # unregister all sub panels
+    for panel_cls in panel_classes.values():
+        try:
+            bpy.utils.unregister_class(panel_cls)
+        except RuntimeError:
+            pass
+
+    # register master panel with category name
+    BONEWIDGET_PT_bw_master_panel.bl_category = prefs.panel_category
+    bpy.utils.register_class(BONEWIDGET_PT_bw_master_panel)
+
+    # re-register the sub panels in user-defined order
+    for panel in prefs.panel_order:
+        if not panel.enabled:
+            continue
+
+        panel_cls = panel_classes.get(panel.panel_id)
+        if not panel_cls:
+            continue
+
+        # make this panel a child of the master panel
+        panel_cls.bl_parent_id = "BONEWIDGET_PT_bw_master_panel"
+
+        # apply expanded/collapsed state
+        panel_cls.bl_options = set() if panel.expanded else {'DEFAULT_CLOSED'}
+
+        bpy.utils.register_class(panel_cls)
 
 
 def register():
+    bpy.types.WindowManager.bw_filter_mode = bpy.props.EnumProperty(
+        name="Filter Mode",
+        items=[
+            ('ALL', "All", "Display all widgets"),
+            ('BUILTIN', "Built-in", "Display built-in widgets only"),
+            ('CUSTOM', "Custom", "Display custom widgets only"),
+        ],
+        default='ALL',
+        update=bw_filter_mode_update,
+    )
+
+    bpy.types.WindowManager.bw_enable_filter_panel = bpy.props.BoolProperty(
+        name="Enable Widget Filter",
+        description="Show widget filter options",
+        default=False,
+        update=bw_filter_mode_update,
+    )
+
+    bpy.types.WindowManager.is_initializing_disabled_widgets = bpy.props.BoolProperty(
+        name="Initializing Disabled Widgets",
+        default=True
+    )
+
     if not hasattr(bpy.types.WindowManager, "widget_list"):
         create_preview_collection()
 
@@ -320,6 +570,13 @@ def register():
         default=True
     )
 
+    bpy.types.WindowManager.bw_show_disable_widgets = bpy.props.BoolProperty(
+    name="Show Disable Widgets Panel",
+    default=False
+    )
+
+    bpy.types.WindowManager.bw_disabled_widgets_index = bpy.props.IntProperty()
+
     from bpy.utils import register_class
     for cls in classes:
         try:
@@ -327,16 +584,28 @@ def register():
         except:
             pass
 
+    register_panels()
+
+    bpy.types.WindowManager.bw_disabled_widgets = bpy.props.CollectionProperty(
+        type=BONEWIDGET_DisabledWidget
+    )
+
 
 def unregister():
     if hasattr(bpy.types.WindowManager, "widget_list"):
         del bpy.types.WindowManager.widget_list
 
+    del bpy.types.WindowManager.bw_filter_mode
+    del bpy.types.WindowManager.bw_enable_filter_panel
     del bpy.types.WindowManager.toggle_preview
     del bpy.types.WindowManager.custom_color_presets
     del bpy.types.WindowManager.colorset_list_index
     del bpy.types.WindowManager.turn_off_colorset_save
     del bpy.types.WindowManager.load_presets_on_startup
+    del bpy.types.WindowManager.is_initializing_disabled_widgets
+    del bpy.types.WindowManager.bw_disabled_widgets_index
+    del bpy.types.WindowManager.bw_show_disable_widgets
+    del bpy.types.WindowManager.bw_disabled_widgets
 
     bpy.utils.unregister_class(PresetColorSetItem)
 
@@ -346,6 +615,12 @@ def unregister():
 
     from bpy.utils import unregister_class
     for cls in classes:
+        try:
+            unregister_class(cls)
+        except:
+            pass
+
+    for cls in panel_classes.values():
         try:
             unregister_class(cls)
         except:

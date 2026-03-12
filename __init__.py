@@ -20,19 +20,19 @@ Created by Manuel Rais and Christophe Seux
 
 if "bpy" in locals():
     import importlib
-    importlib.reload(operators)
     importlib.reload(props)
-    importlib.reload(panels)
     importlib.reload(prefs)
+    importlib.reload(operators)
     importlib.reload(menus)
+    importlib.reload(panels)
     
 else:
     import bpy
-    from . import operators
     from . import props
-    from . import panels
     from . import prefs
+    from . import operators
     from . import menus
+    from . import panels
 
 
 def get_user_preferences(context):
@@ -42,21 +42,16 @@ def get_user_preferences(context):
 
 
 def register():
-    operators.register()
     props.register()
-    menus.register()
     prefs.register()
-
-    # Apply preferences of the panel location.
-    context = bpy.context
-    pref = get_user_preferences(context).addons[__package__].preferences
-    prefs.BoneWidget_preferences.panel_category_update_fn(pref, context)
+    operators.register()
+    menus.register()
     panels.register()
 
 
 def unregister():
-    operators.unregister()
-    props.unregister()
-    menus.unregister()
-    prefs.unregister()
     panels.unregister()
+    menus.unregister()
+    operators.unregister()
+    prefs.unregister()
+    props.unregister()

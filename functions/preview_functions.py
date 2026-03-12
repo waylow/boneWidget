@@ -1,73 +1,136 @@
 import bpy
 import bpy.utils.previews
-from .json_functions import read_widgets, get_widget_data, get_default_image_dir, get_custom_image_dir, JSON_USER_WIDGETS
+from .json_functions import (
+    read_widgets,
+    get_widget_data,
+    get_default_image_dir,
+    get_custom_image_dir,
+    JSON_DEFAULT_WIDGETS,
+    JSON_USER_WIDGETS,
+    load_disabled_widgets,
+)
 import os
 from .. import __package__
 from mathutils import Vector
 
 preview_collections = {}
+BUILTIN_WIDGET_NAMES = []
+DISABLED_WIDGET_NAMES = []
 
 
-def create_preview_collection():
-    if preview_collections:
-        del bpy.types.WindowManager.widget_list
-        for pcoll in preview_collections.values():
-            bpy.utils.previews.remove(pcoll)
-        preview_collections.clear()
+def get_disabled_widgets():
+    return DISABLED_WIDGET_NAMES
 
-    pcoll = bpy.utils.previews.new()
-    pcoll.widget_list = ()
-    preview_collections["widgets"] = pcoll
 
+def get_builtin_widget_names():
+    return BUILTIN_WIDGET_NAMES
+
+
+def create_preview_collection():    
+    pcoll_all = bpy.utils.previews.new()
+    pcoll_all.widget_list = ()
+    pcoll_built_in = bpy.utils.previews.new()
+    pcoll_built_in.widget_list = ()
+    pcoll_custom = bpy.utils.previews.new()
+    pcoll_custom.widget_list = ()
+    pcoll_disabled = bpy.utils.previews.new()
+    pcoll_disabled.widget_list = ()
+    preview_collections["ALL"] = pcoll_all
+    preview_collections["BUILTIN"] = pcoll_built_in
+    preview_collections["CUSTOM"] = pcoll_custom
+    preview_collections["DISABLED"] = pcoll_disabled
+    
+    generate_previews()
+    refresh_widget_list()
+    
+
+def refresh_widget_list():
     bpy.types.WindowManager.widget_list = bpy.props.EnumProperty(
-        items=generate_previews(), name="Shape", description="Shape", update=preview_update
+        items=get_previews(), name="Shape", description="Shape",
     )
 
 
+def get_previews():
+    # if filter is off, just return all the previews without checking the filter mode
+    if not bpy.context.window_manager.bw_enable_filter_panel:
+        return preview_collections["ALL"].widget_list
+    
+    filter_mode = getattr(bpy.context.window_manager, "bw_filter_mode", "ALL")
+    pcoll = preview_collections[filter_mode]
+    if not pcoll.widget_list:
+        # assign empty widget if no real widgets found
+        pcoll.widget_list = [("NO_WIDGETS", "", "No widgets found", 'ERROR', 0)]
+    return pcoll.widget_list
+
+
+def update_widget_list():
+    generate_previews()
+    refresh_widget_list()
+
+
 def generate_previews():
-    enum_items = []
-
-    pcoll = preview_collections["widgets"]
-    if pcoll.widget_list:
-        return pcoll.widget_list
-
     directory = get_default_image_dir('thumbnails')
     custom_directory = get_custom_image_dir("custom_thumbnails")
 
+    DISABLED_WIDGET_NAMES.clear() # reset the list before loading to avoid duplicates if this is called multiple times
+    DISABLED_WIDGET_NAMES.extend(load_disabled_widgets())
+
     if directory and os.path.exists(directory):
-        widget_data = {item[0]: item[1].get(
-            "image", "missing_image.png") for item in read_widgets().items()}
-        widget_names = sorted(widget_data.keys())
+        for widget_type in ('ALL', 'BUILTIN', 'CUSTOM'):
+            if widget_type == "ALL":
+                widgets = read_widgets()
+            elif widget_type == "BUILTIN":
+                widgets = read_widgets(JSON_DEFAULT_WIDGETS)
+            elif widget_type == "CUSTOM":
+                widgets = read_widgets(JSON_USER_WIDGETS)
 
-        for i, name in enumerate(widget_names):
-            image = widget_data.get(name, "")
-            if image is not None:
-                filepath = os.path.join(directory, image)
+            enum_items = []
+            disabled_items = []
+            
+            pcoll = preview_collections[widget_type]
 
-            # try in custom_thumbnails if above failed
-            if not os.path.exists(filepath):
-                filepath = os.path.join(custom_directory, image)
+            widget_data = {item[0]: item[1].get(
+                    "image", "missing_image.png") for item in widgets.items()}
+            widget_names = sorted(widget_data.keys())
 
-            # if image still not found, let the user know
-            if not os.path.exists(filepath):
-                filepath = os.path.join(directory, "missing_image.png")
+            # store built-in widget names in a global list for later use in the filter panel
+            if widget_type == "BUILTIN":
+                BUILTIN_WIDGET_NAMES.extend(widget_names)
 
-            icon = pcoll.get(name)
-            if not icon:
-                thumb = pcoll.load(name, filepath, 'IMAGE')
-            else:
-                thumb = pcoll[name]
+            for i, name in enumerate(widget_names):                
+                image = widget_data.get(name, "")
+                if image is not None:
+                    filepath = os.path.join(directory, image)
 
-            face_data_info = "Contains Face Data" if get_widget_data(
-                name).get("faces") else ""
-            enum_items.append((name, name, face_data_info, thumb.icon_id, i))
+                # try in custom_thumbnails if above failed
+                if not os.path.exists(filepath):
+                    filepath = os.path.join(custom_directory, image)
 
-    pcoll.widget_list = enum_items
-    return enum_items
+                # if image still not found, let the user know
+                if not os.path.exists(filepath):
+                    filepath = os.path.join(directory, "missing_image.png")
 
+                icon = pcoll.get(name)
+                if not icon:
+                    thumb = pcoll.load(name, filepath, 'IMAGE')
+                else:
+                    thumb = pcoll[name]
 
-def preview_update(self, context):
-    generate_previews()
+                face_data_info = "Contains Face Data" if get_widget_data(
+                    name).get("faces") else ""
+
+                if name in DISABLED_WIDGET_NAMES:
+                    # add disabled widget to collection so it can still be viewed in filter panel
+                    disabled_items.append((name, name, face_data_info, thumb.icon_id, i))
+                    continue  # skip disabled widgets
+                
+                enum_items.append((name, name, face_data_info, thumb.icon_id, i))
+
+            pcoll.widget_list = enum_items
+
+            # if disabled widgets
+            if disabled_items:
+                preview_collections["DISABLED"].widget_list = disabled_items
 
 
 def get_preview_default():

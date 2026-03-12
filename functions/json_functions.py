@@ -65,8 +65,8 @@ def validate_json_data(data: dict, required_keys: tuple, can_be_empty: bool = Tr
 
 
 def update_preview_collection():
-    from .functions.preview_functions import create_preview_collection
-    create_preview_collection()
+    from .functions.preview_functions import update_widget_list
+    update_widget_list()
 
 
 def object_data_to_dico(object, custom_image):
@@ -227,8 +227,13 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
         del wgts[widgets]
         if widgets in widget_items:
             widget_index = widget_items.index(widgets)
-            activeShape = widget_items[widget_index +
+
+            if len(widget_items) > 1:
+                activeShape = widget_items[widget_index +
                                        1] if widget_index == 0 else widget_items[widget_index - 1]
+            else:
+                activeShape = "NO_WIDGETS"
+                
             widget_items.remove(widgets)
         return_message = "Widget - " + widgets + " has been removed!"
 
@@ -239,8 +244,9 @@ def add_remove_widgets(context, addOrRemove, items, widgets, widget_name="", cus
         # update the preview panel
         update_preview_collection()
 
-        # trigger an update and display widget
-        bpy.context.window_manager.widget_list = activeShape
+        # trigger an update and display widget if any widgets remain
+        if activeShape != "NO_WIDGETS":
+            bpy.context.window_manager.widget_list = activeShape
 
         return 'INFO', return_message
     elif ob_name is not None:
@@ -385,7 +391,8 @@ def update_widget_library(new_widgets: dict[str, dict[str, list | str]],
     update_preview_collection()
 
     # trigger an update and display original but updated widget
-    bpy.context.window_manager.widget_list = current_widget
+    if current_widget != "NO_WIDGETS":
+        bpy.context.window_manager.widget_list = current_widget
 
 
 def update_custom_image(image_name):
@@ -702,3 +709,17 @@ def load_color_presets():
                 new_item.select = item["select"]
                 new_item.active = item["active"]
             bpy.context.window_manager.turn_off_colorset_save = False
+
+
+def load_disabled_widgets():
+    filepath = os.path.join(get_custom_dir(), "disabled_widgets.json")
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as f:
+            return json.load(f)
+    return []
+
+
+def save_disabled_widgets(disabled_widgets):
+    filepath = os.path.join(get_custom_dir(), "disabled_widgets.json")
+    with open(filepath, 'w') as f:
+        json.dump(disabled_widgets, f, indent=4)

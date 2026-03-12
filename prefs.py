@@ -2,8 +2,80 @@ import bpy
 from bpy.types import AddonPreferences
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 
-from .panels import BONEWIDGET_PT_bw_panel_main
+from .panels import BONEWIDGET_PT_bw_panel_main, register_panels
 from .operators import BONEWIDGET_OT_reset_default_images, BONEWIDGET_OT_user_data_filebrowser
+
+
+def trigger_panel_update(self, context):
+    register_panels()
+
+    # trigger a refresh of the panels
+    context.window_manager.bw_enable_filter_panel = not context.window_manager.bw_enable_filter_panel
+
+    def toggle_back():
+        # toggle back the value to original state
+        context.window_manager.bw_enable_filter_panel = not context.window_manager.bw_enable_filter_panel
+        return None
+
+    # use timer to let the UI refresh before toggling back
+    bpy.app.timers.register(toggle_back, first_interval=0.01)
+
+
+class BW_SubPanel(bpy.types.PropertyGroup):
+    panel_id: bpy.props.StringProperty()   # internal panel id
+    name: bpy.props.StringProperty()       # display name
+    enabled: BoolProperty(
+        name="Enabled",
+        description="Enable/Disable panel",
+        default=True,
+        update=trigger_panel_update
+        )
+    expanded: BoolProperty(
+        name="Expanded",
+        description="Panels open/closed default behavior",
+        default=True,
+        update=trigger_panel_update
+        )
+    
+
+class BONEWIDGET_UL_panel_order(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        row = layout.row(align=True)
+        row.label(text=item.name)
+
+        icon_name = "HIDE_ON" if not item.enabled else "HIDE_OFF"
+        row.prop(item, "enabled", text="", icon=icon_name, toggle=True)
+        row.prop(item, "expanded", text="", icon="TRIA_DOWN" if item.expanded else "TRIA_RIGHT", toggle=True)
+
+
+class BONEWIDGET_OT_move_panel(bpy.types.Operator):
+    bl_idname = "bonewidget.move_panel"
+    bl_label = "Move Panel"
+
+    direction: bpy.props.EnumProperty(
+        items=[
+            ('UP', "Up", ""),
+            ('DOWN', "Down", "")
+        ]
+    )
+
+    def execute(self, context):
+        prefs = context.preferences.addons[__package__].preferences
+        idx = prefs.panel_order_index
+
+        if self.direction == 'UP':
+            if idx > 0:
+                prefs.panel_order.move(idx, idx - 1)
+                prefs.panel_order_index -= 1
+
+        elif self.direction == 'DOWN':
+            if idx < len(prefs.panel_order) - 1:
+                prefs.panel_order.move(idx, idx + 1)
+                prefs.panel_order_index += 1
+
+        trigger_panel_update(self, context)
+
+        return {'FINISHED'}
 
 
 class BoneWidget_preferences(AddonPreferences):
@@ -38,14 +110,7 @@ class BoneWidget_preferences(AddonPreferences):
     )
 
     def panel_category_update_fn(self, context):
-        has_panel = hasattr(bpy.types, BONEWIDGET_PT_bw_panel_main.bl_idname)
-        if has_panel:
-            try:
-                bpy.utils.unregister_class(BONEWIDGET_PT_bw_panel_main)
-            except:
-                pass
-        BONEWIDGET_PT_bw_panel_main.bl_category = self.panel_category
-        bpy.utils.register_class(BONEWIDGET_PT_bw_panel_main)
+        register_panels()
 
     panel_category: StringProperty(
         name="Panel Category",
@@ -120,6 +185,10 @@ class BoneWidget_preferences(AddonPreferences):
         description="Choose a location where you want to save custom data",
         default="",
     )
+
+    # panel order
+    panel_order: bpy.props.CollectionProperty(type=BW_SubPanel)
+    panel_order_index: bpy.props.IntProperty(name="Panel Index")
 
     reset_custom_shape_transforms: BoolProperty(
         name="Reset Custom Shape Transforms",
@@ -208,6 +277,30 @@ class BoneWidget_preferences(AddonPreferences):
         box.prop(self, "reset_custom_shape_transforms",
                  text="Reset Custom Shape Transforms")
 
+        # panel order
+        row = layout.row()
+        box = layout.box()
+        row = box.row(align=True)
+        row.label(text="Panel Order:")
+
+        list_col = row.column()
+        list_col.template_list(
+            "BONEWIDGET_UL_panel_order",
+            "",
+            self,
+            "panel_order",
+            self,
+            "panel_order_index",
+            rows=3,
+            sort_lock=True,
+        )
+
+        btn_col = row.column(align=True)
+        op = btn_col.operator("bonewidget.move_panel", icon="TRIA_UP", text="")
+        op.direction = 'UP'
+        op = btn_col.operator("bonewidget.move_panel", icon="TRIA_DOWN", text="")
+        op.direction = 'DOWN'
+
         # reset button
         layout.separator()
         row = layout.row()
@@ -216,9 +309,69 @@ class BoneWidget_preferences(AddonPreferences):
         row.operator("bonewidget.reset_default_images", icon="ERROR")
 
 
+classes = (
+    BW_SubPanel,
+    BONEWIDGET_UL_panel_order,
+    BONEWIDGET_OT_move_panel,
+    BoneWidget_preferences,
+)
+
 def register():
-    bpy.utils.register_class(BoneWidget_preferences)
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    # add panels to the list and perform a sanity check to ensure
+    # the list is always in sync with the actual panels available
+    prefs = bpy.context.preferences.addons[__package__].preferences
+
+    # the panels to show in the UI list, with their default order
+    expected_panels = [
+        ("BONEWIDGET_PT_bw_panel_main", "Widget Library"),
+        ("BONEWIDGET_PT_bw_custom_color_presets", "Custom Color Presets"),
+        ("BONEWIDGET_PT_bw_blender_color_set", "Blender Color Sets"),
+    ]
+
+    # map panel_id to default index
+    default_index = {pid: i for i, (pid, _) in enumerate(expected_panels)}
+
+    # track IDs
+    existing_ids = {entry.panel_id for entry in prefs.panel_order}
+
+    # add missing panels
+    for pid, name in expected_panels:
+        # update existing if out of sync
+        for entry in prefs.panel_order:
+            if entry.panel_id == pid:
+                if entry.name != name:
+                    entry.name = name
+                    
+        if pid not in existing_ids:
+            # decide where to insert the new panel based on its default index
+            target_default_index = default_index[pid]
+
+            # count how many have a lower default index
+            insert_at = sum(
+                1 for entry in prefs.panel_order
+                if default_index.get(entry.panel_id, 9999) < target_default_index
+            )
+
+            # add missing panels at the end first
+            new = prefs.panel_order.add()
+            new.panel_id = pid
+            new.name = name
+            new.enabled = True
+            new.expanded = True
+
+            # move it to the correct position
+            prefs.panel_order.move(len(prefs.panel_order) - 1, insert_at)
+
+    # remove any panels that no longer exist
+    expected_ids = {pid for pid, _ in expected_panels}
+    for i in reversed(range(len(prefs.panel_order))):
+        if prefs.panel_order[i].panel_id not in expected_ids:
+            prefs.panel_order.remove(i)
 
 
 def unregister():
-    bpy.utils.unregister_class(BoneWidget_preferences)
+    for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)

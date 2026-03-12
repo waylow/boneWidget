@@ -74,7 +74,8 @@ class BONEWIDGET_OT_create_widget(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.mode == 'POSE' and context.selected_pose_bones)
+        return (context.object and context.object.mode == 'POSE' and
+                context.selected_pose_bones and context.window_manager.widget_list != "NO_WIDGETS")
 
     relative_size: BoolProperty(
         name="Scale to Bone length",
@@ -489,6 +490,10 @@ class BONEWIDGET_OT_remove_widgets(bpy.types.Operator):
     bl_idname = "bonewidget.remove_widgets"
     bl_label = "Remove Widgets"
     bl_options = {'INTERNAL'}
+
+    @classmethod
+    def poll(self, context):
+        return context.window_manager.widget_list != "NO_WIDGETS"
 
     def execute(self, context):
         objects = bpy.context.window_manager.widget_list
@@ -1908,10 +1913,14 @@ def register():
 
 
 def unregister():
-    del bpy.types.WindowManager.prop_grp
+    if hasattr(bpy.types.WindowManager, "prop_grp"):
+        del bpy.types.WindowManager.prop_grp
 
-    bpy.utils.previews.remove(
-        BONEWIDGET_OT_shared_property_group.image_collection)
+    try:
+        bpy.utils.previews.remove(
+            BONEWIDGET_OT_shared_property_group.image_collection)
+    except Exception:
+        pass
 
     from bpy.utils import unregister_class
     for cls in classes:
