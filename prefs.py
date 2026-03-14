@@ -29,14 +29,14 @@ class BW_SubPanel(bpy.types.PropertyGroup):
         description="Enable/Disable panel",
         default=True,
         update=trigger_panel_update
-        )
+    )
     expanded: BoolProperty(
         name="Expanded",
         description="Panels open/closed default behavior",
         default=True,
         update=trigger_panel_update
-        )
-    
+    )
+
 
 class BONEWIDGET_UL_panel_order(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
@@ -45,7 +45,8 @@ class BONEWIDGET_UL_panel_order(bpy.types.UIList):
 
         icon_name = "HIDE_ON" if not item.enabled else "HIDE_OFF"
         row.prop(item, "enabled", text="", icon=icon_name, toggle=True)
-        row.prop(item, "expanded", text="", icon="TRIA_DOWN" if item.expanded else "TRIA_RIGHT", toggle=True)
+        row.prop(item, "expanded", text="",
+                 icon="TRIA_DOWN" if item.expanded else "TRIA_RIGHT", toggle=True)
 
 
 class BONEWIDGET_OT_move_panel(bpy.types.Operator):
@@ -158,7 +159,7 @@ class BoneWidget_preferences(AddonPreferences):
 
     clear_both_modes: BoolProperty(
         name="Clear All Bone Color",
-        description='When enabled, bone colors from Edit mode and Pose mode will be cleared.  When disabled, only the color from the current mode will be cleared',
+        description='When enabled, bone colors from Edit mode and Pose mode will be reset to default.  When disabled, only the color from the current mode will be reset',
         default=True
     )
 
@@ -192,7 +193,7 @@ class BoneWidget_preferences(AddonPreferences):
 
     reset_custom_shape_transforms: BoolProperty(
         name="Reset Custom Shape Transforms",
-        description='When enabled, any transforms to the custom shape will be reset to default when adding a new widget. This will force your new widget to display exactly as expected.',
+        description='When enabled, any transforms to the custom shape will be reset to default when adding a new widget. This will force your new widget to display exactly as expected.  This is helpful if editing a rig that has custom bone transformations.',
         default=True
     )
 
@@ -220,6 +221,27 @@ class BoneWidget_preferences(AddonPreferences):
         box_col = box.column()
         box_col.label(text="Set the category to show Bone-Widgets panel:")
         box_col.prop(self, "panel_category")
+
+        # custom data
+        row = layout.row()
+        box = layout.box()
+
+        box.label(text="Custom Data:")
+        box_row = box.row()
+        box_row.prop(self, "use_default_location", text="Use Default Location")
+
+        box_row = box.row()
+        box_col = box_row.column()
+        box_col.prop(self, "user_data_location", text="Custom Path")
+        box_row.operator("bonewidget.user_data_filebrowser",
+                         icon="FILEBROWSER", text="")
+        box_row.enabled = not self.use_default_location
+
+        # reset custom shape transforms
+        box = layout.box()
+        box.label(text="Custom Shape Transforms:")
+        box.prop(self, "reset_custom_shape_transforms",
+                 text="Reset Custom Shape Transforms")
 
         # edit bone colors
         row = layout.row()
@@ -256,26 +278,15 @@ class BoneWidget_preferences(AddonPreferences):
         box_col.label(text="Preview Popup Size:")
         box_row.prop(self, "preview_popup_size", text="")
 
-        # custom data
-        row = layout.row()
-        box = layout.box()
-
-        box.label(text="Custom Data:")
+        # Spacer
+        box_col.separator()
         box_row = box.row()
-        box_row.prop(self, "use_default_location", text="Use Default Location")
 
+        # reset button
         box_row = box.row()
         box_col = box_row.column()
-        box_col.prop(self, "user_data_location", text="Custom Path")
-        box_row.operator("bonewidget.user_data_filebrowser",
-                         icon="FILEBROWSER", text="")
-        box_row.enabled = not self.use_default_location
-
-        # reset custom shape transforms
-        box = layout.box()
-        box.label(text="Reset Transforms:")
-        box.prop(self, "reset_custom_shape_transforms",
-                 text="Reset Custom Shape Transforms")
+        box_col.label(text="Reset Thumbnails:")
+        box_row.operator("bonewidget.reset_default_images", icon="ERROR")
 
         # panel order
         row = layout.row()
@@ -298,15 +309,9 @@ class BoneWidget_preferences(AddonPreferences):
         btn_col = row.column(align=True)
         op = btn_col.operator("bonewidget.move_panel", icon="TRIA_UP", text="")
         op.direction = 'UP'
-        op = btn_col.operator("bonewidget.move_panel", icon="TRIA_DOWN", text="")
+        op = btn_col.operator("bonewidget.move_panel",
+                              icon="TRIA_DOWN", text="")
         op.direction = 'DOWN'
-
-        # reset button
-        layout.separator()
-        row = layout.row()
-        row = row.split(factor=.75)
-        row.label(text="Reset Default Widget Thumbnails")
-        row.operator("bonewidget.reset_default_images", icon="ERROR")
 
 
 classes = (
@@ -315,6 +320,7 @@ classes = (
     BONEWIDGET_OT_move_panel,
     BoneWidget_preferences,
 )
+
 
 def register():
     for cls in classes:
@@ -344,7 +350,7 @@ def register():
             if entry.panel_id == pid:
                 if entry.name != name:
                     entry.name = name
-                    
+
         if pid not in existing_ids:
             # decide where to insert the new panel based on its default index
             target_default_index = default_index[pid]
