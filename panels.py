@@ -4,6 +4,8 @@ from .props import PresetColorSetItem
 from .functions.main_functions import (
     recursive_layer_collection,
     get_preferences,
+    is_cloudrig_spine_toon,
+    get_cloudrig_component_type,
 )
 from .functions.preview_functions import (
     create_preview_collection,
@@ -63,6 +65,43 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         else:
             row.operator("bonewidget.return_to_armature",
                          icon="LOOP_BACK", text='To bone')
+
+        # CloudRig 组件集成
+        if context.mode == "POSE" and context.active_pose_bone:
+            bone = context.active_pose_bone
+            component_type = get_cloudrig_component_type(bone)
+            bw_settings = context.scene.bw_settings
+            
+            if component_type:
+                box = layout.box()
+                box.label(text=f"{component_type}:", icon='ARMATURE_DATA')
+                row = box.row()
+                
+                # 根据组件类型显示对应的枚举
+                if component_type == 'Spine: Cartoon':
+                    row.prop(bw_settings, "cloudrig_spine_toon_param", text="")
+                elif component_type == 'Spine: IK/FK':
+                    row.prop(bw_settings, "cloudrig_spine_ikfk_param", text="")
+                elif component_type == 'Limb: Biped Leg':
+                    row.prop(bw_settings, "cloudrig_limb_leg_param", text="")
+                elif component_type == 'Chain: FK':
+                    row.prop(bw_settings, "cloudrig_chain_fk_param", text="")
+                elif component_type == 'Chain: IK':
+                    row.prop(bw_settings, "cloudrig_chain_ik_param", text="")
+                elif component_type == 'Chain: Toon':
+                    row.prop(bw_settings, "cloudrig_chain_toon_param", text="")
+                elif component_type == 'Aim':
+                    row.prop(bw_settings, "cloudrig_aim_param", text="")
+                elif component_type == 'Single Control':
+                    row.prop(bw_settings, "cloudrig_single_control_param", text="")
+                elif component_type == 'Lattice':
+                    row.prop(bw_settings, "cloudrig_lattice_param", text="")
+                elif component_type == 'Limb: Generic':
+                    row.prop(bw_settings, "cloudrig_limb_generic_param", text="")
+                elif component_type == 'Shoulder Bone':
+                    row.prop(bw_settings, "cloudrig_shoulder_param", text="")
+                elif component_type == 'Curve: With Hooks':
+                    row.prop(bw_settings, "cloudrig_curve_hooks_param", text="")
 
         layout.separator()
 

@@ -32,6 +32,50 @@ def get_collection(context):
         return collection
 
 
+def get_cloudrig_widget_collection(context):
+    """
+    获取 CloudRig 的 widget collection。
+    如果当前选中的骨骼属于 CloudRig，则返回 CloudRig 的 widget collection。
+    
+    Args:
+        context: Blender 上下文
+    
+    Returns:
+        Collection: CloudRig 的 widget collection，如果没有则返回 None
+    """
+    active_obj = context.active_object
+    if not active_obj or active_obj.type != 'ARMATURE':
+        return None
+    
+    # 检查是否是 CloudRig 骨骼
+    if hasattr(active_obj, 'cloudrig') and active_obj.cloudrig:
+        generator = active_obj.cloudrig.generator
+        if generator and hasattr(generator, 'widget_collection'):
+            return generator.widget_collection
+    
+    return None
+
+
+def get_widget_collection(context):
+    """
+    获取用于放置 widget 的集合。
+    优先使用 CloudRig 的 widget collection，否则使用默认的 Bone Widget collection。
+    
+    Args:
+        context: Blender 上下文
+    
+    Returns:
+        Collection: 用于放置 widget 的集合
+    """
+    # 首先尝试获取 CloudRig 的 widget collection
+    cloudrig_collection = get_cloudrig_widget_collection(context)
+    if cloudrig_collection:
+        return cloudrig_collection
+    
+    # 否则使用默认的 Bone Widget collection
+    return get_collection(context)
+
+
 def recursive_layer_collection(layer_collection, collection_name):
     found = None
     if (layer_collection.name == collection_name):
@@ -103,18 +147,25 @@ def from_widget_find_bone(widget):
     return match_bone
 
 
-def create_widget(bone, widget, relative, size, slide, rotation, collection, use_face_data, wireframe_width):
+def create_widget(bone, widget, relative, size, slide, rotation, collection, use_face_data, wireframe_width, cloudrig_param='NONE'):
     if not get_preferences(bpy.context).use_rigify_defaults:
         bw_widget_prefix = get_preferences(bpy.context).widget_prefix
     else:
         bw_widget_prefix = "WGT-" + bpy.context.active_object.name + "_"
 
     matrix_bone = bone
+    
+    # CloudRig 参数后缀
+    param_suffix = ""
+    if cloudrig_param != 'NONE':
+        param_suffix = "_" + cloudrig_param.replace("SHAPE_", "")
+    
+    widget_name = bw_widget_prefix + bone.name + param_suffix
 
-    # delete the existing shape
-    if bone.custom_shape:
-        bpy.data.objects.remove(
-            bpy.data.objects[bone.custom_shape.name], do_unlink=True)
+    # delete the existing shape with the same name
+    existing_obj = bpy.data.objects.get(widget_name)
+    if existing_obj:
+        bpy.data.objects.remove(existing_obj, do_unlink=True)
 
     # make the data name include the prefix
     new_data = bpy.data.meshes.new(bw_widget_prefix + bone.name)
@@ -148,10 +199,10 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
 
     new_data.update(calc_edges=True)
 
-    new_object = bpy.data.objects.new(bw_widget_prefix + bone.name, new_data)
+    new_object = bpy.data.objects.new(widget_name, new_data)
 
     new_object.data = new_data
-    new_object.name = bw_widget_prefix + bone.name
+    new_object.name = widget_name
     collection.objects.link(new_object)
 
     new_object.matrix_world = bpy.context.active_object.matrix_world @ matrix_bone.bone.matrix_local
@@ -160,12 +211,16 @@ def create_widget(bone, widget, relative, size, slide, rotation, collection, use
     layer = bpy.context.view_layer
     layer.update()
 
-    bone.custom_shape = new_object
-    # show faces if use face data is enabled
-    bone.bone.show_wire = not use_face_data
+    # CloudRig 模式：不设置骨骼的 custom_shape，只返回对象
+    if cloudrig_param == 'NONE':
+        bone.custom_shape = new_object
+        # show faces if use face data is enabled
+        bone.bone.show_wire = not use_face_data
 
-    if bpy.app.version >= (4, 2, 0):
-        bone.custom_shape_wire_width = wireframe_width
+        if bpy.app.version >= (4, 2, 0):
+            bone.custom_shape_wire_width = wireframe_width
+    
+    return new_object
 
 
 def symmetrize_widget(bone, collection):
@@ -272,8 +327,12 @@ def delete_unused_widgets():
     return
 
 
-def edit_widget(active_bone):
-    widget = active_bone.custom_shape
+def edit_widget(active_bone, widget=None):
+    if widget is None:
+        widget = active_bone.custom_shape
+
+    if widget is None:
+        raise KeyError("Bone has no custom shape widget")
 
     collection = get_view_layer_collection(bpy.context, widget)
     collection.hide_viewport = False
@@ -300,8 +359,18 @@ def edit_widget(active_bone):
         True, False, False)  # enter vertex mode
 
 
-def return_to_armature(widget):
-    bone = from_widget_find_bone(widget)
+def return_to_armature(widget, bone=None):
+    # 如果没有提供 bone，尝试查找
+    if bone is None:
+        bone = from_widget_find_bone(widget)
+    
+    # 还是没找到，尝试 CloudRig 查找
+    if bone is None:
+        bone = find_bone_from_cloudrig_widget(widget)
+    
+    if bone is None:
+        return False
+    
     armature = bone.id_data
 
     if bpy.context.active_object.mode == 'EDIT':
@@ -325,6 +394,7 @@ def return_to_armature(widget):
     if bpy.app.version < (5, 0, 0):
         armature.data.bones[bone.name].select = True
     armature.data.bones.active = armature.data.bones[bone.name]
+    return True
 
 
 def find_mirror_object(object):
@@ -612,3 +682,383 @@ def live_update_toggle(self, context):
 
 def get_preferences(context):
     return context.preferences.addons[__package__].preferences
+
+
+# ========================================================================
+# CloudRig 支持函数
+# ========================================================================
+
+def get_cloudrig_param_mappings():
+    """
+    获取所有 CloudRig 组件的参数映射。
+    
+    Returns:
+        dict: 组件类型到参数映射的字典
+    """
+    return {
+        # 脊柱组件
+        'Spine: Cartoon': {
+            'SHAPE_IK': ('spine_toon', 'shape_ik'),
+            'SHAPE_IK_SECONDARY': ('spine_toon', 'shape_ik_secondary'),
+            'SHAPE_TORSO': ('spine_toon', 'shape_torso'),
+            'SHAPE_FK': ('fk_chain', 'shape_fk'),
+            'SHAPE_FK_ROOT': ('fk_chain', 'shape_fk_root'),
+        },
+        'Spine: IK/FK': {
+            'SHAPE_HIP': ('spine', 'shape_hip'),
+            'SHAPE_CHEST': ('spine', 'shape_chest'),
+            'SHAPE_TORSO': ('spine', 'shape_torso'),
+            'SHAPE_IK': ('spine', 'shape_ik'),
+        },
+        'Spine: Squashy': {
+            'SHAPE_FK': ('fk_chain', 'shape_fk'),
+            'SHAPE_FK_ROOT': ('fk_chain', 'shape_fk_root'),
+        },
+        # 肢体组件
+        'Limb: Biped Leg': {
+            'LEG_STRETCH': ('chain', 'shape_stretch'),
+            'LEG_STRETCH_ENDS': ('chain', 'shape_stretch_ends'),
+            'LEG_FK': ('fk_chain', 'shape_fk'),
+            'LEG_FK_ROOT': ('fk_chain', 'shape_fk_root'),
+            'LEG_IK_MASTER': ('ik_chain', 'shape_ik_master'),
+            'LEG_IK_FIRST': ('ik_chain', 'shape_ik_first'),
+            'LEG_IK_POLE': ('ik_chain', 'shape_pole'),
+            'LEG_FOOT_ROLL': ('leg', 'shape_footroll'),
+            'LEG_FOREFOOT': ('leg', 'shape_forefoot'),
+        },
+        'Limb: Generic': {
+            'LIMB_STRETCH': ('chain', 'shape_stretch'),
+            'LIMB_STRETCH_ENDS': ('chain', 'shape_stretch_ends'),
+            'LIMB_FK': ('fk_chain', 'shape_fk'),
+            'LIMB_FK_ROOT': ('fk_chain', 'shape_fk_root'),
+            'LIMB_IK_MASTER': ('ik_chain', 'shape_ik_master'),
+            'LIMB_IK_FIRST': ('ik_chain', 'shape_ik_first'),
+            'LIMB_IK_POLE': ('ik_chain', 'shape_pole'),
+            'LIMB_RUBBERHOSE': ('limb', 'shape_rubberhose'),
+        },
+        # 链式组件
+        'Chain: FK': {
+            'FK_SHAPE': ('fk_chain', 'shape_fk'),
+            'FK_ROOT_SHAPE': ('fk_chain', 'shape_fk_root'),
+        },
+        'Chain: IK': {
+            'IK_MASTER': ('ik_chain', 'shape_ik_master'),
+            'IK_FIRST': ('ik_chain', 'shape_ik_first'),
+            'IK_POLE': ('ik_chain', 'shape_pole'),
+        },
+        'Chain: Toon': {
+            'CHAIN_STRETCH': ('chain', 'shape_stretch'),
+            'CHAIN_STRETCH_ENDS': ('chain', 'shape_stretch_ends'),
+            'CHAIN_DEF_CONTROL': ('chain', 'shape_def_control'),
+        },
+        'Chain: Sphere': {
+            'SPHERE_CONTROL': ('chain_sphere', 'shape_sphere_control'),
+        },
+        'Chain: Finger': {
+            'FINGER_FK': ('fk_chain', 'shape_fk'),
+            'FINGER_FK_ROOT': ('fk_chain', 'shape_fk_root'),
+            'FINGER_IK_MASTER': ('ik_chain', 'shape_ik_master'),
+            'FINGER_IK_FIRST': ('ik_chain', 'shape_ik_first'),
+            'FINGER_IK_POLE': ('ik_chain', 'shape_pole'),
+        },
+        'Chain: Face Grid': {
+            'FACE_INTERSECTION': ('face_chain', 'shape_intersection'),
+        },
+        'Chain: Eyelid': {
+            'EYELID_FK': ('fk_chain', 'shape_fk'),
+            'EYELID_FK_ROOT': ('fk_chain', 'shape_fk_root'),
+        },
+        'Chain: Physics': {
+            'PHYSICS_FK': ('fk_chain', 'shape_fk'),
+            'PHYSICS_FK_ROOT': ('fk_chain', 'shape_fk_root'),
+        },
+        # 其他组件
+        'Aim': {
+            'AIM_TARGET': ('aim', 'shape_target'),
+            'AIM_EYE': ('aim', 'shape_eye'),
+            'AIM_ROOT': ('aim', 'shape_root'),
+            'AIM_HIGHLIGHT': ('aim', 'shape_highlight'),
+            'AIM_MASTER': ('aim', 'shape_master'),
+        },
+        'Single Control': {
+            'CONTROL_SHAPE': ('copy', 'shape_control'),
+            'CONTROL_PIVOT': ('copy', 'shape_pivot'),
+        },
+        'Shoulder Bone': {
+            'SHOULDER_SHAPE': ('shoulder', 'shape_shoulder'),
+        },
+        'Feather': {
+            'FEATHER_SHAPE': ('feather', 'shape_feather'),
+        },
+        'Lattice': {
+            'LATTICE_ROOT': ('lattice', 'shape_root'),
+            'LATTICE_SHAPE': ('lattice', 'shape_lattice'),
+        },
+        # 曲线组件
+        'Curve: With Hooks': {
+            'CURVE_ROOT': ('curve', 'shape_root'),
+            'CURVE_POINT': ('curve', 'shape_point'),
+            'CURVE_HANDLE': ('curve', 'shape_handle'),
+            'CURVE_BEZIER_CENTER': ('curve', 'shape_bezier_center'),
+            'CURVE_BEZIER': ('curve', 'shape_bezier'),
+            'CURVE_SPLINE_ROOT': ('curve', 'shape_spline_root'),
+            'CURVE_RADIUS': ('curve', 'shape_radius'),
+        },
+        'Curve: Spline IK': {
+            'SPLINE_FK': ('spline_ik', 'shape_fk'),
+        },
+    }
+
+
+def update_cloudrig_widget(bone, param_value, widget_obj, component_type=None):
+    """
+    更新 CloudRig 组件的形状参数引用。
+    支持所有 CloudRig 组件。
+    
+    Args:
+        bone: PoseBone
+        param_value: 参数值
+        widget_obj: 控件对象
+        component_type: 可选，强制指定组件类型
+    
+    Returns:
+        bool: 是否成功
+    """
+    if not hasattr(bone, 'cloudrig_component'):
+        return False
+    
+    component = bone.cloudrig_component
+    if not component or not hasattr(component, 'params'):
+        return False
+    
+    # 自动检测组件类型
+    if component_type is None:
+        component_type = get_cloudrig_component_type(bone)
+    
+    if component_type is None:
+        return False
+    
+    params = component.params
+    
+    # 获取参数映射
+    param_mappings = get_cloudrig_param_mappings()
+    
+    if component_type not in param_mappings:
+        return False
+    
+    mapping = param_mappings[component_type]
+    
+    if param_value not in mapping:
+        return False
+    
+    namespace, param_name = mapping[param_value]
+    
+    if not hasattr(params, namespace):
+        return False
+    
+    param_group = getattr(params, namespace)
+    
+    if not hasattr(param_group, param_name):
+        return False
+    
+    shape_param = getattr(param_group, param_name)
+    
+    # 设置 use_pointer 并更新 custom_shape
+    try:
+        if hasattr(shape_param, 'use_pointer'):
+            shape_param.use_pointer = True
+        if hasattr(shape_param, 'custom_shape'):
+            shape_param.custom_shape = widget_obj
+            
+            # 刷新 CloudRig GPU 预览
+            # 通过 rna_ancestors 找到并标记所有相关组件为脏
+            if hasattr(shape_param, 'rna_ancestors'):
+                for ancestor in shape_param.rna_ancestors():
+                    if hasattr(ancestor, 'overlay_is_dirty'):
+                        ancestor.overlay_is_dirty = True
+            # 同时标记直接组件
+            if hasattr(component, 'overlay_is_dirty'):
+                component.overlay_is_dirty = True
+            # 标记 inherited_component（如果存在）
+            if hasattr(component, 'inherited_component') and component.inherited_component:
+                if hasattr(component.inherited_component, 'overlay_is_dirty'):
+                    component.inherited_component.overlay_is_dirty = True
+            
+            return True
+    except Exception as e:
+        print(f"Bone Widget: Failed to update CloudRig: {e}")
+    
+    return False
+
+
+# 保留旧函数名以保持兼容性
+def update_cloudrig_spine_toon(bone, param_value, widget_obj):
+    """旧函数名，保留兼容性"""
+    return update_cloudrig_widget(bone, param_value, widget_obj, 'Spine: Cartoon')
+
+
+def get_cloudrig_component_type(bone):
+    """
+    检测骨骼的 CloudRig 组件类型。
+    
+    Args:
+        bone: PoseBone
+    
+    Returns:
+        str: 组件类型原始字符串（如 'Spine: Cartoon', 'Limb: Biped Leg'），或 None
+    """
+    if not hasattr(bone, 'cloudrig_component'):
+        return None
+    
+    component = bone.cloudrig_component
+    if not component:
+        return None
+    
+    # 直接返回组件类型的显示名称
+    if hasattr(component, 'component_type'):
+        return component.component_type
+    
+    return None
+
+
+def get_cloudrig_widget(bone, param_value, component_type=None):
+    """
+    获取 CloudRig 组件参数引用的控件对象。
+    支持 Spine: Cartoon 和 Limb: Biped Leg 组件。
+    
+    Args:
+        bone: PoseBone
+        param_value: 参数值（如 'SHAPE_IK', 'LEG_FK' 等）
+        component_type: 可选，强制指定组件类型原始字符串
+    
+    Returns:
+        Object: 控件对象，如果找不到则返回 None
+    """
+    if not hasattr(bone, 'cloudrig_component'):
+        return None
+    
+    component = bone.cloudrig_component
+    if not component or not hasattr(component, 'params'):
+        return None
+    
+    # 自动检测组件类型
+    if component_type is None:
+        component_type = get_cloudrig_component_type(bone)
+    
+    if component_type is None:
+        return None
+    
+    params = component.params
+    
+    # 获取参数映射
+    param_mappings = get_cloudrig_param_mappings()
+    
+    if component_type not in param_mappings:
+        return None
+    
+    mapping = param_mappings[component_type]
+    
+    if param_value not in mapping:
+        return None
+    
+    namespace, param_name = mapping[param_value]
+    
+    if not hasattr(params, namespace):
+        return None
+    
+    param_group = getattr(params, namespace)
+    
+    if not hasattr(param_group, param_name):
+        return None
+    
+    shape_param = getattr(param_group, param_name)
+    
+    if hasattr(shape_param, 'custom_shape'):
+        return shape_param.custom_shape
+    
+    return None
+
+
+# 保留旧函数名以保持兼容性
+def get_cloudrig_spine_toon_widget(bone, param_value):
+    """旧函数名，保留兼容性"""
+    return get_cloudrig_widget(bone, param_value, 'Spine: Cartoon')
+
+
+def find_bone_from_cloudrig_widget(widget):
+    """
+    通过 CloudRig 控件查找对应的骨骼。
+    检查所有骨骼的 CloudRig 组件参数中是否引用了该控件。
+    支持所有 CloudRig 组件。
+    
+    Args:
+        widget: 控件对象
+    
+    Returns:
+        PoseBone: 找到的骨骼，没找到返回 None
+    """
+    if widget is None:
+        return None
+    
+    # 所有支持的参数路径（从参数映射中提取）
+    param_mappings = get_cloudrig_param_mappings()
+    all_param_paths = set()
+    for mapping in param_mappings.values():
+        for namespace, param_name in mapping.values():
+            all_param_paths.add((namespace, param_name))
+    
+    all_param_paths = list(all_param_paths)
+    
+    for ob in bpy.context.scene.objects:
+        if ob.type == "ARMATURE":
+            for bone in ob.pose.bones:
+                if not hasattr(bone, 'cloudrig_component'):
+                    continue
+                
+                component = bone.cloudrig_component
+                if not component or not hasattr(component, 'params'):
+                    continue
+                
+                params = component.params
+                
+                for namespace, param_name in all_param_paths:
+                    if hasattr(params, namespace):
+                        param_group = getattr(params, namespace)
+                        if hasattr(param_group, param_name):
+                            shape_param = getattr(param_group, param_name)
+                            if hasattr(shape_param, 'custom_shape') and shape_param.custom_shape == widget:
+                                return bone
+                            # 直接比较
+                            if shape_param == widget:
+                                return bone
+    
+    return None
+
+
+def is_cloudrig_component(bone):
+    """
+    检查骨骼是否是任何支持的 CloudRig 组件。
+    
+    Args:
+        bone: PoseBone
+    
+    Returns:
+        bool
+    """
+    return get_cloudrig_component_type(bone) is not None
+
+
+def is_cloudrig_spine_toon(bone):
+    """
+    检查骨骼是否是 Spine: Cartoon 组件（或任何支持的 CloudRig 组件）。
+    保留此函数名以保持向后兼容。
+    
+    Args:
+        bone: PoseBone
+    
+    Returns:
+        bool
+    """
+    # 使用新的通用函数
+    component_type = get_cloudrig_component_type(bone)
+    return component_type is not None
