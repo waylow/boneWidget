@@ -219,11 +219,6 @@ def create_wireframe_copy(obj, use_color, color, thickness):
         'GeometryNodeInstanceOnPoints')
     node_curve_to_mesh = node_group.nodes.new('GeometryNodeCurveToMesh')
     node_join_geometry = node_group.nodes.new('GeometryNodeJoinGeometry')
-    # Thickness scaling (so it isn't so sensitive)
-    node_scale_thickness = node_group.nodes.new("ShaderNodeMath")
-    node_scale_thickness.operation = 'MULTIPLY'
-    node_scale_thickness.inputs[1].default_value = 0.1
-
     # Set initial values (internal)
     node_uv_sphere.inputs["Segments"].default_value = 8
     node_uv_sphere.inputs["Rings"].default_value = 8
@@ -235,11 +230,9 @@ def create_wireframe_copy(obj, use_color, color, thickness):
     node_group.links.new(
         node_input.outputs["Geometry"], node_mesh_to_curve.inputs["Mesh"])
     node_group.links.new(
-        node_input.outputs["Thickness"], node_scale_thickness.inputs[0])
+        node_input.outputs["Thickness"], node_uv_sphere.inputs["Radius"])
     node_group.links.new(
-        node_scale_thickness.outputs[0], node_uv_sphere.inputs["Radius"])
-    node_group.links.new(
-        node_scale_thickness.outputs[0], node_curve_circle.inputs["Radius"])
+        node_input.outputs["Thickness"], node_curve_circle.inputs["Radius"])
     node_group.links.new(
         node_uv_sphere.outputs["Mesh"], node_instance_on_points.inputs["Instance"])
     node_group.links.new(
@@ -253,9 +246,13 @@ def create_wireframe_copy(obj, use_color, color, thickness):
     node_group.links.new(
         node_join_geometry.outputs["Geometry"], node_output.inputs["Geometry"])
 
-    # scale this so it isn't so sensitive
+    # Apply scale from input so it isn't so sensitive
+    thickness *= 0.1
     if bpy.app.version < (5, 2, 0):
         geo_mod["Socket_2"] = thickness
+    else:
+        # Geometry nodes changed in 5.2
+        geo_mod.properties.inputs.Socket_2.value = thickness
 
     return copy
 
