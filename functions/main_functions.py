@@ -693,7 +693,7 @@ def copy_color_to_selected(context, active_bone, selected_bones):
 
             # Pose Bone Color (both modes)
             context.object.pose.bones[bone.name].color.palette = context.object.pose.bones[active_bone.name].color.palette
-            if active_bone.color.palette == 'CUSTOM':
+            if context.object.pose.bones[active_bone.name].color.palette == 'CUSTOM':
                 context.object.pose.bones[bone.name].color.custom.normal = context.object.pose.bones[active_bone.name].color.custom.normal
                 context.object.pose.bones[bone.name].color.custom.select = context.object.pose.bones[active_bone.name].color.custom.select
                 context.object.pose.bones[bone.name].color.custom.active = context.object.pose.bones[active_bone.name].color.custom.active
