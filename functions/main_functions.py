@@ -685,11 +685,12 @@ def copy_color_to_selected(context, active_bone, selected_bones):
     for bone in selected_bones:
         if bone.name != active_bone.name:
             # Edit Bone Color (While in Pose Mode)
-            context.object.data.bones[bone.name].color.palette = context.object.data.bones[active_bone.name].color.palette
-            if active_bone.color.palette == 'CUSTOM':
-                context.object.data.bones[bone.name].color.custom.normal = context.object.data.bones[active_bone.name].color.custom.normal
-                context.object.data.bones[bone.name].color.custom.select = context.object.data.bones[active_bone.name].color.custom.select
-                context.object.data.bones[bone.name].color.custom.active = context.object.data.bones[active_bone.name].color.custom.active
+            if context.object.mode == 'POSE':
+                context.object.data.bones[bone.name].color.palette = context.object.data.bones[active_bone.name].color.palette
+                if context.object.data.bones[active_bone.name].color.palette == 'CUSTOM':
+                    context.object.data.bones[bone.name].color.custom.normal = context.object.data.bones[active_bone.name].color.custom.normal
+                    context.object.data.bones[bone.name].color.custom.select = context.object.data.bones[active_bone.name].color.custom.select
+                    context.object.data.bones[bone.name].color.custom.active = context.object.data.bones[active_bone.name].color.custom.active
 
             # Pose Bone Color (both modes)
             context.object.pose.bones[bone.name].color.palette = context.object.pose.bones[active_bone.name].color.palette
@@ -701,9 +702,10 @@ def copy_color_to_selected(context, active_bone, selected_bones):
             # Edit Bone Colors (While in Edit Mode)
             if context.object.mode == 'EDIT':
                 bone.color.palette = active_bone.color.palette
-                bone.color.custom.normal = active_bone.color.custom.normal
-                bone.color.custom.select = active_bone.color.custom.select
-                bone.color.custom.active = active_bone.color.custom.active
+                if active_bone.color.palette == 'CUSTOM':
+                    bone.color.custom.normal = active_bone.color.custom.normal
+                    bone.color.custom.select = active_bone.color.custom.select
+                    bone.color.custom.active = active_bone.color.custom.active
 
 
 def update_bone_color(self, context):
