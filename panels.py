@@ -241,6 +241,11 @@ class BONEWIDGET_PT_bw_panel_main(BONEWIDGET_PT_bw_panel, bpy.types.Panel):
         row.prop(preferences, "copy_color",
                  icon=copy_color_icon, text='', toggle=True)
 
+        # Make Unique
+        row = col.row(align=True)
+        row.operator("bonewidget.make_widget_unique",
+                     icon='RESTRICT_INSTANCED_ON', text="Make Unique")
+
         layout.separator()
         # 2ND BLOCK
         # Match Transforms | Resync Names

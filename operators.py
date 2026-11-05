@@ -914,6 +914,36 @@ class BONEWIDGET_OT_toggle_collection_visibility(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class BONEWIDGET_OT_make_widget_unique(bpy.types.Operator):
+    """Ensure selected widgets are single users of the widget data"""
+    bl_idname = "bonewidget.make_widget_unique"
+    bl_label = "Make Widget Unique"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.object and
+            context.object.type == 'ARMATURE' and
+            context.object.mode == 'POSE'
+        )
+
+    def execute(self, context):
+        for b in context.selected_pose_bones:
+            if not b.custom_shape:
+                continue
+            shape = bpy.data.objects[b.custom_shape.name]
+            if shape.data.users == 1:
+                continue
+            else:
+                shape.data = shape.data.copy()
+                shape.data.name = b.custom_shape.name
+                b.custom_shape = shape
+
+        # [TODO:] Store and report the result
+        return {'FINISHED'}
+
+
 class BONEWIDGET_OT_delete_unused_widgets(bpy.types.Operator):
     """Delete unused objects in the WGT collection"""
     bl_idname = "bonewidget.delete_unused_widgets"
@@ -1871,6 +1901,7 @@ class BONEWIDGET_OT_render_widget_thumbnail(bpy.types.Operator):
 
 classes = (
     BONEWIDGET_OT_remove_widgets,
+    BONEWIDGET_OT_make_widget_unique,
     BONEWIDGET_OT_add_widgets,
     BONEWIDGET_OT_import_widget_library,
     BONEWIDGET_OT_export_widget_library,
