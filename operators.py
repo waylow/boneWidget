@@ -925,22 +925,36 @@ class BONEWIDGET_OT_make_widget_unique(bpy.types.Operator):
         return (
             context.object and
             context.object.type == 'ARMATURE' and
-            context.object.mode == 'POSE'
+            context.object.mode == 'POSE' and
+            context.active_pose_bone is not None
         )
 
     def execute(self, context):
+        widget_count = 0
+        found = False
         for b in context.selected_pose_bones:
             if not b.custom_shape:
                 continue
             shape = bpy.data.objects[b.custom_shape.name]
             if shape.data.users == 1:
+                found = True
                 continue
             else:
                 shape.data = shape.data.copy()
                 shape.data.name = b.custom_shape.name
                 b.custom_shape = shape
-
-        # [TODO:] Store and report the result
+                widget_count += 1
+        # Reprting
+        # Didn't find anything
+        if widget_count == 0 and not found:
+            self.report(
+                {'INFO'}, "None of the selected bones have custom shapes.")
+        elif widget_count == 0:
+            self.report(
+                {'INFO'}, "All the selected custom shapes are already single users.")
+        else:
+            self.report(
+                {'INFO'}, f"{widget_count} custom shape(s) made unique.")
         return {'FINISHED'}
 
 
