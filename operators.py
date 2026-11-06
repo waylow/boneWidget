@@ -935,17 +935,15 @@ class BONEWIDGET_OT_make_widget_unique(bpy.types.Operator):
         for b in context.selected_pose_bones:
             if not b.custom_shape:
                 continue
-            shape = bpy.data.objects[b.custom_shape.name]
+            shape = b.custom_shape
             if shape.data.users == 1:
                 found = True
                 continue
             else:
                 shape.data = shape.data.copy()
                 shape.data.name = b.custom_shape.name
-                b.custom_shape = shape
                 widget_count += 1
         # Reprting
-        # Didn't find anything
         if widget_count == 0 and not found:
             self.report(
                 {'INFO'}, "None of the selected bones have custom shapes.")
