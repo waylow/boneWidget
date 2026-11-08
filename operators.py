@@ -936,18 +936,26 @@ class BONEWIDGET_OT_make_widget_unique(bpy.types.Operator):
             if not b.custom_shape:
                 continue
             shape = b.custom_shape
-            if shape.data.users == 1:
+            if (shape.users - shape.use_fake_user) == 1:
                 found = True
                 continue
             else:
+                collection = b.custom_shape.users_collection[0]
+                b.custom_shape = shape.copy()
                 shape.data = shape.data.copy()
-                shape.data.name = b.custom_shape.name
+                # link to whatever collection the OG shape was in
+                collection.objects.link(b.custom_shape)
+                # match transforms
+                b.custom_shape.matrix_world = context.object.matrix_world @ b.bone.matrix_local
+                b.custom_shape.scale = [b.bone.length] * 3
+
                 widget_count += 1
-        # Reprting
+
+        # Reporting
         if widget_count == 0 and not found:
             self.report(
                 {'INFO'}, "None of the selected bones have custom shapes.")
-        elif widget_count == 0:
+        elif widget_count == 0 and found:
             self.report(
                 {'INFO'}, "All the selected custom shapes are already single users.")
         else:
